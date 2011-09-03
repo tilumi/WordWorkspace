@@ -29,29 +29,7 @@ a.rss{
 
 /** MENU */
 
-#menu {
-    overflow:hidden;
-    position:relative;
-}
-#menu ul{ position:absolute; }
-#menu li{
-	margin-right: 7px;
-	width:100px;
-	line-height:21px;
-}
-#menu a {
-	font-family: Georgia, "Times New Roman", Times, serif;
-    font-size:15px;
-    font-weight:bold;
-}
 
-.bookNav{ position:relative;width:1000px;margin:0 auto; }
-.bookNav .bookNavPrev{
-    float:left;width:18px;height:48px;background:url(../images/bg3_left.jpg) center center;cursor:pointer;margin-top:6px;
-}
-.bookNav .bookNavNext{
-    float:right;width:18px;height:48px;background:url(../images/bg3_right.jpg) center center;cursor:pointer;margin-top:6px;
-}
 
 #chapter-guide{
     position:absolute;

@@ -1,20 +1,12 @@
 <?php include('cache/bible_info.php'); ?>
 
-            <div class="bookNav">
-                <div class="bookNavPrev"></div>
-                <div class="bookNavNext"></div>
+            <div class="midnav">
     			<div id="menu-container">
     				<div id="menu">
     					<ul>
 <?php
 foreach( $bibleFull as $id=>$name ){
-    $style='display:inline-block;border-bottom:2px solid white;';
-    if( in_array($id, array(52,53) ) ){ //帖前帖後
-        $style.='font-size:12px;font-weight:normal;line-height:16px;';
-    }
-    if( in_array($id, array(10) ) ){ //撒母耳記下
-        $style.='font-size:14px;';
-    }
+    $style='';
     if( $id <= 5              ){ $style.='border-color:#efb3b3;color:#efb3b3;'; } //摩西五經
     if( $id > 5 && $id <= 17  ){ $style.='border-color:#b3efc8;color:#b3efc8;'; } //歷史書
     if( $id > 17 && $id <= 22 ){ $style.='border-color:#efe9b3;color:#efe9b3;'; } //詩歌智慧書
@@ -33,7 +25,12 @@ foreach( $bibleFull as $id=>$name ){
     }
     $max = $bibleMaxChapter[ $id-1 ];
 ?>
-    						<li <?php echo $active; ?>><a href="<?php echo url( '/'.$name.'.html' ); ?>" rel="bible-book" accesskey="<?php echo $id; ?>" name="<?php echo $name; ?>"><span <?php echo $style; ?>><?php echo $name; ?></span> <span class="digit" style="font-size:10px;color:#eee;"><?php echo $max; ?></span></a></li>
+    						<li <?php echo $active; ?>>
+                                <a href="<?php echo url( '/'.$name.'.html' ); ?>" rel="bible-book" accesskey="<?php echo $id; ?>" name="<?php echo $name; ?>">
+                                    <em <?php echo $style; ?>><?php echo $name; ?></em>
+                                    <span class="digit"><?php echo $max; ?></span>
+                                </a>
+                            </li>
 <?php
 }
 ?>
@@ -41,6 +38,8 @@ foreach( $bibleFull as $id=>$name ){
     				</div>
     			</div>
     			<div class="scroll-bar-wrap ui-widget-content ui-corner-bottom"> 
+                    <div class="next"></div>
+                    <div class="prev"></div>
                     <div class="scroll-bar"></div> 
                 </div>
 			</div>
