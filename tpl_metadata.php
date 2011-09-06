@@ -26,7 +26,7 @@ if( isset($selectIndex) && is_numeric($selectIndex) ){
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jcarousel.lite.js'); ?>"></script>
 
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.core.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.mouse.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.widget.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.mouse.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.slider.js'); ?>"></script>
 

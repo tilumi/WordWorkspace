@@ -15,14 +15,13 @@ $(document).ready( function(){
             href:url
         });
     });
-    $('.bookNav').append('<div id="chapter-guide"></div>');
 });
 
-function scrollbar(){
+$( function(){
 	//scrollpane parts
 	var scrollPane = $( "#menu-container" ),
 		scrollContent = $( "#menu" );
-	
+
 	//build slider
 	var scrollbar = $( ".scroll-bar" ).slider({
 		slide: function( event, ui ) {
@@ -38,15 +37,9 @@ function scrollbar(){
 	
 	//append icon to handle
 	var handleHelper = scrollbar.find( ".ui-slider-handle" )
-	.mousedown(function() {
-		scrollbar.width( handleHelper.width() );
-	})
-	.mouseup(function() {
-		scrollbar.width( "100%" );
-	})
 	.append( "<span class='ui-icon ui-icon-grip-dotted-vertical'></span>" )
 	.wrap( "<div class='ui-handle-helper-parent'></div>" ).parent();
-	
+	 
 	//change overflow to hidden now that slider handles the scrolling
 	scrollPane.css( "overflow", "hidden" );
 	
@@ -55,11 +48,13 @@ function scrollbar(){
 		var remainder = scrollContent.width() - scrollPane.width();
 		var proportion = remainder / scrollContent.width();
 		var handleSize = scrollPane.width() - ( proportion * scrollPane.width() );
+		handleSize = 30;
 		scrollbar.find( ".ui-slider-handle" ).css({
 			width: handleSize,
 			"margin-left": -handleSize / 2
 		});
-		handleHelper.width( "" ).width( scrollbar.width() - handleSize );
+		
+		handleHelper.width( scrollbar.width() - handleSize );
 	}
 	
 	//reset slider value based on scroll content position
@@ -88,4 +83,4 @@ function scrollbar(){
 	});
 	//init scrollbar size
 	setTimeout( sizeScrollbar, 10 );//safari wants a timeout
-}
+} );

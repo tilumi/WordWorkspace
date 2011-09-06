@@ -1,6 +1,10 @@
 <?php include('cache/bible_info.php'); ?>
+<style>
 
+</style>
             <div class="midnav">
+                <a class="logo" href="<?php echo url('/'); ?>">The Bible 線上聖經</a>
+    			
     			<div id="menu-container">
     				<div id="menu">
     					<ul>
@@ -38,8 +42,6 @@ foreach( $bibleFull as $id=>$name ){
     				</div>
     			</div>
     			<div class="scroll-bar-wrap ui-widget-content ui-corner-bottom"> 
-                    <div class="next"></div>
-                    <div class="prev"></div>
                     <div class="scroll-bar"></div> 
                 </div>
 			</div>

@@ -1,12 +1,6 @@
 
 			<div id="topnav" style="font-family: Arial;">
                 <div class="float-left">
-                    <a href="<?php echo url('/'); ?>" class="home">The Bible 線上聖經首頁</a>
-                    <span>|</span>
-                    <a href="http://www.jbride.cc">JBride 資訊站</a>
-                    <span class="mlsite">
-                    <a href="http://www.morninglight.cc">晨光青年網 - 解開人生的根本問題</a>
-                    </span>
                 </div>
                 <div class="float-right">
                     繁體中文
