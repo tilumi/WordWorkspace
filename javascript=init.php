@@ -12,9 +12,19 @@ $(document).ready( function(){
             opacity: 0.1,
             width:"960px",
             height:"80%",
-            href:url
+            href: url
         });
     });
+    
+    if( $('#menu .active a').length > 0 ){
+        var offsetLeft = ( $('#menu .active a')[0].offsetLeft - 320 );
+    }else{
+        var offsetLeft = ( $('#menu a')[39].offsetLeft - 500+83/2 );
+    }
+    var maxLeft = $('#menu')[0].offsetWidth - $('#menu-container')[0].offsetWidth ;
+    if( offsetLeft < 0 ) offsetLeft = 0;
+    if( offsetLeft > maxLeft ) offsetLeft = maxLeft;
+    $('#menu').css('marginLeft', '-'+ offsetLeft +'px' );
 });
 
 $( function(){
@@ -37,21 +47,31 @@ $( function(){
 	
 	//append icon to handle
 	var handleHelper = scrollbar.find( ".ui-slider-handle" )
-	.append( "<span class='ui-icon ui-icon-grip-dotted-vertical'></span>" )
-	.wrap( "<div class='ui-handle-helper-parent'></div>" ).parent();
+    	.mousedown(function() {
+    		scrollbar.width( handleHelper.width() );
+    	})
+    	.mouseup(function() {
+    		scrollbar.width( "100%" );
+    	})
+    	.append( "<span class='ui-icon ui-icon-grip-dotted-vertical'></span>" )
+    	.wrap( "<div class='ui-handle-helper-parent'></div>" ).parent();
 	 
 	//change overflow to hidden now that slider handles the scrolling
 	scrollPane.css( "overflow", "hidden" );
 	
 	//size scrollbar and handle proportionally to scroll distance
 	function sizeScrollbar() {
-		var remainder = scrollContent.width() - scrollPane.width();
-		var proportion = remainder / scrollContent.width();
-		var handleSize = scrollPane.width() - ( proportion * scrollPane.width() );
-		handleSize = 30;
+        var warpSize = $('.scroll-bar-wrap').width();
+		var handleSize = 1;//warpSize * ( scrollPane.width() / scrollContent.width() );
+		
+		var leftVal = scrollContent.css( "margin-left" ) === "auto" ? 0 :
+			parseInt( scrollContent.css( "margin-left" ) );
+		var handleLeft = warpSize * ( (-leftVal) / ( scrollContent.width()-scrollPane.width() ) ) - handleSize;
+		
 		scrollbar.find( ".ui-slider-handle" ).css({
 			width: handleSize,
-			"margin-left": -handleSize / 2
+			"margin-left": -handleSize / 2,
+			"left": handleLeft+'px'
 		});
 		
 		handleHelper.width( scrollbar.width() - handleSize );

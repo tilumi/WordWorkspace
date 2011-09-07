@@ -22,6 +22,10 @@
 -->
 			</div>
 
-
+<style>
+#menu-container{width:1000px;}
+.logo{display:none;}
+.scroll-bar-wrap{ top:-40px; }
+</style>
 <?php include('tpl_mainmenu.php'); ?>
 
