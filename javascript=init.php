@@ -36,9 +36,9 @@ $( function(){
 	var scrollbar = $( ".scroll-bar" ).slider({
 		slide: function( event, ui ) {
 			if ( scrollContent.width() > scrollPane.width() ) {
-				scrollContent.css( "margin-left", Math.round(
-					ui.value / 100 * ( scrollPane.width() - scrollContent.width() )
-				) + "px" );
+				//scrollContent.css( "margin-left", Math.round( ui.value / 100 * (scrollPane.width() - scrollContent.width()) ) + "px" );
+				var pos = Math.round( ui.value / 100 * (scrollPane.width() - scrollContent.width()) ) + "px";
+				scrollContent.stop().animate( { marginLeft: pos }, 300 );
 			} else {
 				scrollContent.css( "margin-left", 0 );
 			}

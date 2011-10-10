@@ -296,12 +296,12 @@ ul.style3 li {
 
 #menu-container {
     float:right;
-	width:760px;
+	width:740px;
 	height:54px;
+	margin-right:20px;
 }
 
 #menu {
-    overflow:hidden;
     position:relative;
     width: 6050px;
 	height: 40px;

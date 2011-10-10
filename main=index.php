@@ -1,6 +1,7 @@
 <?php
 list( $rows ) = APP::$appBuffer;
 $selectIndex = 40;
+$homeIndex = true;
 include('tpl_header.php');
 ?>
 

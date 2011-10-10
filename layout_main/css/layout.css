@@ -1,6 +1,8 @@
-a.home{
+.home{
     background: url(../images/icon.png) no-repeat left top;
     padding-left:20px;
+    font-style:normal;
+    line-height:20px;
 }
 a.rss{
     background: url(../images/application-rss+xml.png) no-repeat right top;

@@ -23,7 +23,7 @@
 			</div>
 
 <style>
-#menu-container{width:1000px;}
+#menu-container{width:960px;margin:0 20px;}
 .logo{display:none;}
 .scroll-bar-wrap{ top:-40px; }
 </style>
