@@ -16,6 +16,7 @@ $(document).ready( function(){
         });
     });
     
+    /* 設定 books navigator 的起始位置 */
     if( $('#menu .active a').length > 0 ){
         var offsetLeft = ( $('#menu .active a')[0].offsetLeft - 320 );
     }else{
@@ -62,11 +63,11 @@ $( function(){
 	//size scrollbar and handle proportionally to scroll distance
 	function sizeScrollbar() {
         var warpSize = $('.scroll-bar-wrap').width();
-		var handleSize = 1;//warpSize * ( scrollPane.width() / scrollContent.width() );
+		var handleSize = 32;//warpSize * ( scrollPane.width() / scrollContent.width() );
 		
 		var leftVal = scrollContent.css( "margin-left" ) === "auto" ? 0 :
 			parseInt( scrollContent.css( "margin-left" ) );
-		var handleLeft = warpSize * ( (-leftVal) / ( scrollContent.width()-scrollPane.width() ) ) - handleSize;
+		var handleLeft = warpSize * ( (-leftVal) / ( scrollContent.width()-scrollPane.width() ) ) - handleSize/2;
 		
 		scrollbar.find( ".ui-slider-handle" ).css({
 			width: handleSize,

@@ -25,7 +25,7 @@
 <style>
 #menu-container{width:960px;margin:0 20px;}
 .logo{display:none;}
-.scroll-bar-wrap{ top:-40px; }
+.scroll-bar-wrap{ top:-47px; }
 </style>
 <?php include('tpl_mainmenu.php'); ?>
 

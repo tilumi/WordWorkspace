@@ -39,7 +39,7 @@ foreach( $bibleFull as $id=>$name ){
     					</ul>
     				</div>
     			</div>
-    			<div class="scroll-bar-wrap ui-widget-content ui-corner-all"> 
+    			<div class="scroll-bar-wrap ui-widget-content"> 
                     <div class="scroll-bar"></div> 
                 </div>
 			</div>

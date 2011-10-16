@@ -63,7 +63,30 @@ a.rss{
 #content ul li{
     margin:5px 0;
 }
-
+#bible-container{
+    height:550px;
+    width:900px;
+    overflow:hidden;
+}
+#bible-container ul{
+    height:550px;
+    margin-left:0px;
+}
+#bible-container ul li{
+    float:left;
+    width:180px;
+    height:100%;
+}
+.bible-button{
+    height:40px;
+    line-height:40px;
+    width:440px;
+    text-align:center;
+    cursor:pointer;
+    border:1px solid #ccc;
+}
+#bible-old{ float:left; }
+#bible-new{ float:right; }
 /** SIDEBAR */
 
 #sidebar {
