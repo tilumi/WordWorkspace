@@ -92,7 +92,7 @@ $posnav='<div style="text-align:center;border-top:1px solid #ccc;border-bottom:1
         $html.='<h2 class="title">'.$ch_start.' ~ '.$ch_end.'</h2>';
         while( $chap && $items < $blockChaps ){
             $name='';
-            if( ! empty($chap['name']) ){ $name = ' &nbsp; '.$chap['name']; }
+            if( ! empty($chap['name']) ){ /*$name = ' &nbsp; '.$chap['name'];*/ }
             $unit='章';
             if( $chap['book_id']==19 ){ $unit='篇'; }
             $url=url('/'.$r['name'].'/'.$chap['chapter_id'].'.html');
@@ -103,10 +103,10 @@ $posnav='<div style="text-align:center;border-top:1px solid #ccc;border-bottom:1
             $chap=next($chaps);
         }
         $html.='</ul>'."\n";
-        $width='33%';
+        $width='20%';
         //一個區塊的寬度預設都是一半的空間，但若是最後一個且靠左（單數），可以使用全部空間（100%）
-        if( $i==$loops && $i%3==1 ){ $width='99%'; }
-        if( $i==$loops && $i%3==2 ){ $width='66%'; }
+        //if( $i==$loops && $i%3==1 ){ $width='99%'; }
+        //if( $i==$loops && $i%3==2 ){ $width='66%'; }
 /*        $width='50%';
         //一個區塊的寬度預設都是一半的空間，但若是最後一個且靠左（單數），可以使用全部空間（100%）
         if( $i==$loops && $i%2==1 ){ $width='100%'; } */
