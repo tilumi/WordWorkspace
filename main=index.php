@@ -65,6 +65,7 @@ $(document).ready( function(){
 .book-cats .book-info{  }
 .ts .chapter_digit{ font-size:12px;color:#000;font-family:Arial;font-weight:bold; }
 .ts .book-link{ font-size:12px;color:#777; }
+.social-link img { height:30px; }
 </style>
 			<div id="page" class="single container">
 				<div id="content">
@@ -330,7 +331,7 @@ $(document).ready( function(){
 				    </div>
 -->
 				    <div class="clearfix" style="border-bottom:1px solid #CCC;margin-bottom:40px;">
-    					<div id="box5" class="box-style sky" style="width:550px;">
+    					<div id="box5" class="box-style sky" style="width:550px;height:450px;">
     					    <h2 class="title">舊約 Old Testament</h2>
     					    <div class="cloud" style="line-height:24px;">
 <?php
@@ -371,7 +372,7 @@ $(document).ready( function(){
 
                             </div>
     					</div>
-    					<div id="box5" class="box-style sky" style="width:350px;margin-left:0px;">
+    					<div id="box5" class="box-style sky" style="width:350px;height:450px;margin-left:0px;">
     					    <h2 class="title">新約 New Testament</h2>
     					    <div class="cloud" style="line-height:24px;">
 <?php
@@ -421,10 +422,9 @@ $(document).ready( function(){
                             <span id="fb-root"></span>
                             <script src="http://connect.facebook.net/en_US/all.js#appId=256358261057256&amp;xfbml=1"></script>
                             <fb:like href="http://bible.jbride.cc" send="true" layout="button_count" width="100" show_faces="true" font=""></fb:like>
-                            </p>
+                            <br>
+                            或分享給你的朋友喔 ...
 
-<p>或分享給你的朋友喔 ...</p>
-<p>
 <?php $url_encode=urlencode('http://bible.jbride.cc'); ?>
 <?php $title_encode=urlencode('The Bible 線上聖經'); ?>
 <?php $link="http://twitter.com/home?status=".$title_encode.$url;?>
@@ -443,7 +443,7 @@ $(document).ready( function(){
 <a class="social-link normal" target="_blank" title="Linkedin" href="http://www.linkedin.com/shareArticle?url=<?php echo $url_encode; ?>&amp;title=<?php echo $title_encode; ?>">
 <img src="images/social_icons/1311129543_linkedin.png" /></a>
 -->
-</p>
+                            </p>
 
                         </div>
                     </div>
