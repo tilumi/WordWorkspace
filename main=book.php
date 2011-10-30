@@ -93,6 +93,8 @@ $posnav='<div style="text-align:center;border-top:1px solid #ccc;border-bottom:1
         while( $chap && $items < $blockChaps ){
             $name='';
             if( ! empty($chap['name']) ){ $name = ' &nbsp; '.$chap['name']; }
+            if( $chap['book_id'] > 4 ){ $name=''; }
+            
             $unit='章';
             if( $chap['book_id']==19 ){ $unit='篇'; }
             $url=url('/'.$r['name'].'/'.$chap['chapter_id'].'.html');
@@ -113,6 +115,7 @@ $posnav='<div style="text-align:center;border-top:1px solid #ccc;border-bottom:1
         echo '<div style="float:left;width:'.$width.';">'."\n";
         echo $html;
         echo '</div>'."\n";
+        if( $i%3 == 0 ){ echo '<div style="clear:both;"></div>'."\n"; }
     }
 ?>
                         </div>

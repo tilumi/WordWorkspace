@@ -9,7 +9,7 @@ class Main{
         
         $sql="SELECT * FROM bible_books WHERE id=".Model::quote($book_id, 'text');
         $data=Model::fetchRow($sql);
-        $sql="SELECT * FROM bible_chapters WHERE book_id=".Model::quote($book_id, 'text');
+        $sql="SELECT * FROM cuv_chapters WHERE book_id=".Model::quote($book_id, 'text');
         $chaps=Model::fetchAll($sql);
         
         $book_id=$data['id'];
@@ -111,9 +111,9 @@ class Main{
         
         $chapter_id = $region['chapter_id'];
         
-        $sql="SELECT * FROM bible WHERE book_id=".Model::quote($book_id, 'integer')." AND chapter_id >= ".Model::quote($region['start'][0], 'integer')." AND chapter_id <= ".Model::quote($region['end'][0], 'integer');
+        $sql="SELECT * FROM cuv WHERE book_id=".Model::quote($book_id, 'integer')." AND chapter_id >= ".Model::quote($region['start'][0], 'integer')." AND chapter_id <= ".Model::quote($region['end'][0], 'integer');
         $rows=Model::fetchAll($sql);
-        $sql="SELECT * FROM bible_chapters WHERE book_id=".Model::quote($book_id, 'integer')." AND chapter_id=".Model::quote($chapter_id, 'integer');
+        $sql="SELECT * FROM cuv_chapters WHERE book_id=".Model::quote($book_id, 'integer')." AND chapter_id=".Model::quote($chapter_id, 'integer');
         $chapter=Model::fetchRow($sql);
         $sql="SELECT * FROM bible_books WHERE id=".Model::quote($book_id, 'integer');
         $book=Model::fetchRow($sql);

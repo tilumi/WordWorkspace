@@ -51,6 +51,7 @@ function right(){
 .psalms_scroll h1.title{  }
 .psalms_title h2.title{ margin:0; }
 .psalms_note h3.title{ font-size:14px; }
+.cunp{ display:none; }
 </style>
 
 <?php ob_start(); //建立上下章導引列 ?>
@@ -90,7 +91,7 @@ $prev_stype='';
 $highlight_1st=false;
 $prev_chapter=false;
 foreach( $rows as $r ){
-    foreach($r as $key=>$value){$r[$key]=htmlspecialchars($value);}
+    foreach($r as $key=>$value){$r[$key]=$value;}
     if( $prev_chapter && $prev_chapter <> $r['chapter_id'] ){ //跨章顯示時，章與章之間需要間隔
         echo '<div style="height:20px;"></div>'."\n";
 ?>

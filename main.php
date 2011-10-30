@@ -147,7 +147,7 @@ function chapter(){
         $i+=1;
     }
     
-    View::setHeader( 'metas.description', $description . ' ...' );
+    View::setHeader( 'metas.description', strip_tags($description . ' ...') );
     View::setHeader( 'metas.keywords', $navbar['testament'].', '.$navbar['book_name'].', '.$navbar['chapter_name'] );
     
     APP::$appBuffer = array($rows, $navbar);
