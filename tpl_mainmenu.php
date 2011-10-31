@@ -8,6 +8,7 @@
     					<ul>
 <?php
 foreach( $bibleFull as $id=>$name ){
+    $short = $bibleShort[$id];
     $style='';
     if( $id <= 5              ){ $style.='border-color:#efb3b3;color:#efb3b3;'; } //摩西五經
     if( $id > 5 && $id <= 17  ){ $style.='border-color:#b3efc8;color:#b3efc8;'; } //歷史書
@@ -28,7 +29,7 @@ foreach( $bibleFull as $id=>$name ){
     $max = $bibleMaxChapter[ $id-1 ];
 ?>
     						<li <?php echo $active; ?>>
-                                <a href="<?php echo url( '/'.$name.'.html' ); ?>" rel="bible-book" accesskey="<?php echo $id; ?>" name="<?php echo $name; ?>">
+                                <a href="<?php echo url( '/'.$name.'.html' ); ?>" rel="bible-book" accesskey="<?php echo $id; ?>" name="<?php echo $name; ?>(<?php echo $short; ?>)">
                                     <em <?php echo $style; ?>><?php echo $name; ?></em>
                                     <span class="digit"><?php echo $max; ?></span>
                                 </a>
@@ -39,7 +40,7 @@ foreach( $bibleFull as $id=>$name ){
     					</ul>
     				</div>
     			</div>
-    			<div class="scroll-bar-wrap ui-widget-content"> 
+    			<div class="scroll-bar-wrap"> 
                     <div class="scroll-bar"></div> 
                 </div>
 			</div>

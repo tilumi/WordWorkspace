@@ -261,9 +261,9 @@ ul.style3 li {
 
 /** MENU */
 
-.logo{ text-indent:-3000px;height:100%;width:200px;display:block;float:left; }
+.logo{ text-indent:-3000px;height:53px;width:200px;display:block;float:left; }
 
-.midnav{ position:relative;width:1000px;margin:0 auto;height:54px; }
+.midnav{ position:relative;width:1000px;margin:0 auto;height:110px; }
 .midnav .prev{
     float:right;width:30px;height:48px;background:url(../images/bg3_left.jpg) center center;cursor:pointer;margin-top:6px;
 }
@@ -273,19 +273,37 @@ ul.style3 li {
 
 .scroll-bar-wrap{
     position:absolute;
-    right:44px;
-    top:40px;
-    width:457px;
-    height:32px;
-    border-bottom:1px solid #ccc;
+    width:900px;
+    height:50px;
+    top:60px;
+    left:50px;
+    cursor:pointer;
+    /*border-bottom:1px solid #0e3757;*/
+    /*background:#333;*/
+}
+.scroll-bar-wrap .grads{
+    position:absolute;
+    width:1px;
+    height:5px;
+    top:0px;
+    background:#0e3757;
+}
+.scroll-bar-wrap .grad-tags{
+    position:absolute;
+    font-size:11px;
+    width:10px;
+    height:5px;
+    color:#0e3757;
 }
 .scroll-bar{
     clear: both;
     height:100%;
     margin:0 auto;
+    top:-55px;
 }
-.scroll-bar .ui-handle-helper-parent { position: relative; width: 100%; height: 30px; margin: 0 auto; }
-.scroll-bar .ui-slider-handle { display:block; position:absolute; top:1px; height: 30px; background:url(../images/scrollbar-handler.png) no-repeat 0 12px; }
+
+.scroll-bar .ui-handle-helper-parent { position: relative; width: 100%; height: 30px; margin: 0 auto;}
+.scroll-bar .ui-slider-handle { display:block; position:absolute; top:0px; height: 47px; border:2px solid red; /*background:url(../images/scrollbar-handler.png) no-repeat 0 12px;*/ }
 .scroll-bar .ui-slider-handle .ui-icon { margin: -8px auto 0; position: relative; top: 50%; }
 
 /* Corner radius */

@@ -47,16 +47,40 @@ $(document).ready( function(){
     } ).mouseout( function(){
         $(this).css('background-color', '');
     } );
+    
+    $(".scrolls").mouseover( function(){
+        $(this).find("img").css('opacity', 1);
+    } ).mouseout( function(){
+        $(this).find("img").css('opacity', 0.5);
+    } );
 });
 </script>
 <?php } ?>
 
 
 <style>
-.sky { float:left;font-family: Georgia, "蘋果儷黑體", "微軟正黑體", "新細明體", "Times New Roman", Times, serif; }
+.sky {
+    height:450px;
+    font-family: Georgia, "蘋果儷黑體", "微軟正黑體", "新細明體", "Times New Roman", Times, serif;
+}
+.ot{ width:330px; }
+.nt{ width:320px; }
+.blocks-ot{ float:left;width:120px; }
+#block-ot-1{ width:113px; }
+#block-ot-2{ width:105px; }
+#block-ot-3{ width:112px; }
+.blocks-nt{ float:left;width:150px; }
+#block-nt-1{ width:150px; }
+#block-nt-2{ width:160px; }
+
 .cloud{ line-height:24px; }
-.cloud a{ text-decoration:none; }
+.cloud a{ text-decoration:none;letter-spacing:-1px; }
 .cloud a:hover{ text-decoration:underline; }
+.cloud .chaps{ color:#000;font-size:13px;font-weight:bold;font-family:Arial; }
+.cloud img{ height:12px;filter: alpha(opacity=50);-moz-opacity:.50;opacity:.50; }
+.cloud .brief{ font-size:12px;color:#999;margin-left:3px; }
+.cloud .catalog{ font-size:16px; }
+
 .ts { font-family: Georgia, "蘋果儷黑體", "微軟正黑體", "新細明體", "Times New Roman", Times, serif;margin-bottom:20px; }
 .book-cats{ float:left;position:relative;width:180px;height:235px; }
 .book-cats img{ position:absolute;z-index:10; }
@@ -69,6 +93,83 @@ $(document).ready( function(){
 </style>
 			<div id="page" class="single container">
 				<div id="content">
+				    <div class="clearfix" style="border-bottom:1px solid #CCC;margin-bottom:40px;">
+    					<div id="box5" class="ot box-style sky" style="float:left;">
+    					    <h2 class="title">舊約 Old Testament</h2>
+    					    <div class="cloud" style="line-height:24px;">
+<?php
+    $max=39;
+    $blockChaps=13;
+    
+    $loops = ceil($max/$blockChaps); //將要產生的區塊數
+    $blocks = array();
+    $pointer=0;
+    for( $i=1;$i<=$loops;$i++ ){
+        $html='';
+        $items=0;
+        $r=pos($rows);
+        //$html.='<h2 class="title">'.$ch_start.' ~ '.$ch_end.'</h2>';
+        while( $r && $pointer < $max && $items < $blockChaps ){
+            $items+=1;
+            $pointer+=1;
+            
+            $html.='<div class="scrolls">';
+            $html.='<a class="brief" href="'.$r['name'].'.html" title="'.$r['name'].' 簡介與概要"><img src="'.url('/cabinets/book-icon.png').'" alt="概要"></a>';
+            $html.=' <a class="catalog" href="'.$r['name'].'.html" rel="bible-index" name="'.$r['name'].'" title="'.$r['name'].' 目錄">'.$r['name'].'</a>';
+            $html.=' <span class="chaps">'.$r['max_chapter'].'</span>';
+            $html.='</div>'."\n";
+            
+            $r=next($rows);
+        }
+        echo '<div id="block-ot-'.$i.'" class="blocks-ot">'."\n";
+        echo $html;
+        echo '</div>'."\n";
+    }
+?>
+
+
+                            </div>
+    					</div>
+    					<div id="box5" class="nt box-style sky" style="float:right;">
+    					    <h2 class="title">新約 New Testament</h2>
+    					    <div class="cloud" style="line-height:24px;">
+<?php
+    $max=66;
+    $blockChaps=14;
+    
+    $loops = ceil($max/$blockChaps); //將要產生的區塊數
+    $blocks = array();
+    for( $i=1;$i<=$loops;$i++ ){
+        $html='';
+        $items=0;
+        $r=pos($rows);
+        //$html.='<h2 class="title">'.$ch_start.' ~ '.$ch_end.'</h2>';
+        while( $r && $pointer < $max && $items < $blockChaps ){
+            $items+=1;
+            $pointer+=1;
+            
+            $html.='<div class="scrolls">';
+            $html.='<a class="brief" href="'.$r['name'].'.html" title="'.$r['name'].' 簡介與概要"><img src="'.url('/cabinets/book-icon.png').'" alt="概要"></a>';
+            $html.=' <a class="catalog" href="'.$r['name'].'.html" rel="bible-index" name="'.$r['name'].'" title="'.$r['name'].' 目錄">'.$r['name'].'</a>';
+            $html.=' <span class="chaps">'.$r['max_chapter'].'</span>';
+            $html.='</div>';
+            
+            $r=next($rows);
+        }
+        $width='50%';
+/*        $width='50%';
+        //一個區塊的寬度預設都是一半的空間，但若是最後一個且靠左（單數），可以使用全部空間（100%）
+        if( $i==$loops && $i%2==1 ){ $width='100%'; } */
+        echo '<div id="block-nt-'.$i.'" class="blocks-nt">'."\n";
+        echo $html;
+        echo '</div>'."\n";
+    }
+?>
+
+        					</div>
+    					</div>
+    					<div style="width:200px;height:450px;background:#ccc;margin:0 auto;"></div>
+					</div>
 <!--
 				    <div class="clearfix" style="border-bottom:1px solid #CCC;margin-bottom:40px;">
     					<div id="box5" class="box-style ts clearfix">
@@ -330,88 +431,6 @@ $(document).ready( function(){
 				        </div>
 				    </div>
 -->
-				    <div class="clearfix" style="border-bottom:1px solid #CCC;margin-bottom:40px;">
-    					<div id="box5" class="box-style sky" style="width:550px;height:450px;">
-    					    <h2 class="title">舊約 Old Testament</h2>
-    					    <div class="cloud" style="line-height:24px;">
-<?php
-    $max=39;
-    $blockChaps=13;
-    
-    $loops = ceil($max/$blockChaps); //將要產生的區塊數，20章1區
-    $blocks = array();
-    $pointer=0;
-    for( $i=1;$i<=$loops;$i++ ){
-        $html='';
-        $items=0;
-        $r=pos($rows);
-        //$html.='<h2 class="title">'.$ch_start.' ~ '.$ch_end.'</h2>';
-        while( $r && $pointer < $max && $items < $blockChaps ){
-            $items+=1;
-            $pointer+=1;
-            
-            $html.='<span style="font-size:11px;color:#ccc;font-family:Arial;">'.$pointer.' ';
-            $html.='</span> ';
-            $html.='<a href="'.$r['name'].'.html" style="font-size:16px;" rel="bible-index" name="'.$r['name'].'">'.$r['name'].'</a>';
-            $html.=' <span style="color:#000;font-size:13px;font-weight:bold;font-family:Arial;">'.$r['max_chapter'].'</span>';
-            $html.=' &nbsp;<a href="'.$r['name'].'.html" style="font-size:12px;color:#999;">概要</a>';
-            $html.='<br>'."\n";
-            
-            $r=next($rows);
-        }
-        $width='33%';
-/*        $width='50%';
-        //一個區塊的寬度預設都是一半的空間，但若是最後一個且靠左（單數），可以使用全部空間（100%）
-        if( $i==$loops && $i%2==1 ){ $width='100%'; } */
-        echo '<div style="float:left;width:'.$width.';">'."\n";
-        echo $html;
-        echo '</div>'."\n";
-    }
-?>
-
-
-                            </div>
-    					</div>
-    					<div id="box5" class="box-style sky" style="width:350px;height:450px;margin-left:0px;">
-    					    <h2 class="title">新約 New Testament</h2>
-    					    <div class="cloud" style="line-height:24px;">
-<?php
-    $max=66;
-    $blockChaps=14;
-    
-    $loops = ceil($max/$blockChaps); //將要產生的區塊數，20章1區
-    $blocks = array();
-    for( $i=1;$i<=$loops;$i++ ){
-        $html='';
-        $items=0;
-        $r=pos($rows);
-        //$html.='<h2 class="title">'.$ch_start.' ~ '.$ch_end.'</h2>';
-        while( $r && $pointer < $max && $items < $blockChaps ){
-            $items+=1;
-            $pointer+=1;
-            
-            $html.='<span style="font-size:11px;color:#ccc;font-family:Arial;">'.$pointer.' ';
-            $html.='</span> ';
-            $html.='<a href="'.$r['name'].'.html" style="font-size:16px;" rel="bible-index" name="'.$r['name'].'">'.$r['name'].'</a>';
-            $html.=' <span style="color:#000;font-size:13px;font-weight:bold;font-family:Arial;">'.$r['max_chapter'].'</span>';
-            $html.=' &nbsp;<a href="'.$r['name'].'.html" style="font-size:12px;color:#999;">概要</a>';
-            $html.='<br>'."\n";
-            
-            $r=next($rows);
-        }
-        $width='50%';
-/*        $width='50%';
-        //一個區塊的寬度預設都是一半的空間，但若是最後一個且靠左（單數），可以使用全部空間（100%）
-        if( $i==$loops && $i%2==1 ){ $width='100%'; } */
-        echo '<div style="float:left;width:'.$width.';">'."\n";
-        echo $html;
-        echo '</div>'."\n";
-    }
-?>
-
-        					</div>
-    					</div>
-					</div>
 					<div class="box5 box-style" style="width:65%;float:left;">
                         <div class="clearfix" style="padding-bottom:20px;margin-bottom:30px;">
     						<h2 class="title">分享這個網站</h2>

@@ -3,7 +3,7 @@ list( $startIndex ) = APP::$appBuffer;
 ?>
 $(document).ready( function(){
     $("a[rel='bible-book']").each( function(){
-        var url = encodeURI( '<?php echo url('/');?>' + this.name + '/chapters.html' );
+        var url = encodeURI( '<?php echo url('/');?>' + this.name.substring( 0, this.name.indexOf('(') ) + '/chapters.html' );
         $(this).colorbox({
             loop: false,
             top: "90px",
@@ -16,16 +16,44 @@ $(document).ready( function(){
         });
     });
     
+    var key=0;
+    $('#menu a').each( function(){
+    	var scrollPane = $( "#menu-container" ),
+		    scrollContent = $( "#menu" ),
+		    scrollBar = $( ".scroll-bar" ),
+            scrollBarWarp = $( ".scroll-bar-warp" );
+        var oLeft=this.offsetLeft + ($(this).width() / 2);
+        var name=this.name;
+        var sh=name.substring( name.indexOf('(')+1, name.indexOf(')') );
+        var pos=Math.round( oLeft / scrollContent.width() * scrollBar.width() );
+        var style1='background:#176ba7;';
+        var pos1=pos;
+        var style2='top:10px;color:#176ba7;';
+        var pos2=pos-6;
+        if( (key % 2) == 1 ){
+            style1='height:20px;';
+            style2='top:25px;';
+            if( sh.length > 1 ){
+                style2='top:23px;width:12px;';
+                pos2=pos-6;
+            }
+        }
+        scrollBar.append('<div class="grads" style="left:'+pos1+'px;'+style1+'"></div><div class="grad-tags" style="left:'+pos2+'px;'+style2+'">'+sh+'</div>');
+        key=key+1;
+    });
+    
     /* 設定 books navigator 的起始位置 */
     if( $('#menu .active a').length > 0 ){
-        var offsetLeft = ( $('#menu .active a')[0].offsetLeft - 320 );
+        var target = $('#menu .active a');
+        var offsetLeft = ( target[0].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
     }else{
-        var offsetLeft = ( $('#menu a')[39].offsetLeft - 500+83/2 );
+        var target = $('#menu a');
+        var offsetLeft = ( target[39].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
     }
     var maxLeft = $('#menu')[0].offsetWidth - $('#menu-container')[0].offsetWidth ;
     if( offsetLeft < 0 ) offsetLeft = 0;
     if( offsetLeft > maxLeft ) offsetLeft = maxLeft;
-    $('#menu').css('marginLeft', '-'+ offsetLeft +'px' );
+    $('#menu').css('margin-left', '-'+ offsetLeft +'px' );
 });
 
 $( function(){
@@ -54,8 +82,8 @@ $( function(){
     	.mouseup(function() {
     		scrollbar.width( "100%" );
     	})
-    	.append( "<span class='ui-icon ui-icon-grip-dotted-vertical'></span>" )
-    	.wrap( "<div class='ui-handle-helper-parent'></div>" ).parent();
+    	.append( '<span class="ui-icon ui-icon-grip-dotted-vertical"></span>' )
+    	.wrap( '<div class="ui-handle-helper-parent"></div>' ).parent();
 	 
 	//change overflow to hidden now that slider handles the scrolling
 	scrollPane.css( "overflow", "hidden" );
@@ -63,14 +91,17 @@ $( function(){
 	//size scrollbar and handle proportionally to scroll distance
 	function sizeScrollbar() {
         var warpSize = $('.scroll-bar-wrap').width();
-		var handleSize = 32;//warpSize * ( scrollPane.width() / scrollContent.width() );
+		var handleSize = warpSize * ( scrollPane.width() / scrollContent.width() );
 		
-		var leftVal = scrollContent.css( "margin-left" ) === "auto" ? 0 :
-			parseInt( scrollContent.css( "margin-left" ) );
-		var handleLeft = warpSize * ( (-leftVal) / ( scrollContent.width()-scrollPane.width() ) ) - handleSize/2;
+		var leftVal = scrollContent.css( "margin-left" ) === "auto" ? 0 : parseInt( scrollContent.css( "margin-left" ) );
+		//var handleLeft = warpSize * ( (-leftVal) / ( scrollContent.width()-scrollPane.width() ) ) - handleSize/2;
+		var handleLeft = warpSize / scrollContent.width() * (-leftVal);
+		if( handleLeft < 0 ) handleLeft = 0;
 		
 		scrollbar.find( ".ui-slider-handle" ).css({
 			width: handleSize,
+			//"margin-left": -handleSize / 2,
+			//"left": handleLeft+'px'
 			"margin-left": -handleSize / 2,
 			"left": handleLeft+'px'
 		});
