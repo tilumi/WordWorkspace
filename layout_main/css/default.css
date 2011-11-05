@@ -328,28 +328,54 @@ ul.style3 li {
 
 #menu-nav{
     float:right;
-	width:45px;
-	height:45px;
-	padding-top:9px;
+	width:50px;
+	height:48px;
+	padding-top:6px;
+	margin-left:5px;
 }
-.menu-nav-button{
-	height:15px;
-    color:#ccc;
+#menu-nav .menu-nav-button{
+	height:48px;
+    color:#333;
     font-weight:bold;
     text-align:center;
     cursor:pointer;
 }
-.menu-nav-button:hover{
-    color:#fff;
+.scroll-restore{
+	background:url( ../images/scroll-nav.png ) 5px -168px;
 }
-
+.scroll-restore:hover{
+	background-position:5px -120px;
+}
+#menu-nav-2{
+    float:right;
+	width:40px;
+	height:60px;
+	margin-right:5px;
+}
+#menu-nav-2 .menu-nav-button{
+	width:40px;
+	height:30px;
+    cursor:pointer;
+}
+.scroll-plus{
+	background:url( ../images/scroll-nav.png ) 0px 0px;
+}
+.scroll-plus:hover{
+	background-position:0px -30px;
+}
+.scroll-minus{
+	background:url( ../images/scroll-nav.png ) 0px -60px;
+}
+.scroll-minus:hover{
+	background-position:0px -90px;
+}
 #menu {
     position:relative;
     width: 6050px;
-	height: 40px;
-	padding-top: 14px;
+	height: 48px;
+	padding-top: 6px;
 	_padding-top: 0px;
-	_margin-top: 14px;
+	_margin-top: 6px;
 }
 
 #menu ul {
@@ -375,9 +401,9 @@ ul.style3 li {
 #menu a {
 	display: block;
 	height: 36px;
-	padding: 4px 5px 0px 5px;
+	padding: 12px 5px 0px 5px;
 	height: 32px\9;
-	padding: 4px 5px 4px 5px\9;
+	padding: 12px 5px 4px 5px\9;
 	letter-spacing: -1px;
 	text-decoration: none;
 	/*text-shadow: #00568D -1px 2px 3px;*/
@@ -409,11 +435,11 @@ ul.style3 li {
 }
 */
 #menu li.active {
-	background: url(../images/homepage05.jpg) repeat-x left top;
+	background: url(../images/homepage05.jpg) repeat-x 6px;
 }
 
 #menu li.active a {
-	background: url(../images/pointer.png) no-repeat bottom center;
+	background: url(../images/pointer.jpg) no-repeat bottom center;
 	/*text-shadow: #4C8100 -1px 2px 3px;*/
 }
 

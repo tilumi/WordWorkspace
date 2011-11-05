@@ -4,9 +4,7 @@
                 <a class="logo" href="<?php echo url('/'); ?>">The Bible 線上聖經</a>
     			
     			<div id="menu-nav">
-                    <div class="menu-nav-button scroll-plus">→</div>
-                    <div class="menu-nav-button scroll-restore">原點</div>
-                    <div class="menu-nav-button scroll-minus">←</div>
+                    <div class="menu-nav-button scroll-restore"></div>
     			</div>
     			<div id="menu-container">
     				<div id="menu">
@@ -45,7 +43,12 @@ foreach( $bibleFull as $id=>$name ){
     					</ul>
     				</div>
     			</div>
-                <div class="midnav-scrollbar-sensor"></div>
+                <div class="midnav-scrollbar-sensor">
+        			<div id="menu-nav-2">
+                        <div class="menu-nav-button scroll-plus"></div>
+                        <div class="menu-nav-button scroll-minus"></div>
+                    </div>
+                </div>
     			<div class="scroll-bar-wrap"> 
                     <div class="scroll-bar"></div> 
                 </div>
