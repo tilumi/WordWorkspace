@@ -3,23 +3,22 @@ list( $rows , $nav ) = APP::$appBuffer;
 $tab_id = $nav['book_id'];
 $book_on_top = $nav;
 include('tpl_header-style2.php');
-//pr($nav);
-$prev_url=url('/'.$nav['prev']['book_name'].'/'.$nav['prev']['chapter_id'].'.html');
-$next_url=url('/'.$nav['next']['book_name'].'/'.$nav['next']['chapter_id'].'.html');
+
+$prev_url='';
+if( $nav['prev']!==array() )
+    $prev_url=url('/'.$nav['prev']['book_name'].'/'.$nav['prev']['chapter_id'].'.html');
+$next_url='';
+if( $nav['next']!==array() )
+    $next_url=url('/'.$nav['next']['book_name'].'/'.$nav['next']['chapter_id'].'.html');
 ?>
 <script>
-$(document).keydown(keyCtrl);
-function keyCtrl(e){
+$(document).keydown(function(e){
     var e=window.event?window.event:e;
-    if( e.keyCode == 37 ) left();
-    if( e.keyCode == 39 ) right();
-}
-function left(){
-    location.href="<?php echo $prev_url;?>";
-}
-function right(){
-    location.href="<?php echo $next_url;?>";
-}
+    /* left */
+    if( e.keyCode == 37 <?php echo ($nav['prev']===array())?'&& false':''; ?> ){ location.href="<?php echo $prev_url;?>"; }
+    /* right */
+    if( e.keyCode == 39 <?php echo ($nav['next']===array())?'&& false':''; ?> ){ location.href="<?php echo $next_url;?>"; }
+});
 
 </script>
 

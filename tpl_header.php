@@ -23,7 +23,7 @@
 			</div>
 
 <style>
-#menu-container{width:960px;margin:0 20px;}
+#menu-container{float:right; width:910px;}
 .logo{display:none;}
 </style>
 <?php include('tpl_mainmenu.php'); ?>

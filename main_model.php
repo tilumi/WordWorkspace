@@ -183,6 +183,7 @@ class Main{
             'ts' => ($book_id < 40)?'OT':'NT',
             'testament' => ($book_id < 40)?'舊約':'新約',
             'name' => $pageName,
+            'title' => $chapter['name'],
             'book_id' => $book_id,
             'book_name' => $bibleFull[ $book_id ],
             'book_name_en' => $book['name_en'],

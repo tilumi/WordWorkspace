@@ -168,7 +168,8 @@ ul.style3 li {
 #topnav {
     height:20px;
     line-height:20px;
-	width: 970px;
+	width: 985px;
+	padding-right:15px;
 	margin: 0px auto;
 	_padding-top:2px;
     _height:18px;
@@ -261,25 +262,30 @@ ul.style3 li {
 
 /** MENU */
 
-.logo{ text-indent:-3000px;height:53px;width:200px;display:block;float:left; }
-
-.midnav{ position:relative;width:1000px;margin:0 auto;height:110px; }
+.logo{ text-indent:-3000px;height:73px;width:225px;display:block;float:left;margin-top:-20px; }
+.midnav{ position:relative;width:1000px;margin:0 auto;height:60px; }
 .midnav .prev{
     float:right;width:30px;height:48px;background:url(../images/bg3_left.jpg) center center;cursor:pointer;margin-top:6px;
 }
 .midnav .next{
     float:right;width:30px;height:48px;background:url(../images/bg3_right.jpg) center center;cursor:pointer;margin-top:6px;
 }
-
+.midnav-scrollbar-sensor{
+    position:absolute;
+    width:1000px;
+    height:50px;
+    top:60px;
+    left:0px;
+}
 .scroll-bar-wrap{
     position:absolute;
     width:900px;
-    height:50px;
+    height:49px;
     top:60px;
     left:50px;
     cursor:pointer;
-    /*border-bottom:1px solid #0e3757;*/
-    /*background:#333;*/
+    border-top:1px solid #0e3757;*/
+    alpha(opacity=0);-moz-opacity:0;opacity:0;
 }
 .scroll-bar-wrap .grads{
     position:absolute;
@@ -300,10 +306,11 @@ ul.style3 li {
     height:100%;
     margin:0 auto;
     top:-55px;
+    /*background:#fff;*/
 }
 
 .scroll-bar .ui-handle-helper-parent { position: relative; width: 100%; height: 30px; margin: 0 auto;}
-.scroll-bar .ui-slider-handle { display:block; position:absolute; top:0px; height: 47px; border:2px solid red; /*background:url(../images/scrollbar-handler.png) no-repeat 0 12px;*/ }
+.scroll-bar .ui-slider-handle { display:block; position:absolute; top:5px; height: 42px; border:2px solid red; alpha(opacity=70);-moz-opacity:0.7;opacity:0.7; }
 .scroll-bar .ui-slider-handle .ui-icon { margin: -8px auto 0; position: relative; top: 50%; }
 
 /* Corner radius */
@@ -314,9 +321,26 @@ ul.style3 li {
 
 #menu-container {
     float:right;
-	width:740px;
+	width:715px;
 	height:54px;
-	margin-right:20px;
+	/*margin-right:45px;*/
+}
+
+#menu-nav{
+    float:right;
+	width:45px;
+	height:45px;
+	padding-top:9px;
+}
+.menu-nav-button{
+	height:15px;
+    color:#ccc;
+    font-weight:bold;
+    text-align:center;
+    cursor:pointer;
+}
+.menu-nav-button:hover{
+    color:#fff;
 }
 
 #menu {

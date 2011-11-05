@@ -1,6 +1,46 @@
 <?php
 list( $startIndex ) = APP::$appBuffer;
 ?>
+var initContentLeft=0, initHandleLeft=0; //記錄書卷捲軸的起始點
+var stHolder;
+var stStop=false;
+var stSpeed=10;
+var stTS=50;
+function scrollMinus(){
+    if( stStop ){ stStop=false;return; }
+	var scrollPane = $( "#menu-container" ),
+		scrollContent = $( "#menu" );
+    var oLeft = scrollContent[0].offsetLeft;
+    oLeft = parseInt(scrollContent[0].style.marginLeft);
+    var ts = stTS;
+    oLeft = oLeft + stSpeed;
+    if( oLeft > 0 ){ oLeft=0; }
+    scrollContent.css( 'margin-left', oLeft );
+    
+    var handleLeft = 100*Math.abs(oLeft) / (scrollContent.width()-scrollPane.width());
+    $( ".scroll-bar .ui-slider-handle" ).css( 'left', handleLeft+'%' );
+    
+    stHolder = setTimeout('scrollMinus()', ts);
+}
+function scrollPlus(){
+    if( stStop ){ stStop=false;return; }
+	var scrollPane = $( "#menu-container" ),
+		scrollContent = $( "#menu" );
+    var oLeft = parseInt(scrollContent[0].style.marginLeft);
+    //alert(oLeft);
+    var ts = stTS;
+    var max = -(scrollContent.width() - scrollPane.width());
+    oLeft = oLeft - stSpeed;
+    //alert(oLeft);
+    if( oLeft <= max ){ oLeft=max; }
+    //alert(oLeft);return;
+    scrollContent.css( 'margin-left', oLeft );
+    
+    var handleLeft = 100*Math.abs(oLeft) / (scrollContent.width()-scrollPane.width());
+    $( ".scroll-bar .ui-slider-handle" ).css( 'left', handleLeft+'%' );
+    
+    stHolder = setTimeout('scrollPlus()', ts);
+}
 $(document).ready( function(){
     $("a[rel='bible-book']").each( function(){
         var url = encodeURI( '<?php echo url('/');?>' + this.name.substring( 0, this.name.indexOf('(') ) + '/chapters.html' );
@@ -16,6 +56,7 @@ $(document).ready( function(){
         });
     });
     
+    //自動產生捲軸刻度
     var key=0;
     $('#menu a').each( function(){
     	var scrollPane = $( "#menu-container" ),
@@ -41,8 +82,49 @@ $(document).ready( function(){
         scrollBar.append('<div class="grads" style="left:'+pos1+'px;'+style1+'"></div><div class="grad-tags" style="left:'+pos2+'px;'+style2+'">'+sh+'</div>');
         key=key+1;
     });
+    //設定書卷捲軸的顯示及隱藏
+    var showWrap=false;
+    var overHolder, outHolder;
+    $(".midnav").mouseover(function(){
+        clearTimeout(outHolder);
+        if( $(".scroll-bar-wrap").css('opacity') >= 0.9 ){ return; }
+        overHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().css('opacity', 1); }, 200);
+        //$('#middle-area').text( $('#middle-area').text() + '1 ' );
+    }).mouseout(function(){
+        clearTimeout(overHolder);
+        if( $(".scroll-bar-wrap").css('opacity') <= 0.1 ){ return; }
+        outHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'opacity':0}, 500); }, 3000);
+        //$('#middle-area').text( $('#middle-area').text() + '0 ' );
+    });
     
-    /* 設定 books navigator 的起始位置 */
+    /* 設定捲軸控制鈕 */
+    $('.scroll-restore').click(function(){
+        if( $( ".scroll-bar .ui-slider-handle" ).css('left').indexOf('px') > 0 ){ return; }
+    	var scrollPane = $( "#menu-container" ),
+    		scrollContent = $( "#menu" );
+        var handleHelper = $( ".scroll-bar .ui-handle-helper-parent" );
+        scrollContent.stop().animate( { marginLeft: initContentLeft }, 300 );
+        
+        var handleLeft = 100*initHandleLeft / handleHelper.width();
+        $( ".scroll-bar .ui-slider-handle" ).stop().animate( { left: handleLeft+'%' }, 300 );
+    });
+    $('.scroll-minus').mousedown(function(){
+        scrollMinus();
+    });
+    $(window).mouseup(function(){
+        $( "#menu" ).stop();
+        clearTimeout(stHolder);
+    });
+    $('.scroll-plus').mousedown(function(){
+        scrollPlus();
+    });
+    $(window).mouseup(function(){
+        $( "#menu" ).stop();
+        clearTimeout(stHolder);
+    });
+    
+    
+    /* 設定書卷Scroll Handler的起始位置 */
     if( $('#menu .active a').length > 0 ){
         var target = $('#menu .active a');
         var offsetLeft = ( target[0].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
@@ -97,11 +179,11 @@ $( function(){
 		//var handleLeft = warpSize * ( (-leftVal) / ( scrollContent.width()-scrollPane.width() ) ) - handleSize/2;
 		var handleLeft = warpSize / scrollContent.width() * (-leftVal);
 		if( handleLeft < 0 ) handleLeft = 0;
+		initContentLeft = leftVal; //紀錄Content起始點
+		initHandleLeft = handleLeft; //紀錄起始點
 		
 		scrollbar.find( ".ui-slider-handle" ).css({
 			width: handleSize,
-			//"margin-left": -handleSize / 2,
-			//"left": handleLeft+'px'
 			"margin-left": -handleSize / 2,
 			"left": handleLeft+'px'
 		});
