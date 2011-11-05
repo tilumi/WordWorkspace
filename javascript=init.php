@@ -69,14 +69,14 @@ $(document).ready( function(){
         var pos=Math.round( oLeft / scrollContent.width() * scrollBar.width() );
         var style1='background:#176ba7;';
         var pos1=pos;
-        var style2='top:10px;color:#176ba7;';
+        var style2='top:7px;color:#176ba7;';
         var pos2=pos-6;
         if( (key % 2) == 1 ){
             style1='height:20px;';
-            style2='top:25px;';
+            style2='top:22px;';
             if( sh.length > 1 ){
                 style2='top:23px;width:12px;';
-                pos2=pos-6;
+                pos2=pos-8;
             }
         }
         scrollBar.append('<div class="grads" style="left:'+pos1+'px;'+style1+'"></div><div class="grad-tags" style="left:'+pos2+'px;'+style2+'">'+sh+'</div>');
