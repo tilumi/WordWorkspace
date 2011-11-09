@@ -54,7 +54,7 @@ if( file_exists($viewTpl) )
 
 function index(){
     $rows=Main::getBooks();
-    View::setHeader( 'sitename', 'The Bible 線上聖經 - 最美最舒適的線上讀經網站' );
+    View::setHeader( 'sitename', 'The Bible 線上聖經 - 最美最舒適的線上讀經網' );
     APP::$appBuffer = array($rows);
 }
 function catalog(){

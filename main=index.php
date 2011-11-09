@@ -37,6 +37,7 @@ $(document).ready( function(){
     height:450px;
     font-family: Georgia, "蘋果儷黑體", "微軟正黑體", "新細明體", "Times New Roman", Times, serif;
 }
+/*
 .ot{ width:330px; }
 .nt{ width:320px; }
 .blocks-ot{ float:left;width:120px; }
@@ -46,6 +47,25 @@ $(document).ready( function(){
 .blocks-nt{ float:left;width:150px; }
 #block-nt-1{ width:150px; }
 #block-nt-2{ width:160px; }
+*/
+.ot{ position:absolute;width:360px;left:0px;z-index:10; }
+.nt{ position:absolute;width:320px;right:0px;z-index:10; }
+#middle-area{
+    position:absolute;
+    z-index:0;
+    width:100%;
+    height:100%;
+    background:url(<?php echo layout_url('main','/images/jesus.png'); ?>) no-repeat center top;
+    alpha(opacity=50);
+    opacity:0.5;
+}
+.blocks-ot{ float:left;width:120px; }
+/*#block-ot-1{ width:113px; }
+#block-ot-2{ width:105px; }
+#block-ot-3{ width:112px; }*/
+.blocks-nt{ float:left;width:150px; }
+/*#block-nt-1{ width:150px; }
+#block-nt-2{ width:160px; }*/
 
 .cloud{ line-height:24px; }
 .cloud a{ text-decoration:none;letter-spacing:-1px; }
@@ -61,10 +81,11 @@ $(document).ready( function(){
 </style>
 			<div id="page" class="single container">
 				<div id="content">
-				    <div class="clearfix" style="border-bottom:1px solid #CCC;margin-bottom:40px;">
-    					<div id="box5" class="ot box-style sky" style="float:left;">
+				    <div class="clearfix" style="position:relative;border-bottom:1px solid #CCC;margin-bottom:40px;height:450px;">
+    					<div id="middle-area"></div>
+    					<div id="box5" class="ot box-style sky">
     					    <h2 class="title">舊約 Old Testament</h2>
-    					    <div class="cloud" style="line-height:24px;">
+    					    <div class="cloud">
 <?php
     $max=39;
     $blockChaps=13;
@@ -98,9 +119,9 @@ $(document).ready( function(){
 
                             </div>
     					</div>
-    					<div id="box5" class="nt box-style sky" style="float:right;">
+    					<div id="box5" class="nt box-style sky">
     					    <h2 class="title">新約 New Testament</h2>
-    					    <div class="cloud" style="line-height:24px;">
+    					    <div class="cloud">
 <?php
     $max=66;
     $blockChaps=14;
@@ -136,8 +157,6 @@ $(document).ready( function(){
 
         					</div>
     					</div>
-    					<div id="middle-area" style="position:relative;width:200px;height:450px;background:url(<?php echo layout_url('main','/images/jesus.png'); ?>) center top;margin:0 auto;">
-                        </div>
 					</div>
 					<div class="box5 box-style" style="width:65%;float:left;">
                         <div class="clearfix" style="padding-bottom:20px;margin-bottom:30px;">
