@@ -100,6 +100,7 @@ $(document).ready( function(){
     });
     
     /* 設定捲軸控制鈕 */
+    var scrollBtnActive=false;
     $('.scroll-restore').click(function(){
         if( $( ".scroll-bar .ui-slider-handle" ).css('left').indexOf('px') > 0 ){ return; }
     	var scrollPane = $( "#menu-container" ),
@@ -111,18 +112,24 @@ $(document).ready( function(){
         $( ".scroll-bar .ui-slider-handle" ).stop().animate( { left: handleLeft+'%' }, 300 );
     });
     $('.scroll-minus').mousedown(function(){
+        scrollBtnActive=true;
         scrollMinus();
     });
-    $(window).mouseup(function(){
+    $(document).mouseup(function(){
+        if( ! scrollBtnActive ){ return; }
         $( "#menu" ).stop();
         clearTimeout(stHolder);
+        scrollBtnActive=false;
     });
     $('.scroll-plus').mousedown(function(){
+        scrollBtnActive=true;
         scrollPlus();
     });
-    $(window).mouseup(function(){
+    $(document).mouseup(function(){
+        if( ! scrollBtnActive ){ return; }
         $( "#menu" ).stop();
         clearTimeout(stHolder);
+        scrollBtnActive=false;
     });
     
     

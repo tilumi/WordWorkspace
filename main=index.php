@@ -56,8 +56,6 @@ $(document).ready( function(){
     width:100%;
     height:100%;
     background:url(<?php echo layout_url('main','/images/jesus.png'); ?>) no-repeat center top;
-    alpha(opacity=50);
-    opacity:0.5;
 }
 .blocks-ot{ float:left;width:120px; }
 /*#block-ot-1{ width:113px; }
