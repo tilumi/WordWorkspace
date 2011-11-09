@@ -23,16 +23,14 @@ if( isset($selectIndex) && is_numeric($selectIndex) ){
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.min.js'); ?>"></script>
 <?php $using_ie6 = (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 6.') !== false ); ?>
 <?php if( ! $using_ie6 ){ //ie6的使用者，不啟用JS功能 ?>
-<script type="text/javascript" src="<?php echo layout_url('main', '/js/jcarousel.lite.js'); ?>"></script>
-
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.core.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.widget.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.mouse.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.slider.js'); ?>"></script>
 
-<script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.mousewheel.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.colorbox-min.js'); ?>"></script>
 <script type="text/javascript" src="<?php echo url('/javascript/init/'.$jsIndex.'.js'); ?>"></script>
+
 <?php } ?>
 
 <meta name="google-site-verification" content="Sl77l_lzmUMySMszkvZsOp9FD5ussf3G14LvlThAP8w" />

@@ -58,6 +58,7 @@ marktime( 'Core' , 'Garbage Collection');
 marktime( 'SystemUser', 'User');
 
 if( DEBUG==0 ) exit;
+if( APP::$systemConfigs['Debug']==0 ) exit; //提供APP於執行期決定是否關閉訊息
 
 echo '<b>Cookies:</b>';
 pr($_COOKIE);

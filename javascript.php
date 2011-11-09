@@ -1,4 +1,5 @@
 <?php
+APP::$systemConfigs['Debug'] = 0; //js模擬程式，顯示DEBUG INFO會造成錯誤
 $doctype=APP::$routing['doctype'];
 if( $doctype != 'js' ){
     require('error/404.php');die;

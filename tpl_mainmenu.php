@@ -32,7 +32,7 @@ foreach( $bibleFull as $id=>$name ){
     $max = $bibleMaxChapter[ $id-1 ];
 ?>
     						<li <?php echo $active; ?>>
-                                <a href="<?php echo url( '/'.$name.'.html' ); ?>" rel="bible-book" accesskey="<?php echo $id; ?>" name="<?php echo $name; ?>(<?php echo $short; ?>)">
+                                <a href="<?php echo url( '/'.$name.'.html' ); ?>" rel="bible-book" accesskey="<?php echo $id; ?>" name="<?php echo $name; ?>(<?php echo $short; ?>)" title="<?php echo $name; ?> 目錄">
                                     <em <?php echo $style; ?>><?php echo $name; ?></em>
                                     <span class="digit"><?php echo $max; ?></span>
                                 </a>
@@ -48,8 +48,8 @@ foreach( $bibleFull as $id=>$name ){
                         <div class="menu-nav-button scroll-plus"></div>
                         <div class="menu-nav-button scroll-minus"></div>
                     </div>
-                </div>
-    			<div class="scroll-bar-wrap"> 
-                    <div class="scroll-bar"></div> 
+        			<div class="scroll-bar-wrap"> 
+                        <div class="scroll-bar"></div> 
+                    </div>
                 </div>
 			</div>

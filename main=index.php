@@ -22,32 +22,6 @@ $(document).ready( function(){
             href:url
         });
     });
-    //$('.bookNav').append('<div id="chapter-guide"></div>');
-
-    $("#bible-container").jCarouselLite({
-        //auto: 6000,
-        speed: 500,
-        circular: false,
-        //hoverPause: true,
-        visible: 1,
-        scroll: 1,
-        btnNext: '#bible-new',
-        btnPrev: '#bible-old'
-    });
-    
-    $(".book-cats").mouseover( function(){
-        $(this).find(".book-mask").css('opacity', 0.5);
-        //$(this).find(".book-info").css('background-color', 'white');
-    } ).mouseout( function(){
-        $(this).find(".book-mask").css('opacity', 0.9);
-        //$(this).find(".book-info").css('background-color', 'auto');
-    } );
-    $(".book-info").mouseover( function(){
-        $(this).css('background-color', 'white');
-    } ).mouseout( function(){
-        $(this).css('background-color', '');
-    } );
-    
     $(".scrolls").mouseover( function(){
         $(this).find("img").css('opacity', 1);
     } ).mouseout( function(){
@@ -77,12 +51,13 @@ $(document).ready( function(){
 .cloud a{ text-decoration:none;letter-spacing:-1px; }
 .cloud a:hover{ text-decoration:underline; }
 .cloud .chaps{ color:#000;font-size:13px;font-weight:bold;font-family:Arial; }
-.cloud img{ height:12px;filter: alpha(opacity=50);-moz-opacity:.50;opacity:.50; }
+.cloud img{ width:12px;height:12px;filter: alpha(opacity=50);-moz-opacity:.50;opacity:.50; }
 .cloud .brief{ font-size:12px;color:#999;margin-left:3px; }
 .cloud .catalog{ font-size:16px; }
 
 .ts { font-family: Georgia, "蘋果儷黑體", "微軟正黑體", "新細明體", "Times New Roman", Times, serif;margin-bottom:20px; }
 .social-link img { height:30px; }
+
 </style>
 			<div id="page" class="single container">
 				<div id="content">
@@ -161,7 +136,8 @@ $(document).ready( function(){
 
         					</div>
     					</div>
-    					<div id="middle-area" style="width:200px;height:450px;/*background:#fff;*/margin:0 auto;"></div>
+    					<div id="middle-area" style="position:relative;width:200px;height:450px;background:url(<?php echo layout_url('main','/images/jesus.png'); ?>) center top;margin:0 auto;">
+                        </div>
 					</div>
 					<div class="box5 box-style" style="width:65%;float:left;">
                         <div class="clearfix" style="padding-bottom:20px;margin-bottom:30px;">

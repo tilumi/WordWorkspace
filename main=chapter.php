@@ -114,7 +114,7 @@ foreach( $rows as $r ){
 ?>
 <div class="subject">
     <h2 class="title"><?php echo $r['name']; ?>
-    <?php if( ! empty($r['relate']) ){echo '（'.$r['relate'].'）';}?></h2>
+    <?php //if( ! empty($r['relate']) ){echo '（'.$r['relate'].'）';}?></h2>
 </div>
 
 <?php

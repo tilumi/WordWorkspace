@@ -4,8 +4,8 @@ list( $startIndex ) = APP::$appBuffer;
 var initContentLeft=0, initHandleLeft=0; //記錄書卷捲軸的起始點
 var stHolder;
 var stStop=false;
-var stSpeed=10;
-var stTS=50;
+var stSpeed=20;
+var stTS=70;
 function scrollMinus(){
     if( stStop ){ stStop=false;return; }
 	var scrollPane = $( "#menu-container" ),
@@ -57,6 +57,7 @@ $(document).ready( function(){
     });
     
     //自動產生捲軸刻度
+    /*
     var key=0;
     $('#menu a').each( function(){
     	var scrollPane = $( "#menu-container" ),
@@ -70,30 +71,31 @@ $(document).ready( function(){
         var style1='background:#176ba7;';
         var pos1=pos;
         var style2='top:7px;color:#176ba7;';
-        var pos2=pos-6;
+        var pos2=pos-5;
         if( (key % 2) == 1 ){
             style1='height:20px;';
             style2='top:22px;';
             if( sh.length > 1 ){
-                style2='top:23px;width:12px;';
-                pos2=pos-8;
+                style2='top:20px;width:12px;';
+                pos2=pos-5;
             }
         }
         scrollBar.append('<div class="grads" style="left:'+pos1+'px;'+style1+'"></div><div class="grad-tags" style="left:'+pos2+'px;'+style2+'">'+sh+'</div>');
         key=key+1;
     });
+    */
     //設定書卷捲軸的顯示及隱藏
     var showWrap=false;
     var overHolder, outHolder;
     $(".midnav").mouseover(function(){
         clearTimeout(outHolder);
-        if( $(".scroll-bar-wrap").css('opacity') >= 0.9 ){ return; }
-        overHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().css('opacity', 1); }, 200);
+        if( $(".scroll-bar-wrap").css('top') > -10 ){ return; }
+        overHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'top': '0px'}, 100); }, 200);
         //$('#middle-area').text( $('#middle-area').text() + '1 ' );
     }).mouseout(function(){
         clearTimeout(overHolder);
-        if( $(".scroll-bar-wrap").css('opacity') <= 0.1 ){ return; }
-        outHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'opacity':0}, 500); }, 3000);
+        if( $(".scroll-bar-wrap").css('top') < -40 ){ return; }
+        outHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'top': '-52px'}, 200); }, 1200);
         //$('#middle-area').text( $('#middle-area').text() + '0 ' );
     });
     
@@ -136,6 +138,27 @@ $(document).ready( function(){
     if( offsetLeft < 0 ) offsetLeft = 0;
     if( offsetLeft > maxLeft ) offsetLeft = maxLeft;
     $('#menu').css('margin-left', '-'+ offsetLeft +'px' );
+    
+    /* 顯示操作說明 */
+    var showTooltip=false;
+    $(".tooltip-button").mouseover( function(){
+        if( showTooltip ) return;
+        $(".tooltip").stop().css({'top':'60px', 'opacity':0, display:'block'}).animate({'top':'55px', 'opacity':1}, 200);
+        //showTooltip=true;
+    } ).mouseout( function(){
+        if( showTooltip ) return;
+        $(".tooltip").stop().animate({'top':'50px', 'opacity':0}, 200);
+        //showTooltip=false;
+    } ).click( function(){
+        showTooltip = ! showTooltip;
+        if( ! showTooltip ){
+            $(".tooltip").stop().animate({'top':'50px', 'opacity':0}, 200);
+            $(this).addClass('tooltip-button').removeClass('tooltip-button-active');
+        }
+        if( showTooltip ){
+            $(this).addClass('tooltip-button-active').removeClass('tooltip-button');
+        }
+    } );
 });
 
 $( function(){
