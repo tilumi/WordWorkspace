@@ -393,7 +393,9 @@ ul.style3 li {
 }
 #menu {
     position:relative;
+    *position:;
     width: 6050px;
+    *width: 6430px;
 	height: 48px;
 	padding-top: 6px;
 	_padding-top: 0px;

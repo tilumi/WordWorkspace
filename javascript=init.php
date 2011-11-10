@@ -136,16 +136,21 @@ $(document).ready( function(){
     /* 設定書卷Scroll Handler的起始位置 */
     if( $('#menu .active a').length > 0 ){
         var target = $('#menu .active a');
-        var offsetLeft = ( target[0].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
+        //alert(target.eq(0).position().left+' =? '+target[0].offsetLeft);
+        //var offsetLeft = ( target[0].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
+        var offsetLeft = ( target.eq(0).position().left - ( $("#menu-container").width()-target.width() )/2 );
     }else{
         var target = $('#menu a');
-        var offsetLeft = ( target[39].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
+        //alert(target.eq(39).position().left+' =? '+target[39].offsetLeft);
+        //var offsetLeft = ( target[39].offsetLeft - ( $("#menu-container").width()-target.width() )/2 );
+        var offsetLeft = ( target.eq(39).position().left - ( $("#menu-container").width()-target.width() )/2 );
     }
-    var maxLeft = $('#menu')[0].offsetWidth - $('#menu-container')[0].offsetWidth ;
+    //var maxLeft = $('#menu')[0].offsetWidth - $('#menu-container')[0].offsetWidth ;
+    var maxLeft = $('#menu').width() - $('#menu-container').width() ;
     if( offsetLeft < 0 ) offsetLeft = 0;
     if( offsetLeft > maxLeft ) offsetLeft = maxLeft;
     $('#menu').css('margin-left', '-'+ offsetLeft +'px' );
-    
+        
     /* 顯示操作說明 */
     var showTooltip=false;
     $(".tooltip-button").mouseover( function(){

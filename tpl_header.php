@@ -17,6 +17,9 @@
 	display:none;
 	position: absolute;
 	background:transparent url(<?php echo layout_url('main', '/images/tooltip/white_arrow_wide.png'); ?>);
+	background-image:url(<?php echo layout_url('main', '/images/tooltip/white_arrow_wide.gif'); ?>)\0/IE8+9;
+	background-image:url(<?php echo layout_url('main', '/images/tooltip/white_arrow_wide.png'); ?>) \0/IE9;
+	*background-image:url(<?php echo layout_url('main', '/images/tooltip/white_arrow_wide.gif'); ?>);
 	font-size:12px;
 	height:90px;
 	width:730px;
@@ -37,7 +40,6 @@
 <!--[if lt IE 7]>
 <style>
 .tooltip {
-	background-image:url(<?php echo layout_url('main', '/images/tooltip/black_arrow.gif'); ?>);
 }
 
 </style>
