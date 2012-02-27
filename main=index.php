@@ -159,14 +159,32 @@ $(document).ready( function(){
 					<div class="box5 box-style" style="width:65%;float:left;">
                         <div class="clearfix" style="padding-bottom:20px;margin-bottom:30px;">
     						<h2 class="title">分享這個網站</h2>
-    						<p>喜歡這個網站嗎？請幫忙推薦我們 ...
+    						<p>
+                            喜歡這個網站嗎？請幫忙推薦我們 ...<br>
+<?php
+$IE6 = (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 6.') !== false );
+$IE7 = (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 7.') !== false );
+if( ! ($IE6 || $IE7) ){
+?>
                             <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
                             <g:plusone size="medium"></g:plusone>
+
+<?php
+}
+?>
                             
-                            <span id="fb-root"></span>
-                            <script src="http://connect.facebook.net/en_US/all.js#appId=256358261057256&amp;xfbml=1"></script>
-                            <fb:like href="http://bible.jbride.cc" send="true" layout="button_count" width="100" show_faces="true" font=""></fb:like>
-                            <br>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1&appId=256358261057256";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+</script>
+<div class="fb-like" data-href="http://bible.jbride.cc" data-send="false" data-width="450" data-show-faces="true"></div>
+                            </p>
+                            <p>
                             或分享給你的朋友喔 ...
 
 <?php $url_encode=urlencode('http://bible.jbride.cc'); ?>

@@ -1,13 +1,14 @@
 <?php
-APP::$systemConfigs['Debug'] = 0; //js模擬程式，顯示DEBUG INFO會造成錯誤
+APP::$systemConfigs['Debug'] = 0; //此為js模擬程式，顯示DEBUG INFO會造成錯誤
+
 $doctype=APP::$routing['doctype'];
 if( $doctype != 'js' ){
     require('error/404.php');die;
 }
 
 header('Content-type: text/javascript; charset=utf-8');
-
 $action = pos( APP::$params );
+
 if( empty($action) ){ $action='index'; }
 if( $action == 'init' ){ array_shift(APP::$params); }
 

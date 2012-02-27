@@ -56,7 +56,7 @@ marktime( 'Core' , 'Loading Configs');
 //儲存routing分析結果
 APP::$routing = $routing_args;
 APP::$params = $routing_args['params'];
-APP::$handler = $app; //紀錄總管負責的程式
+APP::$handler = $app; //紀錄總管負責的程式，$app來自index.php Line 31
 
 //Loading System Configs
 //$configs = sfYaml::load( DIRCONFIG.'config.yml' );
@@ -124,6 +124,7 @@ session_start();
 marktime( 'Core' , 'Setting Session');
 marktime( 'SystemUser', 'System');
 
+//載入自訂項目
 include( 'app_custom.php' );
 
 //載入Controller

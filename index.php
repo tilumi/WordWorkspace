@@ -1,14 +1,10 @@
 <?php
 require('lib/marktime.php');
+require('lib/routing.php');
 
 marktime('Core', 'Start');
 marktime('SystemUser', 'Start');
 
-class Routing{
-    static $appRegister=array(
-            'javascript',
-        );
-}
 //phpinfo();
 /*******************************************************************\
 *** Routing     ****************************************************
@@ -26,8 +22,12 @@ $p=urldecode( $p );
 $p=substr( $p, strlen($base) );
 if( substr($p,0,1)=='/' ) $p=substr($p,1);
 
-$routing_args=routing( $p );
+$routing_args=Routing::parse( $p );
 
+/*echo '<pre>';
+print_r($routing_args);
+echo '</pre>';
+die;*/
 $app = $routing_args['app'].'.php';
 if( $routing_args['prefix']!='main' ){
     $app = $routing_args['prefix'].'#'.$app;
@@ -70,51 +70,6 @@ pr($_SESSION['PageBeforeLogin']);
 markquery_report();
 marktime_report();
 
-/*******************************************************************\
-*** 路由函數     ****************************************************
-\*******************************************************************/
-
-function routing( $p ){
-    if( empty($p) ){
-        return array(
-            'prefix'=>'main',
-            'app'=>'main',
-            'params'=>array(),
-            'doctype'=>'html'
-        );
-    }
-    //取得副檔名
-    $p=trim($p);
-    $ext = strtolower( substr( strrchr($p, ".") ,1 ) );
-    if( empty($ext) ) $ext='html';
-    $p = preg_replace( "/\.".$ext."$/", '', $p ); //移除副檔名
-    
-    //拆解路徑
-    $nodes = explode('/', $p);
-    
-    //判別第一個節點，取得所屬的prefix
-    $prefix='main';
-    if( pos($nodes) == 'administrator' ){
-        $prefix='admin';
-        array_shift($nodes);
-    }
-    
-    //排除prefix之後，只判斷第一層級，如有註冊，就指定為app
-    //其他自動保留為參數
-    $app='main';
-    $arg1 = pos($nodes);
-    if( in_array( $arg1 , Routing::$appRegister ) ){
-        $app = array_shift($nodes);
-    }
-    
-    return array(
-        'prefix'=>$prefix,
-        'app'=>$app,
-        'params'=>$nodes,
-        'doctype'=>$ext
-    );
-    
-}
 
 
 ?>
