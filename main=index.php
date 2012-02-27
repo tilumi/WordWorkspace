@@ -2,7 +2,7 @@
 list( $rows ) = APP::$appBuffer;
 $selectIndex = 40;
 $homeIndex = true;
-include('tpl_header.php');
+include('layout_main/tpl_header.php');
 ?>
 
 <?php $using_ie6 = (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE 6.') !== false ); ?>
@@ -223,5 +223,5 @@ if( ! ($IE6 || $IE7) ){
 			</div>
 
 <?php
-include('tpl_footer.php');
+include('layout_main/tpl_footer.php');
 ?>

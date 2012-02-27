@@ -1,7 +1,7 @@
 <?php
 list( $r , $chaps , $position ) = APP::$appBuffer;
 $tab_id = $r['id'];
-include('tpl_header-style2.php');
+include('layout_main/tpl_header-style2.php');
 
 $category_image = url('/cabinets/bible/bible-'.$r['category_id'].'.png');
 
@@ -130,5 +130,5 @@ $posnav='<div style="text-align:center;border-top:1px solid #ccc;border-bottom:1
 
 
 <?php
-include('tpl_footer.php');
+include('layout_main/tpl_footer.php');
 ?>

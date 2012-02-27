@@ -57,6 +57,7 @@ marktime( 'Core' , 'Loading Configs');
 APP::$routing = $routing_args;
 APP::$params  = $routing_args['params'];
 APP::$handler = $routing_args['handler']; //標示總管負責的程式
+APP::$prefix  = $routing_args['prefix']; //網址前綴詞
 //Loading System Configs
 //$configs = sfYaml::load( DIRCONFIG.'config.yml' );
 $basic=APP::$systemConfigs;

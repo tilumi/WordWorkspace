@@ -17,6 +17,7 @@ class APP{
     static $routing=array();
     static $params=array();
     static $handler=''; //紀錄本次執行，總管負責的程式
+    static $prefix=''; //網址前綴詞
     static $appBuffer=''; //action執行完畢的結果回傳
     
     /* Syslog */
@@ -417,7 +418,7 @@ class View{
                 continue;
             }
             //預設路徑為 layout 的 js資料夾
-            $_link['href']='css/'.$url;
+            $_link['href']='/css/'.$url;
             $contents.=self::link($_link)."\n";
         }
         if( $return ) return $content;
@@ -440,7 +441,7 @@ class View{
                 continue;
             }
             //預設路徑為 layout 的 js資料夾
-            $url='js/'.$url;
+            $url='/js/'.$url;
             $contents.=self::script($url)."\n";
         }
         if( $return ) return $content;
@@ -470,9 +471,9 @@ class View{
         return '<img src="'.$src_abs.'"'.$prefix.' />';
     }
     /**** Head tag utilities End ****/
-    function js_url( $src ){ return self::layout_url($src); }
-    function css_url( $src ){ return self::layout_url($src); }
-    function layout_url( $href='' ){ return layout_url($href); }
+    function js_url( $src ){ return self::layout_url(APP::$routing['prefix'], $src); }
+    function css_url( $src ){ return self::layout_url(APP::$routing['prefix'], $src); }
+    function layout_url( $href='' ){ return layout_url(APP::$routing['prefix'], $href); }
     function image_url( $src ){ return image_url($src); }
     function url( $href ){ return url($href); }
     protected function _attrs_to_str( $attrs ){

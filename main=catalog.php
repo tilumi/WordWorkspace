@@ -1,7 +1,7 @@
 <?php
 list( $r , $chaps , $position ) = APP::$appBuffer;
 $selectIndex = 40;
-include('tpl_header-style2.php');
+include('layout_main/tpl_header-style2.php');
 
 $category_image = url('/cabinets/bible/bible-'.$r['category_id'].'.png');
 
@@ -72,5 +72,5 @@ if( $last['id'] != 66 ){ $posnav.=' &hellip; '; }
 
 
 <?php
-include('tpl_footer.php');
+include('layout_main/tpl_footer.php');
 ?>

@@ -2,7 +2,7 @@
 list( $rows , $nav ) = APP::$appBuffer;
 $tab_id = $nav['book_id'];
 $book_on_top = $nav;
-include('tpl_header-style2.php');
+include('layout_main/tpl_header-style2.php');
 
 $prev_url='';
 if( $nav['prev']!==array() )
@@ -194,5 +194,5 @@ foreach( $rows as $r ){
 
 
 <?php
-include('tpl_footer.php');
+include('layout_main/tpl_footer.php');
 ?>
