@@ -6,12 +6,25 @@ class Routing{
             return array(
                 'prefix'=>'main',
                 'app'=>'main',
-                'params'=>array(),
-                'doctype'=>'html'
+                'params'=>array('index'),
+                'doctype'=>'html',
+                'handler'=>'main',
             );
         }
-        //取得副檔名
+        
+        //過濾不必要的空白
         $p=trim($p);
+        //去除GET string（路徑中"?"以後的字串）
+        if( mb_strpos($p, '?')!==false ){
+            //用拆解的方式，只取以"?"區隔的第一個元素
+            $_ = explode('?', $p);
+            $p=$_[0];
+        }
+        //若結尾是 "/" ，暗示使用預設 "index.html"，自動補上
+        if( substr($p, -1)==='/' ){
+            $p.="index.html";
+        }
+        //取得副檔名
         $ext = strtolower( substr( strrchr($p, ".") ,1 ) );
         if( empty($ext) ) $ext='html';
         $p = preg_replace( "/\.".$ext."$/", '', $p ); //移除副檔名
@@ -32,15 +45,13 @@ class Routing{
         
         //排除prefix之後，只判斷第一層級，如有註冊，就指定為app
         //其他自動保留為參數
-        $app='main';
         $arg_1 = pos($nodes);
-        $p = implode('/', $nodes).'.'.$ext;
-        
         //若prefix未在apps中設定，則視為找不到
         if( ! isset(RoutingConfigs::$apps[ $prefix ]) ){
             return array('error'=>'404');
         }
         
+        $app='main';
         $routingTable = RoutingConfigs::$apps[ $prefix ];
         if( isset($routingTable[ $arg_1 ]) ){
             $app = $routingTable[ $arg_1 ]['name'];
@@ -48,15 +59,18 @@ class Routing{
         }elseif( isset($routingTable['__default__']) ){
             $app = $routingTable['__default__']['name'];
         }
-        if( !empty($arg1) && is_array( RoutingConfigs::$apps[$prefix] ) && in_array( $arg1 , RoutingConfigs::$apps[$prefix] ) ){
-            $app = array_shift($nodes);
+        
+        $handler = $app;
+        if( $prefix!='main' ){
+            $handler = $prefix.'#'.$handler;
         }
         
         return array(
             'prefix'=>$prefix,
             'app'=>$app,
             'params'=>$nodes,
-            'doctype'=>$ext
+            'doctype'=>$ext,
+            'handler'=>$handler,
         );
         
     }

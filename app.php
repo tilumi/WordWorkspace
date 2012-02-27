@@ -55,9 +55,8 @@ marktime( 'Core' , 'Loading Configs');
 
 //儲存routing分析結果
 APP::$routing = $routing_args;
-APP::$params = $routing_args['params'];
-APP::$handler = $app; //紀錄總管負責的程式，$app來自index.php Line 31
-
+APP::$params  = $routing_args['params'];
+APP::$handler = $routing_args['handler']; //標示總管負責的程式
 //Loading System Configs
 //$configs = sfYaml::load( DIRCONFIG.'config.yml' );
 $basic=APP::$systemConfigs;
@@ -129,7 +128,7 @@ include( 'app_custom.php' );
 
 //載入Controller
 //因為index.php已經檢查過，載入時不用再檢查
-require( APP::$handler );
+require( APP::$handler.'.php' );
 
 
 

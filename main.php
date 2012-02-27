@@ -3,12 +3,8 @@ $doctype=APP::$routing['doctype'];
 if( $doctype != 'html' ){
     require('error/404.php');die;
 }
-
 $action = pos( APP::$params );
-if( empty($action) ){ $action='index'; }
-if( $action == 'init' ){ array_shift(APP::$params); }
-
-//全部都是中文字，表示已指定書卷或是章節
+//全都是中文字，表示為指定書卷或是章節
 if( preg_match( '/^([\x{4e00}-\x{9fff}]+)$/u', $action) ){
     switch( count(APP::$params) ){
         case 1: //只有指定書卷的時候，進入書卷介紹頁
@@ -26,13 +22,15 @@ if( preg_match( '/^([\x{4e00}-\x{9fff}]+)$/u', $action) ){
             }
     }
 }
+if( in_array($action, array('index') ) ){
+    $action=array_shift(APP::$params);
+}
+
 $registerAction = array(
     'index',
     'book',
     'chapters', //顯示書卷章節表
     'chapter', //閱讀經文
-    'catalog',
-    'init',
 );
 
 include( APP::$routing['app'].'_model.php' );

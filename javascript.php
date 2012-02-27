@@ -7,10 +7,11 @@ if( $doctype != 'js' ){
 }
 
 header('Content-type: text/javascript; charset=utf-8');
-$action = pos( APP::$params );
 
-if( empty($action) ){ $action='index'; }
-if( $action == 'init' ){ array_shift(APP::$params); }
+$action = pos( APP::$params );
+if( in_array($action, array('init') ) ){
+    $action=array_shift(APP::$params);
+}
 
 $registerAction = array(
     'init',

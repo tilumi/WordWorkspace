@@ -15,6 +15,8 @@ marktime('SystemUser', 'Start');
 //$path=filter_var( $path, FILTER_SANITIZE_URL); //for php version > 5.2
 //$p=$path;
 
+//清除$_GET全域陣列中的 p （rewrite所引入的路徑資料）
+unset($_GET['p']);
 //直接從系統環境取得REDIRECT_URL
 $base=dirname( getenv('SCRIPT_NAME') );
 $p=filter_var( getenv('REQUEST_URI'), FILTER_SANITIZE_URL);
@@ -27,16 +29,10 @@ $routing_args=Routing::parse( $p );
 /*echo '<pre>';
 print_r($routing_args);
 echo '</pre>';
+echo '<pre>';
+print_r($_GET);
+echo '</pre>';
 die;*/
-$app = $routing_args['app'].'.php';
-if( $routing_args['prefix']!='main' ){
-    $app = $routing_args['prefix'].'#'.$app;
-}
-
-if( ! file_exists($app) ){
-    require('error/404.php');
-    die;
-}
 
 marktime('Core', 'Routing');
 
