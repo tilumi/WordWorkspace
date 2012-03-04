@@ -61,6 +61,9 @@ pr($_COOKIE);
 echo '<b>PageBeforeLogin:</b>';
 pr($_SESSION['PageBeforeLogin']);
 
+echo '<b>Routing:</b>';
+pr(APP::$routing);
+
 //pr(Dispatch::$params);
 //pr($pageConfig);
 markquery_report();

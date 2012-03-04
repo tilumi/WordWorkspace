@@ -12,7 +12,8 @@ class RoutingConfigs{
     //各前綴名稱註冊的路徑和指向的控制器
     static $apps=array(
             'admin'=>array(
-                'javascript'=>array('name'=>'javascript'),
+                'news'=>array('name'=>'news'),
+                'managers'=>array('name'=>'managers'),
                 '__default__'=>array('name'=>'main'),
             ),
             'main'=>array(

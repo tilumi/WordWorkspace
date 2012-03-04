@@ -19,7 +19,7 @@ function redirect( $href , $message='' , $message_template='' ){
     //pr(headers_list());die;
     if( count($_POST)>0 ){
         $delay=1;
-        $waitimg=WEBLAYOUT.'main/loading.gif';
+        $waitimg=layout_url('admin', 'loading.gif');
         $redirectMiddlePage=<<<EOF
 <html>
 <head>
@@ -74,6 +74,58 @@ function anchor( $name, $href, $options=array() ){
 function url( $href ){
     //如果傳入的參數是字串，則以字串URL方式處理
     if( is_string($href) ){
+        $status = 0; //記錄曾啟用過哪些特殊功能
+        
+        // "/" 時，表示為所在 prefix 下的根目錄
+        // 設為空白後，讓後方的程式自動補上 prefix
+        if( substr($href, 0, 1)=='/' ){
+            $href = substr($href, 1);
+        }
+        // ".." 永遠表示 prefix 的根目錄，或是 main app
+        if( substr($href, 0, 2)=='..' ){
+            $base = '';
+            $href = substr($href, 2);
+            if( APP::$prefix != 'main' ){
+                $base .= APP::$prefixFull.'/';
+            }
+            //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
+            if( ! empty($base) && ! empty($href) ){
+                $base = substr($base, 0, -1);
+            }
+            $href = $base.$href;
+            $status += 1;
+        }
+        // "." 永遠表示 prefix 及 app 的根目錄
+        if( substr($href, 0, 1)=='.' ){
+            $base = '';
+            $href = substr($href, 1);
+            if( APP::$prefix != 'main' ){
+                $base .= APP::$prefixFull.'/';
+            }
+            if( APP::$app != 'main' ){
+                $base .= APP::$app.'/';
+            }
+            //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
+            if( ! empty($base) && ! empty($href) ){
+                $base = substr($base, 0, -1);
+            }
+            $href = $base.$href;
+            $status += 2;
+        }
+        // "_" 表示為系統內部的絕對路徑（一定要放在路徑開頭），則只需要補上WEBROOT即可
+        if( substr($href, 0, 1)=='_' ){
+            $href = substr($href, 1);
+            $status += 4;
+        }
+        //如果不曾啟用過以上特殊功能，預設自動補上 prefix
+        if( $status == 0 ){
+            $base = '';
+            if( APP::$prefix != 'main' ){
+                $base .= APP::$prefixFull.'/';
+            }
+            $href = $base.$href;
+        }
+        
         return txturl($href);
     }
     if( ! is_array($href) ){
@@ -98,11 +150,12 @@ function txturl( $href ){
     $href_abs=$href;
     //for empty path: imply ME
     if( empty($href) ){ return ''; }
-    //for absolute location
+    //for 絕對路徑
     if( $href=='/' ){ return WEBROOT; }
+    //開頭有http(不分大小寫)時，表示絕對路徑
     if( preg_match( '/^http/i', $href) ){ return $href; }
-    if( preg_match( '/^'.str_replace('/','\/',WEBROOT).'/i', $href) ){ return $href; }
-    //if '..', get current position, use explode('/', $href), determin '..' , then count abs path
+    
+    
     if( substr($href, 0, 1)=='/' ){
         return WEBROOT.substr($href, 1);
     }

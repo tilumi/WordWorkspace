@@ -16,9 +16,13 @@ class APP{
     
     static $routing=array();
     static $params=array();
-    static $handler=''; //紀錄本次執行，總管負責的程式
-    static $prefix=''; //網址前綴詞
+    static $handler=''; //紀錄本次執行，總管負責的程式名稱（不含.php）
+    static $app='';     //app (controller) 的名稱
+    static $doctype=''; //副檔名格式
     static $appBuffer=''; //action執行完畢的結果回傳
+    
+    static $prefix=''; //網址前綴，系統使用的代號
+    static $prefixFull=''; //網址前綴，真實路徑
     
     /* Syslog */
     static $prior = array(
@@ -783,6 +787,88 @@ class Form{
         $renderer->setRequiredNoteTemplate($requiredNoteTemplate);
         
         return $renderer;
+    }
+}
+class ACL{
+    function checkAuth( $item_id ){
+        //傳入特定項目，檢查是否有權可供操作
+        return true;
+        $privs = &$_SESSION['privileges'];
+        if( $_SESSION['privileges']['is_super_user']=='1' ){
+            return true;
+        }
+        
+        $item_levels = 0;
+        if( ! empty($item_id) ){
+            $items=explode('.', $item_id);
+            $item_levels = count($items);
+        }
+        
+        $prefix='main';
+        $app='main';
+        switch( $item_levels ){
+            case 1:
+                // 1 個參數的時候，item_id 表示 app
+                $item_id=$prefix.'.'.$item_id.'.index';
+                break;
+            case 2:
+                // 2 個參數的時候，item_id 表示 app.action
+                $item_id=$prefix.'.'.$item_id;
+                break;
+            case 3:
+                // 3 個參數的時候，item_id 表示 prefix.app.action
+                $item_id=$item_id;
+                break;
+            default:
+                // 0 個或超過 3 個參數的時候，錯誤
+                return false;
+        }
+        
+        if( isset($privs[ $item_id ]) && $privs[ $item_id ]=='allow' ){
+            return true;
+        }
+        return false;
+    }
+    function checkPageAuth( $item_id ){
+        //用於頁面的權限確認，無權限時要自動重導至允許的頁面
+        
+        if( self::chechAuth($item_id) ){
+            return true;
+        }else{
+            $item_levels = 0;
+            if( ! empty($item_id) ){
+                $items=explode('.', $item_id);
+                $item_levels = count($items);
+            }
+            
+            $prefix='main';
+            $app='main';
+            $href_redirect='/';
+            switch( $item_levels ){
+                case 1:
+                    // 1 個參數的時候，item_id 表示 app
+                    redirect( $href_redirect , '您的權限不足，無法進入此區域');
+                    break;
+                case 2:
+                    // 2 個參數的時候，item_id 表示 app.action
+                    if( self::checkAuth( $items[0].'.index' ) ){
+                        $href_redirect = $items[0].'/index.html';
+                    }
+                    redirect( $href_redirect , '您的權限不足，無法進入此區域');
+                    break;
+                case 3:
+                    // 3 個參數的時候，item_id 表示 prefix.app.action
+                    if( self::checkAuth( $items[1].'.index' ) ){
+                        $href_redirect = $items[1].'/index.html';
+                        redirect( $href_redirect , '您的權限不足，無法進入此區域');
+                    }
+                    break;
+                default:
+                    // 0 個或超過 3 個參數的時候，錯誤
+                    redirect('/', '錯誤的權限表格式，請洽程式設計人員');
+            }
+            
+        }
     }
 }
 ?>

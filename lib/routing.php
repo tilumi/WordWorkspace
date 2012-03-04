@@ -34,13 +34,21 @@ class Routing{
         
         //判別第一個節點，取得所屬的prefix
         $prefix='main';
+        $prefixFull='main';
         $current=pos($nodes);
         $prefixMap = RoutingConfigs::$prefixs;
         if( ! empty($current) && array_key_exists( $current , $prefixMap ) ){
             $prefix=$prefixMap[ $current ]['name'];
             array_shift($nodes);
+            
+            //記錄路徑前綴的全名
+            $prefixFull = $current;
+            
         }elseif( array_key_exists( '__default__' , $prefixMap ) ){
             $prefix=$prefixMap['__default__']['name'];
+            
+            //記錄路徑前綴的全名
+            $prefixFull = 'main';
         }
         
         //排除prefix之後，只判斷第一層級，如有註冊，就指定為app
@@ -60,6 +68,7 @@ class Routing{
             $app = $routingTable['__default__']['name'];
         }
         
+
         $handler = $app;
         if( $prefix!='main' ){
             $handler = $prefix.'#'.$handler;
@@ -67,6 +76,7 @@ class Routing{
         
         return array(
             'prefix'=>$prefix,
+            'prefixFull'=>$prefixFull,
             'app'=>$app,
             'params'=>$nodes,
             'doctype'=>$ext,

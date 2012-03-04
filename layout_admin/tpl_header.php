@@ -1,3 +1,124 @@
+<?php
+$copyright="Website Administrator © 2010 Powered by bridii Framework. Designed by DR鹿, DR Studio.";
+
+/* 設定上方工具列 */
+$topmenu=array(
+    array('name'=>'Goto Website', 'link'=>'/' ),
+    array('name'=>'Administrators', 'link'=>array('plugin'=>'managers') ),
+    array('name'=>'Change Password', 'link'=>array('plugin'=>'main','action'=>'changepwd') ),
+);
+
+/* 設定主工具列 */
+$mainmenu=array(
+    array('name'=>'主控面板', 'link'=>'/' ), 
+    array('name'=>'新聞中心', 'link'=>'/news/' ),
+    array('name'=>'系統紀錄', 'link'=>'/syslog/' ),
+    /*
+    array('name'=>'文章管理', 'link'=>array('plugin'=>'articles', 'controller'=>'main'),
+        'submenu'=>array(
+            array('name'=>'關鍵字', 'link'=>array('plugin'=>'articles', 'controller'=>'keywords') ),
+            array('name'=>'類型', 'link'=>array('plugin'=>'articles', 'controller'=>'categories') ),
+        )
+    ),
+    */
+    //array('name'=>'分類管理', 'link'=>array('plugin'=>'subjects', 'controller'=>'yeartopics') ),
+);
+function parseMenuItem($item, $markup=false, $submenu_key=null){
+    $tmp="";
+    $hidden=false;
+    if( is_array($item) ){
+        if( $item['hidden']===true ){
+            $hidden=true;
+        }
+        if( isset($item['link']) && !empty($item['link']) ){
+            $attrs=array();
+            if( is_numeric($submenu_key) ){
+                $attrs=array('onmouseover'=>"javascript: submenu.show($submenu_key);");
+            }
+            $current='';
+            if( $markup ){ $current=' id="current"'; }
+            
+            if( ! $hidden ){
+                $tmp .= '<li'.$current.'>';
+                $tmp .= View::anchor( $item['link'], $item['name'], $attrs );
+                $tmp .= "</li>\n";
+            }
+        }else{
+            if( $markup ){
+                $tmp.='<li id="current">';
+                $tmp.=$item['name'];
+                $tmp.="</li>\n";
+            }else{
+                $tmp.=$item['name']."\n";
+            }
+        }
+    }
+    
+    return $tmp;
+}
+
+
+/* 產生 Top Menu，存入$topmenu_for_layout */
+$tmp="";
+foreach($topmenu as $item){
+    $tmp.=parseMenuItem($item)."\n";
+}
+$topmenu_for_layout=$tmp;
+
+/* 產生 mainmenu 和 submenu，存入$mainmenu_for_layout, $submenu_for_layout */
+$tmp="";$_="";
+$i=1;$list=array();
+foreach($mainmenu as $item){
+    //依照權限設定顯示
+    if( ! method_exists('ACL','checkAuth') ){
+        continue;
+    }
+    if( ! ACL::checkAuth($item['link']) ){
+        continue;
+    }
+    //開始產生MENU
+    $active=false;
+    if( isset($item['submenu']) && !empty($item['submenu']) ){
+        $subtmp="";
+        $first=true; //控制分隔線的顯示
+        foreach($item['submenu'] as $subitem){
+            //依照權限設定顯示: 子選單部分
+            if( ! ACL::checkAuth($item['link']) ){
+                continue;
+            }
+            //開始產生子選單
+            $subactive=false;
+            if( isset($dispatch['plugin'])
+                && $subitem['link']['plugin']==$dispatch['plugin']
+                && $subitem['link']['controller']==$dispatch['controller']
+            )
+            { $active=true;$subactive=true; }
+            if( !$first ){
+                //$subtmp.='<span>|</span>'."\n";
+            }
+            if( $first ){ $first=!$first; }
+            $subtmp.=parseMenuItem($subitem, $subactive);
+        }
+        $_.='<ul id="submenu-'.$i.'" style="float:left">'."\n";
+        $_.=$subtmp;
+        $_.="</ul>"."\n";
+        //$_.=($active)?'<script>$(document).ready(function(){ submenu.show('.$i.') });</script>':'';
+    }else{
+        $_.='<ul id="submenu-'.$i.'" style="float:left">'."\n";
+        $_.="</ul>"."\n";
+    }
+    if( isset($dispatch['plugin'])
+        && $item['link']['plugin']==$dispatch['plugin']
+        && ( $item['link']['controller']==$dispatch['controller']
+            || (empty($item['link']['controller']) && $dispatch['controller']=='main') )
+    ) $active=true;
+    $tmp.=parseMenuItem($item, $active, $i);
+    $i=$i+1;
+}
+$mainmenu_for_layout=$tmp;
+$submenu_for_layout=$_;
+
+?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"><head>
 
@@ -41,12 +162,13 @@ img, div, input  { behavior: url(<?php echo layout_url('admin', '/js/ie6/iepngfi
                         <?php } ?>
                     </div>
                     <div class="grid_6 topmenu">
-                        <a href="<?php echo url( array('plugin'=>'main','action'=>'logout') );?>" id="logout">登出</a>
-                        <a href="<?php echo url( array('plugin'=>'main','action'=>'change_password') );?>">變更密碼</a>
-<?php if( method_exists('Region','checkAuth') ){ if( Region::checkAuth( array('plugin'=>'managers') ) ){ ?>
-                        <a href="<?php echo url( array('plugin'=>'managers') );?>">系統管理員</a>
+                        <a href="<?php echo url( '../logout.html' );?>" id="logout">登出</a>
+                        <a href="<?php echo url( '../chpasswd.html' );?>">變更密碼</a>
+<?php if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers' ) ){ ?>
+                        <a href="<?php echo url( '../managers/' );?>">系統管理員</a>
 <?php } } ?>
-                        <a href="<?php echo url( array('plugin'=>'main') );?>">主控面版</a>
+                        <a href="<?php echo url( '_/' );?>" target="_blank">網站前台</a>
+                        <a href="<?php echo url( '..' );?>">主控面版</a>
                     </div>
                 </div>
                 <div style="clear: both;"></div>

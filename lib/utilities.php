@@ -71,7 +71,7 @@ function underline2ucwords( $str ){
     }
     return $res;
 }
-function errmsg( $errmsg ){
+function errmsg( $errmsg='' ){
     if( PRODUCTION==1 ) return ;
     
     $backtrace=debug_backtrace();

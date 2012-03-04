@@ -7,7 +7,7 @@ include('layout_admin/tpl_header.php');
             </div>
             <!-- Dashboard icons -->
             <div class="grid_7">
-            	<a href="<?php echo url( array('plugin'=>'news') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url( '/news/' ); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/view-pim-news.png'); ?>" alt="edit" width="64" height="64">
                 	<span>新聞中心</span>
                 </a>
@@ -58,15 +58,16 @@ include('layout_admin/tpl_header.php');
                 	<span>歌曲管理</span>
                 </a>
 -->
-            	<a href="<?php echo url( array('plugin'=>'main', 'action'=>'change_password' ) ); ?>" class="dashboard-module">
+            	<a href="<?php echo url( 'chpasswd.html' ); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/preferences-desktop-user-password.png'); ?>" alt="edit" width="64" height="64">
                 	<span>變更密碼</span>
                 </a>
                 
-            	<a href="<?php echo url( array('plugin'=>'managers') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url( '/managers/' ); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/Crystal_Clear_user.gif'); ?>" alt="edit" width="64" height="64">
                 	<span>系統管理員</span>
                 </a>
+                
 <!--
             	<a href="" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/Crystal_Clear_write.gif'); ?>" alt="edit" width="64" height="64">
