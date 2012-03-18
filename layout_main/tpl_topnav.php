@@ -6,7 +6,7 @@
 <?php } ?>
                 </div>
                 <div class="float-right">
-<?php if( is_array( $book_on_top ) ){ pr($book_on_top); ?>
+<?php if( is_array( $book_on_top ) ){ ?>
                     第<?php echo $book_on_top['chapter_id']; ?><?php echo $book_on_top['unit']; ?>
                     <span>|</span>
                     <?php echo $book_on_top['title']; ?>

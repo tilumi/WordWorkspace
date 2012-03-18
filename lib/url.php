@@ -102,8 +102,12 @@ function url( $href ){
         // "/" 時，表示為所在 prefix 下的絕對路徑
         if( substr($href, 0, 1)=='/' ){
             $href = substr($href, 1);
-            if( APP::$prefix != 'main' ){
+            $base = '';
+            if( APP::$prefix !== 'main' ){
                 $base .= APP::$prefixFull.'/';
+            }
+            if( APP::$prefix === 'main' ){
+                $base = '/';
             }
             $href = $base.$href;
             $status += 8;

@@ -49,7 +49,7 @@ class Routing{
             $prefix=$prefixMap['__default__']['name'];
             
             //記錄路徑前綴的全名
-            $prefixFull = 'main';
+            $prefixFull = '';
         }
         
         //排除prefix之後，只判斷第一層級，如有註冊，就指定為app
@@ -60,7 +60,11 @@ class Routing{
             return array('error'=>'404');
         }
         
-        $p_app = substr($p, strlen($prefixFull)+1 );
+        $p_app = $p;
+        if( $prefix!=='main' ){
+            $p_app = substr($p, strlen($prefixFull)+1 );
+        }
+        
         $app='main';
         $routingTable = RoutingConfigs::$apps[ $prefix ];
         $default = array('name'=>'main');
@@ -87,6 +91,10 @@ class Routing{
         $p_params = $p_app;
         if( $app!='main' )
             $p_params = substr($p_app, strlen($app_path)+1 );
+        
+        /*echo 'p: '.$p.'<br>';
+        echo 'p_app: '.$p_app.'<br>';
+        echo 'p_params: '.$p_params.'<br>';*/
         
         //更新屬於參數的路徑區域
         $nodes=explode('/', $p_params);
