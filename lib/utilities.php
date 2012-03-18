@@ -80,7 +80,10 @@ function errmsg( $errmsg='' ){
     $err=$backtrace[1];
     echo '<META CONTENT="text/html; charset=utf-8" HTTP-EQUIV="Content-Type">';
     $msg ='<p style="font-size:14px;color:black;font-weight:normal;"><b>'.$loc['file'].' Line '.$loc['line'].'</b></p>';
-    $msg.='<p style="font-size:12px;color:red;font-weight:normal;"><b>'.$err['class'].'::'.$err['function'].'() Error';
+    $msg.='<p style="font-size:12px;color:red;font-weight:normal;"><b>'.$err['function'].'() Error';
+    if( !empty($err['class']) ){
+        $msg.='<p style="font-size:12px;color:red;font-weight:normal;"><b>'.$err['class'].'::'.$err['function'].'() Error';
+    }
     $msg.='<p style="font-size:12px;color:black;font-weight:normal;"><b>Error Message:</b> '.$errmsg.'</p>';
     //pr($backtrace);
     $msg.=debugBacktrace();

@@ -13,6 +13,7 @@ class RoutingConfigs{
     static $apps=array(
             'admin'=>array(
                 'news'=>array('name'=>'news'),
+                'managers/groups'=>array('name'=>'groups'),
                 'managers'=>array('name'=>'managers'),
                 '__default__'=>array('name'=>'main'),
             ),

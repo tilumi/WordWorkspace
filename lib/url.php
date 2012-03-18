@@ -1,4 +1,26 @@
 <?php
+function redirect_message(){
+    //檢查Redirect Message並取出
+    $RedirectMSG='';
+    
+    $redirect_messages = &$_SESSION['Redirect'];
+    $ME_alias=preg_replace('/index\.html$/','', APP::$ME );
+    if( isset($redirect_messages[ APP::$ME ]) ){ //取出
+        $RMSG=$redirect_messages[ APP::$ME ];
+        unset($redirect_messages[ APP::$ME ]);
+    }
+    if( APP::$ME!=$ME_alias && isset($redirect_messages[ $ME_alias ]) ){
+        $RMSG=$redirect_messages[ $ME_alias ];
+        unset($redirect_messages[ $ME_alias ]);
+    }
+    if( $RMSG['timeout'] < mktime() ){ //如果逾期就刪除
+        unset($RMSG);
+    }
+    if( isset($RMSG) && is_array( $RMSG ) ){
+        $RedirectMSG=$RMSG['message'];
+    }
+    return $RedirectMSG;
+}
 function redirect( $href , $message='' , $message_template='' ){
     $url=url($href);
     if( !empty($message) ){
@@ -54,6 +76,7 @@ EOF;
         exit;
     }
 }
+
 function anchor( $name, $href, $options=array() ){
     $url=url($href);
     if( is_string($options) ){
@@ -76,13 +99,17 @@ function url( $href ){
     if( is_string($href) ){
         $status = 0; //記錄曾啟用過哪些特殊功能
         
-        // "/" 時，表示為所在 prefix 下的根目錄
-        // 設為空白後，讓後方的程式自動補上 prefix
+        // "/" 時，表示為所在 prefix 下的絕對路徑
         if( substr($href, 0, 1)=='/' ){
             $href = substr($href, 1);
+            if( APP::$prefix != 'main' ){
+                $base .= APP::$prefixFull.'/';
+            }
+            $href = $base.$href;
+            $status += 8;
         }
         // ".." 永遠表示 prefix 的根目錄，或是 main app
-        if( substr($href, 0, 2)=='..' ){
+        if( $status==0 && substr($href, 0, 2)=='..' ){
             $base = '';
             $href = substr($href, 2);
             if( APP::$prefix != 'main' ){
@@ -96,7 +123,7 @@ function url( $href ){
             $status += 1;
         }
         // "." 永遠表示 prefix 及 app 的根目錄
-        if( substr($href, 0, 1)=='.' ){
+        if( $status==0 && substr($href, 0, 1)=='.' ){
             $base = '';
             $href = substr($href, 1);
             if( APP::$prefix != 'main' ){
@@ -113,15 +140,18 @@ function url( $href ){
             $status += 2;
         }
         // "_" 表示為系統內部的絕對路徑（一定要放在路徑開頭），則只需要補上WEBROOT即可
-        if( substr($href, 0, 1)=='_' ){
+        if( $status==0 && substr($href, 0, 1)=='_' ){
             $href = substr($href, 1);
             $status += 4;
         }
-        //如果不曾啟用過以上特殊功能，預設自動補上 prefix
+        //如果不曾啟用過以上特殊功能，表示為相對路徑，自動補上 prefix 和 app
         if( $status == 0 ){
             $base = '';
             if( APP::$prefix != 'main' ){
                 $base .= APP::$prefixFull.'/';
+            }
+            if( APP::$app != 'main' ){
+                $base .= APP::$app.'/';
             }
             $href = $base.$href;
         }
@@ -137,6 +167,9 @@ function url( $href ){
 function layout_url( $layout, $href ){
     //如果傳入的參數是字串，則以字串URL方式處理
     if( is_string($href) ){
+        if( substr($href, 0, 1)!='/' ){
+            $href = '/'.$href;
+        }
         return txturl('/layout_'.$layout.$href);
     }
     if( ! is_array($href) ){

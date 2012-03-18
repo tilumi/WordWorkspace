@@ -1,121 +1,166 @@
 <?php
-//處理登入判斷
-if( ! isset($_SESSION['administrator']) || ! $_SESSION['administrator']['is_auth'] ){
-    //處理自動登入
-    if( isset($_COOKIE['admin_autologin']) && !empty($_COOKIE['admin_autologin']['login']) ){
-        
-        APP::load('component', 'Auth');
-        $auth=new AuthComponent;
-        
-        $id=$_COOKIE['admin_autologin']['user'];
-        $pwd=$_COOKIE['admin_autologin']['login'];
-        
-        $autologin=true;
-        if( $auth->login( $id , $pwd , $autologin ) ){
-            $_SESSION['administrator']=array();
-            $SESSION = &$_SESSION['administrator'];
+
+//檢查使用者的登入狀態
+userLoginCheck();
+
+
+
+
+function userLoginCheck(){
+    //處理登入判斷
+    if( ! isset($_SESSION[ APP::$prefix ]) || ! $_SESSION[ APP::$prefix ]['is_auth'] ){
+        //處理自動登入
+        if( isset($_COOKIE['admin_autologin']) && !empty($_COOKIE['admin_autologin']['login']) ){
             
-            $userdata=$auth->getAuthData();
-            $encryptPassword=$auth->encryptPassword;
+            APP::load('vendor', 'auth.component');
+            $auth=new AuthComponent;
             
-            $SESSION=$userdata;
-            $SESSION['is_auth'] = true;
-            $SESSION['privileges'] = $auth->getPrivileges( $userdata['id'] );
+            $id=$_COOKIE['admin_autologin']['user'];
+            $pwd=$_COOKIE['admin_autologin']['login'];
             
-            APP::syslog($SESSION['userid'].' 自動登入成功', APP::$prior['info'], 'login');
+            $autologin=true;
+            if( $auth->login( $id , $pwd , $autologin ) ){
+                $_SESSION['admin']=array();
+                $SESSION = &$_SESSION['admin'];
+                
+                $userdata=$auth->getAuthData();
+                $encryptPassword=$auth->encryptPassword;
+                
+                $SESSION=$userdata;
+                $SESSION['is_auth'] = true;
+                $SESSION['privileges'] = $auth->getPrivileges( $userdata['id'] );
+                
+                APP::syslog($SESSION['userid'].' 自動登入成功', APP::$prior['info'], 'login');
+            }
         }
     }
-}
-
-//設定不需要登入保護的頁面
-if( $dispatch['plugin']=='main' && $dispatch['controller']=='main' ){
-    if( in_array($dispatch['action'], array('login', 'forgot_password') ) ){
-        return true;
-    }
-}
-
-if( ! isset($_SESSION['administrator']) || ! $_SESSION['administrator']['is_auth'] ){
-    self::savePageBeforeLogin();
-    redirect( array('plugin'=>'main', 'action'=>'login') );
-}
-//以下為登入核可後的檢查
-$SESSION = &$_SESSION['administrator'];
-if( $SESSION['is_super_user'] === '1' ){
-    return true; //若是超級管理者，到這裡就檢查結束了
-}
-if( $dispatch['plugin']=='main' && $dispatch['controller']=='main' ){
-    return true; //基本功能部分為當然權限，不需檢查
-}
-if( ! self::__privileges( $dispatch ) ){
-    $logmsg = $SESSION['userid'].' 嘗試進入無權通行的區域 ';
-    $logmsg.= '@ '.ME;
-    APP::syslog($logmsg, APP::$prior['warning'], 'login');
     
-    redirect( array('plugin'=>'main'), '抱歉！您沒有權限進入這個區域', 'error' );
+    //設定不需要登入保護的頁面
+    if( APP::$app=='main' ){
+        $action = pos(APP::$params);
+        if( in_array($action, array('login', 'forgot_password') ) ){
+            return true;
+        }
+    }
+    
+    if( ! isset($_SESSION['admin']) || ! $_SESSION['admin']['is_auth'] ){
+        Admin::savePageBeforeLogin();
+        redirect( '/login.html' );
+    }
+    //以下為登入核可後的檢查
+    $SESSION = &$_SESSION['admin'];
+    if( $SESSION['is_super_user'] === '1' ){
+        return true; //若是超級管理者，到這裡就檢查結束了
+    }
+    if( APP::$app=='main' ){
+        return true; //基本功能部分為當然權限，不需檢查
+    }
+    if( ! ACL::checkAuth( pos(APP::$params) ) ){
+        $logmsg = $SESSION['userid'].' 嘗試進入無通行權的區域 ';
+        $logmsg.= '@ '.ME;
+        APP::syslog($logmsg, APP::$prior['warning'], 'login');
+        
+        redirect( '/', '抱歉！您沒有權限進入這個區域', 'error' );
+    }
 }
-
 /******************************************************************************/
-function __privileges( $dispatch ){
-    //檢查目前的頁面，用戶是否有權可用
-    $privileges = &$_SESSION['administrator']['privileges'];
-    extract($dispatch); //will get region, plugin, controller, action, doctype
-    if( isset($privileges[ $plugin ][ $controller ][ $action ])
-        && $privileges[ $plugin ][ $controller ][ $action ]=='allow' ){
+function RenderRedirectMSG( $message , $layout_name ){
+    
+    $layoutpath = DIRROOT. 'layout_admin'.DS.$layout_name.'.html'.EXT;
+    ob_start();
+    require( $layoutpath );
+    $contents=ob_get_contents();
+    ob_end_clean();
+    
+    return $contents;
+}
+class Admin{
+    function savePageBeforeLogin(){
+        //logout動作不紀錄
+        if( APP::$app=='main' && pos(APP::$params)=='logout' ){ return false; }
+        //非html操作不記錄
+        if( APP::$doctype!='html' ){ return false; }
+        $_SESSION['PageBeforeLogin']=APP::$routing['p'];
         return true;
     }
-    return false;
 }
-function savePageBeforeLogin(){
-    global $dispatch;
-    //logout動作不紀錄
-    if( $dispatch['plugin']=='main' && $dispatch['controller']=='main' && $dispatch['action']=='logout' ){ return false; }
-    //非html操作不記錄
-    if( $dispatch['doctype']!='html' ){ return false; }
-    $_SESSION['PageBeforeLogin']=ME;
-    return true;
-}
-function checkSuperUser(){
-    if( !isset($_SESSION['administrator']['is_super_user']) ){
+class ACL{
+    function checkAuth( $item_id='' ){
+        //傳入特定項目，檢查是否有權可供操作
+        //return true;
+        $privileges = &$_SESSION[ APP::$prefix ];
+        if( $privileges['is_super_user']=='1' ){
+            return true;
+        }
+        
+        $item_id = APP::parseFullID( $item_id );
+        
+        list($prefix, $app, $action)=explode('.', $item_id);
+        
+        if( isset($privileges[$prefix][$app][$action]) && $privileges[$prefix][$app][$action]=='allow' ){
+            return true;
+        }
         return false;
     }
-    if( $_SESSION['administrator']['is_super_user']=='1' ){
-        return true;
+    function checkSuperUser(){
+        if( !isset($_SESSION['admin']['is_super_user']) ){
+            return false;
+        }
+        if( $_SESSION['admin']['is_super_user']=='1' ){
+            return true;
+        }
+        return false;
     }
-    return false;
-}
-function checkAuth( $item=array() ){
-    global $dispatch;
-    //傳入特定項目，檢查是否有權可供操作
-    $privs = &$_SESSION['administrator']['privileges'];
-    if( $_SESSION['administrator']['is_super_user']=='1' ){
-        return true;
+    function checkLogin(){
+        if( !isset($_SESSION['admin']['is_auth']) ){
+            return false;
+        }
+        if( $_SESSION['admin']['is_auth']===true ){
+            return true;
+        }
+        return false;
     }
-    
-    $plugin='main';
-    $controller='main';
-    $action='index';
-    $first_param='';
-    if( isset($item['plugin']) && !empty($item['plugin']) ){
-        $plugin=$item['plugin'];
-        if( empty($first_param) ){ $first_param='plugin'; }
+    function checkPageAuth( $item_id ){
+        //用於頁面的權限確認，無權限時要自動重導至允許的頁面
+        
+        if( self::chechAuth($item_id) ){
+            return true;
+        }else{
+            $item_levels = 0;
+            if( ! empty($item_id) ){
+                $items=explode('.', $item_id);
+                $item_levels = count($items);
+            }
+            
+            $prefix='main';
+            $app='main';
+            $href_redirect='/';
+            switch( $item_levels ){
+                case 1:
+                    // 1 個參數的時候，item_id 表示 app
+                    redirect( $href_redirect , '您的權限不足，無法進入此區域');
+                    break;
+                case 2:
+                    // 2 個參數的時候，item_id 表示 app.action
+                    if( self::checkAuth( $items[0].'.index' ) ){
+                        $href_redirect = $items[0].'/index.html';
+                    }
+                    redirect( $href_redirect , '您的權限不足，無法進入此區域');
+                    break;
+                case 3:
+                    // 3 個參數的時候，item_id 表示 prefix.app.action
+                    if( self::checkAuth( $items[1].'.index' ) ){
+                        $href_redirect = $items[1].'/index.html';
+                        redirect( $href_redirect , '您的權限不足，無法進入此區域');
+                    }
+                    break;
+                default:
+                    // 0 個或超過 3 個參數的時候，錯誤
+                    redirect('/', '錯誤的權限表格式，請洽程式設計人員');
+            }
+            
+        }
     }
-    if( isset($item['controller']) && !empty($item['controller']) ){
-        $controller=$item['controller'];
-        if( empty($first_param) ){ $first_param='controller'; }
-    }
-    if( isset($item['action']) && !empty($item['action']) ){
-        $action=$item['action'];
-        if( empty($first_param) ){ $first_param='action'; }
-    }
-    if( $first_param=='plugin' ){ /*do nothing*/ }
-    if( $first_param=='controller' ){ $plugin=$dispatch['plugin']; }
-    if( $first_param=='action' ){ $plugin=$dispatch['plugin'];$controller=$dispatch['controller']; }
-    if( empty($first_param) ){ return false; }
-    
-    if( isset($privs[$plugin][$controller][$action]) && $privs[$plugin][$controller][$action]=='allow' ){
-        return true;
-    }
-    return false;
 }
 
 ?>

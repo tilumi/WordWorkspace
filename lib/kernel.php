@@ -20,9 +20,19 @@ class APP{
     static $app='';     //app (controller) 的名稱
     static $doctype=''; //副檔名格式
     static $appBuffer=''; //action執行完畢的結果回傳
+    static $p=''; //傳入的URL
+    static $ME=''; //傳入的URL，排除GET字串
     
     static $prefix=''; //網址前綴，系統使用的代號
     static $prefixFull=''; //網址前綴，真實路徑
+
+    static $action=''; //記錄action
+    static $id=''; //記錄APP 的 id，僅在setAction時產生，權限表對照依據 
+    
+    static $loadedFiles=array(
+        'vendors'=>array(),
+        'pears'=>array(),
+    ); //記錄以載入的library
     
     /* Syslog */
     static $prior = array(
@@ -35,15 +45,55 @@ class APP{
         'info'=>'Info',
         'debug'=>'Debug'
     );
+    function setAction( $action='' ){
+        self::$action = $action;
+        self::$id='';
+        if( !empty($action) ){
+            self::$id = self::$prefix.'.'.self::$app.'.'.$action;
+        }
+    }
+    function getAction(){
+        return self::$action;
+    }
+    function ID(){
+        return self::$id;
+    }
+    function parseFullID( $item_id='' ){
+        $item_levels = 0;
+        if( ! empty($item_id) ){
+            $items=explode('.', $item_id);
+            $item_levels = count($items);
+        }
+        
+        $prefix=APP::$prefix;
+        $app=APP::$app;
+        switch( $item_levels ){
+            case 1:
+                // 1 個參數的時候，item_id 表示 app
+                $item_id=$prefix.'.'.$app.'.'.$item_id;
+                break;
+            case 2:
+                // 2 個參數的時候，item_id 表示 app.action
+                $item_id=$prefix.'.'.$item_id;
+                break;
+            case 3:
+                // 3 個參數的時候，item_id 表示 prefix.app.action
+                $item_id=$item_id;
+                break;
+            default:
+                // 0 個或超過 3 個參數的時候，錯誤
+                return '';
+        }
+        return $item_id;
+    }
     function syslog($message, $prior='Notice', $type='MESSAGE'){
         $mdb=self::$mdb;
         
         $userid='<--SYSTEM-->';
-        if( isset($_SESSION['administrator']['userid']) )
-            $userid=$_SESSION['administrator']['userid'];
-        if( ! class_exists('AuthComponent') ){
-            LoadComponents('Auth');
-        }
+        if( isset($_SESSION['admin']['userid']) )
+            $userid=$_SESSION['admin']['userid'];
+        
+        APP::load('vendor', 'auth.component');
         $ip=AuthComponent::getUserClientIP();
         
         $fields=array();
@@ -66,6 +116,74 @@ class APP{
     	if(MRDB::isError())
     		errmsg('Syslog Error');
     }
+    function load( $type , $name='' ){
+        $msg=$name;
+        if( empty($msg) ) $msg='current';
+        marktime('AppExecute', 'Start Loading '.ul2uc($type).': <span style="color:green;">'.ul2uc($msg).'</span>' );
+        switch( $type ){
+            case 'pear':
+                self::_loadPear( $name );
+                break;
+            case 'vendor':
+                self::_loadVendor( $name );
+                break;
+            default:
+                errmsg('指定的參數錯誤: TYPE: '.$type.' , NAME: '.$name.'</strong> Error.');
+                return false;
+        }
+        marktime('AppExecute', 'Load'.ul2uc($type).':  <span style="color:green;">'.ul2uc($msg).'</span> Over' );
+    }
+    function _loadPear( $name ){
+        if( ! is_string($name) ){
+            errmsg('指定的參數錯誤: <strong>必須是字串</strong>');
+            return false;
+        }
+        
+        if( ! self::FileLoader('pears',$name) ){
+            errmsg('指定的 Pear: <strong>'.$name.'</strong> 找不到.');
+            return false;
+        }
+        return true;
+    }
+    function _loadVendor( $name ){
+        if( ! is_string($name) ){
+            errmsg('指定的參數錯誤: <strong>必須是字串</strong>');
+            return false;
+        }
+        
+        if( ! self::FileLoader('vendors',$name) ){
+            errmsg('指定的 Vendor: <strong>'.$name.'</strong> 找不到.');
+            return false;
+        }
+        return true;
+    }
+    function FileLoader( $type , $name , $resource=array() ){
+        
+        if( !in_array( $type , array('pears','vendors') ) ){
+            die('Given Parameters: '.$type.' Not Allowed in '.__FUNCTION__);
+        }
+        $basepath=DIRLIB.$type.DS;
+        switch( $type ){
+            case 'pears':
+                $basepath='';
+                if( !in_array( $name , APP::$loadedFiles[$type] ) ){
+                    require($basepath.$name.EXT);
+                    //marktime(__FUNCTION__, 'Load '.ucfirst($type).' '.$name);
+                    APP::$loadedFiles[ $type ][]=$name;
+                }
+                return true;
+                break;
+            case 'vendors':
+                $basepath=DIRROOT.$type.DS;
+                if( !in_array( $name , APP::$loadedFiles[$type] ) ){
+                    require($basepath.$name.EXT);
+                    //marktime(__FUNCTION__, 'Load '.ucfirst($type).' '.$name);
+                    APP::$loadedFiles[ $type ][]=$name;
+                }
+                return true;
+                break;
+        }
+    }
 
 }
 
@@ -80,8 +198,6 @@ class Model{
     static $masterConfigs=array(); //記錄主要Model的各項設定
     
     function insert( $fields , $useTable='' ){
-        if( empty($useTable) ){ $useTable=Model::$masterTable; }
-        
         //pr($fields);die;
     	$fs=array();$vs=array();
     	foreach( $fields as $f=>$v ){ $fs[]="`".$f."`"; $vs[]=self::quote($v, 'text'); }
@@ -91,8 +207,6 @@ class Model{
     	return Model::execute($sql);
     }
     function inserts( $rows , $useTable='' , $quotes=array() ){
-        if( empty($useTable) ){ $useTable=Model::$masterTable; }
-        
         $defineQuotes=false;
         if( is_array($quotes) && count($quotes)>0 ){
             $defineQuotes=true;
@@ -122,8 +236,6 @@ class Model{
     	return Model::execute($sql);
     }
     function update( $fields , $identify='id' , $useTable='' ){
-        if( empty($useTable) ){ $useTable=Model::$masterTable; }
-        
         if( is_string($identify) ){
             if( empty($identify) ){ die('The identify field could not empty.'); }
             $identify=array($identify);
@@ -787,88 +899,6 @@ class Form{
         $renderer->setRequiredNoteTemplate($requiredNoteTemplate);
         
         return $renderer;
-    }
-}
-class ACL{
-    function checkAuth( $item_id ){
-        //傳入特定項目，檢查是否有權可供操作
-        return true;
-        $privs = &$_SESSION['privileges'];
-        if( $_SESSION['privileges']['is_super_user']=='1' ){
-            return true;
-        }
-        
-        $item_levels = 0;
-        if( ! empty($item_id) ){
-            $items=explode('.', $item_id);
-            $item_levels = count($items);
-        }
-        
-        $prefix='main';
-        $app='main';
-        switch( $item_levels ){
-            case 1:
-                // 1 個參數的時候，item_id 表示 app
-                $item_id=$prefix.'.'.$item_id.'.index';
-                break;
-            case 2:
-                // 2 個參數的時候，item_id 表示 app.action
-                $item_id=$prefix.'.'.$item_id;
-                break;
-            case 3:
-                // 3 個參數的時候，item_id 表示 prefix.app.action
-                $item_id=$item_id;
-                break;
-            default:
-                // 0 個或超過 3 個參數的時候，錯誤
-                return false;
-        }
-        
-        if( isset($privs[ $item_id ]) && $privs[ $item_id ]=='allow' ){
-            return true;
-        }
-        return false;
-    }
-    function checkPageAuth( $item_id ){
-        //用於頁面的權限確認，無權限時要自動重導至允許的頁面
-        
-        if( self::chechAuth($item_id) ){
-            return true;
-        }else{
-            $item_levels = 0;
-            if( ! empty($item_id) ){
-                $items=explode('.', $item_id);
-                $item_levels = count($items);
-            }
-            
-            $prefix='main';
-            $app='main';
-            $href_redirect='/';
-            switch( $item_levels ){
-                case 1:
-                    // 1 個參數的時候，item_id 表示 app
-                    redirect( $href_redirect , '您的權限不足，無法進入此區域');
-                    break;
-                case 2:
-                    // 2 個參數的時候，item_id 表示 app.action
-                    if( self::checkAuth( $items[0].'.index' ) ){
-                        $href_redirect = $items[0].'/index.html';
-                    }
-                    redirect( $href_redirect , '您的權限不足，無法進入此區域');
-                    break;
-                case 3:
-                    // 3 個參數的時候，item_id 表示 prefix.app.action
-                    if( self::checkAuth( $items[1].'.index' ) ){
-                        $href_redirect = $items[1].'/index.html';
-                        redirect( $href_redirect , '您的權限不足，無法進入此區域');
-                    }
-                    break;
-                default:
-                    // 0 個或超過 3 個參數的時候，錯誤
-                    redirect('/', '錯誤的權限表格式，請洽程式設計人員');
-            }
-            
-        }
     }
 }
 ?>

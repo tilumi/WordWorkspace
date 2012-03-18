@@ -6,19 +6,23 @@ if( APP::$doctype != 'html' ){
 $action = pos( APP::$params );
 $registedAction = array(
     'index',
-    'chpasswd',
+    'login',
+    'logout',
+    'passwd',
 );
 if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
+APP::setAction($action);
 
-include( APP::$handler.'_model.php' );
+$modelPath = APP::$handler.'_model.php';
+if( file_exists($modelPath) ){ include( $modelPath ); }
 
 if( in_array( $action , $registedAction ) ){
     //設定action的別名轉換
     switch( $action ){
-        case 'chpasswd':
-            $action='chpasswd';
+        case 'passwd':
+            $action='passwd';
             break;
     }
     //執行action
@@ -30,17 +34,83 @@ if( in_array( $action , $registedAction ) ){
 
 
 $viewTpl = APP::$handler.'='.$action.'.php';
-if( file_exists($viewTpl) )
-    include( $viewTpl );
+if( file_exists($viewTpl) ){ include( $viewTpl ); }
 
 /******************************************************************************/
 
 function index(){
     //View::setHeader( 'sitename', 'The Bible 線上聖經 - 最美最舒適的線上讀經網' );
-    APP::$appBuffer = array($rows);
+    $user_id=$_SESSION['admin']['userid'];
+    $sql="SELECT * FROM syslog WHERE type='login' AND userid=".Model::quote($user_id, 'text')." ORDER BY created DESC LIMIT 10";
+    $logs=Model::fetchAll($sql);
+    
+    APP::$appBuffer = array($logs);
+}
+function login(){
+    View::setTitle('登入');
+    View::setHeader('has_layout', false);
+    
+    $SESSION = &$_SESSION['admin'];
+    $SESSION['is_auth']==true;
+    if( $SESSION['is_auth']===true ){
+        redirect('/' , '你已經登入過囉！' , 'info' );
+    }
+    
+    APP::load('vendor', 'auth.component');
+    $form=AuthComponent::getLoginForm( '會員登入' );
+    
+    if( $form->validate() ){
+        $submits = $form->getSubmitValues();
+        $userid = $submits['userid'];
+        $password = $submits['password'];
+        $auto_login = $submits['remember'];
+        
+        if( AuthComponent::login( $userid , $password ) ){
+            $userdata=AuthComponent::getAuthData();
+            $encryptPassword=AuthComponent::getEncryptPassword();
+            
+            $SESSION=$userdata;
+            $SESSION['is_auth'] = true;
+            $SESSION['privileges'] = AuthComponent::getPrivileges( $userdata['id'] );
+        	$longterm_login=false;
+            if( $auto_login == 'auto' ){
+                setcookie('admin_autologin[user]', $userdata['id'], time()+60*60*24*14 );
+                setcookie('admin_autologin[login]', $encryptPassword, time()+60*60*24*14 );
+                $longterm_login=true;
+            }
+        	$goto='/';
+        	if( isset($_SESSION['PageBeforeLogin']) && !empty($_SESSION['PageBeforeLogin']) ){
+                $goto = '_/'.$_SESSION['PageBeforeLogin'];
+                unset($_SESSION['PageBeforeLogin']);
+            }
+            $logmsg=$SESSION['userid'].' 登入成功';
+            if( $longterm_login ){
+                $logmsg.='，並已設定長期登入';
+            }
+
+            APP::syslog($logmsg, APP::$prior['info'], 'login');
+        	redirect( $goto , '親愛的 '.$SESSION['username'].', 歡迎回來！' , 'success' );
+        }
+        APP::syslog( '某人使用帳號 '.$userid.' 嘗試登入失敗', APP::$prior['warning'], 'login');
+        redirect( '_/'.APP::$routing['ME'] , '你的帳號密碼有誤，請再試一次' , 'error' );
+    }
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array($form);
+}
+function logout(){
+    $SESSION = &$_SESSION['admin'];
+    $userid=$SESSION['userid'];
+    APP::syslog( $userid.' 登出', APP::$prior['info'], 'login');
+    
+    unset($_SESSION['admin'], $_SESSION['Redirect'], $_SESSION['PageBeforeLogin']); //清除登入用的轉頁標記
+    setcookie('admin_autologin[user]', '', time()-3600 );
+    setcookie('admin_autologin[login]', '', time()-3600 );
+	redirect( '/login.html' , '登出成功！拜拜，歡迎再次回來' , 'success' );
 }
 
-function chpasswd(){
+function passwd(){
     View::setTitle('變更密碼');
 /*    $form=AuthComponent::getChangePasswordForm( '變更密碼' );
     
@@ -51,7 +121,7 @@ function chpasswd(){
         }
         if( $form->validate() ){
             $errmsg = $form->process( array( &$this->Auth , 'changePassword') ); 
-            $userid=$_SESSION['administrator']['userid'];
+            $userid=$_SESSION['admin']['userid'];
             if( $errmsg === true ){
                 APP::syslog( $userid.' 已變更密碼', APP::$prior['notice'], 'login');
                 redirect( '.' , '密碼已變更成功' , 'success' );

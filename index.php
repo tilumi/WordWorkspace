@@ -26,6 +26,15 @@ if( substr($p,0,1)=='/' ) $p=substr($p,1);
 
 $routing_args=Routing::parse( $p );
 
+//以安全的方式重建$p
+$ME = pos(explode('?', $p));
+$p = $ME;
+if( count($_GET)>0 ){
+    $p.='?'.http_build_query($_GET, '', "&");
+}
+$routing_args['p']=$p;
+$routing_args['ME']=$ME;
+
 /*echo '<pre>';
 print_r($routing_args);
 echo '</pre>';

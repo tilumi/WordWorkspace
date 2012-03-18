@@ -1,5 +1,7 @@
 <?php
-$copyright="Website Administrator © 2010 Powered by bridii Framework. Designed by DR鹿, DR Studio.";
+$copyright="Website Administrator © 2012 MiKiDo Group. Powered by bride2 Framework.";
+
+$SESSION = &$_SESSION['admin'];
 
 /* 設定上方工具列 */
 $topmenu=array(
@@ -10,9 +12,9 @@ $topmenu=array(
 
 /* 設定主工具列 */
 $mainmenu=array(
-    array('name'=>'主控面板', 'link'=>'/' ), 
-    array('name'=>'新聞中心', 'link'=>'/news/' ),
-    array('name'=>'系統紀錄', 'link'=>'/syslog/' ),
+    array('name'=>'主控面板', 'link'=>'/', 'id'=>'main.index' ), 
+    array('name'=>'新聞中心', 'link'=>'/news/', 'id'=>'news.index' ),
+    array('name'=>'系統紀錄', 'link'=>'/syslog/', 'id'=>'syslog.index' ),
     /*
     array('name'=>'文章管理', 'link'=>array('plugin'=>'articles', 'controller'=>'main'),
         'submenu'=>array(
@@ -30,7 +32,7 @@ function parseMenuItem($item, $markup=false, $submenu_key=null){
         if( $item['hidden']===true ){
             $hidden=true;
         }
-        if( isset($item['link']) && !empty($item['link']) ){
+        if( isset($item['id']) && !empty($item['id']) ){
             $attrs=array();
             if( is_numeric($submenu_key) ){
                 $attrs=array('onmouseover'=>"javascript: submenu.show($submenu_key);");
@@ -78,21 +80,22 @@ foreach($mainmenu as $item){
     }
     //開始產生MENU
     $active=false;
+    $app_id = APP::$prefix.'.'.APP::$app;
+    $full_id = APP::parseFullID($item['id']);
+    $item_app_id = substr($full_id, 0, strlen(strrchr($full_id, "."))*(-1));
     if( isset($item['submenu']) && !empty($item['submenu']) ){
         $subtmp="";
         $first=true; //控制分隔線的顯示
         foreach($item['submenu'] as $subitem){
             //依照權限設定顯示: 子選單部分
-            if( ! ACL::checkAuth($item['link']) ){
+            if( ! ACL::checkAuth($item['id']) ){
                 continue;
             }
             //開始產生子選單
             $subactive=false;
-            if( isset($dispatch['plugin'])
-                && $subitem['link']['plugin']==$dispatch['plugin']
-                && $subitem['link']['controller']==$dispatch['controller']
-            )
-            { $active=true;$subactive=true; }
+            if( $app_id === $item_app_id ){
+                $active=true;$subactive=true;
+            }
             if( !$first ){
                 //$subtmp.='<span>|</span>'."\n";
             }
@@ -107,11 +110,9 @@ foreach($mainmenu as $item){
         $_.='<ul id="submenu-'.$i.'" style="float:left">'."\n";
         $_.="</ul>"."\n";
     }
-    if( isset($dispatch['plugin'])
-        && $item['link']['plugin']==$dispatch['plugin']
-        && ( $item['link']['controller']==$dispatch['controller']
-            || (empty($item['link']['controller']) && $dispatch['controller']=='main') )
-    ) $active=true;
+    if( $app_id === $item_app_id ){
+        $active=true;
+    }
     $tmp.=parseMenuItem($item, $active, $i);
     $i=$i+1;
 }
@@ -155,20 +156,24 @@ img, div, input  { behavior: url(<?php echo layout_url('admin', '/js/ie6/iepngfi
             <div id="header-status">
                 <div class="container_12">
                     <div class="grid_6">
-                        <span id="text-invitation">親愛的 <?php echo $_SESSION['administrator']['username'];?>, 歡迎回來<?php if( $has_message ){ ?>, 你有<?php } ?></span>
+<?php if( method_exists('ACL','checkLogin') && ACL::checkLogin() ){ ?>
+                        <span id="text-invitation">親愛的 <?php echo $SESSION['username'];?>, 歡迎回來<?php if( $has_message ){ ?>, 你有<?php } ?></span>
                         <?php if( $has_message ){ ?>
                         <!-- Messages displayed through the thickbox -->
                         <a href="<?php echo WEBLAYOUT.LAYOUT; ?>/messages.html" title="Inbox" class="thickbox" id="message-notification"><span>37</span> 則未讀訊息</a>
                         <?php } ?>
+<?php }else{ echo '<span id="text-invitation">'.$copyright.'</span>'; } ?>
                     </div>
                     <div class="grid_6 topmenu">
-                        <a href="<?php echo url( '../logout.html' );?>" id="logout">登出</a>
-                        <a href="<?php echo url( '../chpasswd.html' );?>">變更密碼</a>
-<?php if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers' ) ){ ?>
-                        <a href="<?php echo url( '../managers/' );?>">系統管理員</a>
-<?php } } ?>
+<?php if( method_exists('ACL','checkLogin') && ACL::checkLogin() ){ ?>
+                        <a href="<?php echo url( '/logout.html' );?>" id="logout">登出</a>
+                        <a href="<?php echo url( '/passwd.html' );?>">變更密碼</a>
+<?php       if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers' ) ){ ?>
+                        <a href="<?php echo url( '/managers/' );?>">系統管理員</a>
+<?php       } } ?>
                         <a href="<?php echo url( '_/' );?>" target="_blank">網站前台</a>
-                        <a href="<?php echo url( '..' );?>">主控面版</a>
+                        <a href="<?php echo url( '/' );?>">主控面版</a>
+<?php } ?>
                     </div>
                 </div>
                 <div style="clear: both;"></div>

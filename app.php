@@ -61,6 +61,8 @@ APP::$params  = $routing_args['params'];
 APP::$handler = $routing_args['handler']; //標示總管負責的程式
 APP::$prefix  = $routing_args['prefix']; //網址前綴詞
 APP::$prefixFull = $routing_args['prefixFull']; //網址前綴全名
+APP::$p       = WEBROOT.$routing_args['p']; //傳入的路徑
+APP::$ME      = WEBROOT.$routing_args['ME']; //排除GET字串的路徑
 //Loading System Configs
 //$configs = sfYaml::load( DIRCONFIG.'config.yml' );
 $basic=APP::$systemConfigs;
@@ -121,7 +123,7 @@ marktime( 'Core' , 'Setting ErrorHandler');
 ini_set('session.save_handler', 'user');
 session_set_save_handler('sess_open', 'sess_close', 'sess_read', 'sess_write', 'sess_destroy', 'sess_gc');
 session_save_path( DIRSESSION );
-session_name('bridii');
+session_name('JBride');
 session_start();
 
 marktime( 'Core' , 'Setting Session');
@@ -132,6 +134,11 @@ include( 'app_custom.php' );
 
 //載入Controller
 //因為index.php已經檢查過，載入時不用再檢查
+$preload = APP::$prefix.'.prefix.php';
+if( file_exists($preload) ){
+    require( $preload );
+}
+
 require( APP::$handler.'.php' );
 
 

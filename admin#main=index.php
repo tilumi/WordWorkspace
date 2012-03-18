@@ -1,9 +1,11 @@
 <?php
+list( $logs ) = APP::$appBuffer;
+
 include('layout_admin/tpl_header.php');
 ?>
 
             <div class="grid_12">
-                <?php //echo redirect_message(); ?>
+                <?php echo redirect_message(); ?>
             </div>
             <!-- Dashboard icons -->
             <div class="grid_7">
@@ -117,27 +119,26 @@ include('layout_admin/tpl_header.php');
                                 <tr>
                                     <th style="width:100px;">名稱: </th>
                                     <td>
-                                        <?php echo $_SESSION['administrator']['username']; ?>
-                                        <a style="float:right;" href="<?php echo url( array('plugin'=>'main','action'=>'userinfo') );?>">設定我的名稱</a>
+                                        <?php echo $_SESSION['admin']['username']; ?>
+                                        <a style="float:right;" href="<?php echo url( '/userinfo.html' );?>">設定我的名稱</a>
                                     </td>
                                 </tr>
                                 <tr class="odd">
                                     <th>帳號: </th>
                                     <td>
-                                        <?php echo $_SESSION['administrator']['userid'];?>
-                                        <a style="float:right;" href="<?php echo url( array('plugin'=>'main','action'=>'change_password') );?>">變更密碼</a>
+                                        <?php echo $_SESSION['admin']['userid'];?>
+                                        <a style="float:right;" href="<?php echo url( '/passwd.html' );?>">變更密碼</a>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>最後登入時間: </th>
                                     <td>
                                     <?php
-                                    $last_login=$_SESSION['administrator']['last_login'];
+                                    $last_login=$_SESSION['admin']['last_login'];
                                     $content = 'Never';
                                     if( $last_login!='0000-00-00 00:00:00' ){
                                         $wday=array('日','一','二','三','四','五','六');
-                                        $content = '星期'.$wday[date('w')].' ';
-                                        $content.= date('n/j, g:iA, Y', strtotime($last_login) );
+                                        $content = date('Y/n/j 星期'.$wday[date('w')].' , g:iA', strtotime($last_login) );
                                     }
                                     echo $content;
                                     ?>
@@ -147,7 +148,7 @@ include('layout_admin/tpl_header.php');
                                     <th>最後登入位址: </th>
                                     <td>
                                     <?php
-                                    $last_login_ip=$_SESSION['administrator']['last_login_ip'];
+                                    $last_login_ip=$_SESSION['admin']['last_login_ip'];
                                     $content = 'No Data';
                                     if( !empty($last_login_ip) ){
                                         $content = $last_login_ip;

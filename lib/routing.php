@@ -5,6 +5,7 @@ class Routing{
         if( empty($p) ){
             return array(
                 'prefix'=>'main',
+                'prefixFull'=>'',
                 'app'=>'main',
                 'params'=>array('index'),
                 'doctype'=>'html',
@@ -59,16 +60,37 @@ class Routing{
             return array('error'=>'404');
         }
         
+        $p_app = substr($p, strlen($prefixFull)+1 );
         $app='main';
         $routingTable = RoutingConfigs::$apps[ $prefix ];
-        if( isset($routingTable[ $arg_1 ]) ){
-            $app = $routingTable[ $arg_1 ]['name'];
-            array_shift($nodes);
-        }elseif( isset($routingTable['__default__']) ){
-            $app = $routingTable['__default__']['name'];
+        $default = array('name'=>'main');
+        if( isset($routingTable['__default__']) ){
+            $default=$routingTable['__default__'];
         }
         
-
+        $match=false;
+        $app='';
+        $app_path='';
+        foreach( $routingTable as $path=>$config ){
+            if( $path.'/' === substr($p_app, 0, strlen($path)+1) ){
+                $match=true;
+                $app = $config['name'];
+                $app_path = $path;
+                break;
+            }
+        }
+        if( ! $match ){
+            $app = $default['name'];
+        }
+        
+        //移除屬於app的路徑
+        $p_params = $p_app;
+        if( $app!='main' )
+            $p_params = substr($p_app, strlen($app_path)+1 );
+        
+        //更新屬於參數的路徑區域
+        $nodes=explode('/', $p_params);
+        
         $handler = $app;
         if( $prefix!='main' ){
             $handler = $prefix.'#'.$handler;

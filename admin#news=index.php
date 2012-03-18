@@ -1,26 +1,28 @@
 <?php
 include('layout_admin/tpl_header.php');
+include('layout_admin/helper.blocks.php');
+list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
 ?>
 
             <div class="grid_12">
-                <?php echo $pager->mainTitle($mainTitle); ?>
+                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
             </div>
 
             <div class="grid_12">
                 <?php echo redirect_message(); ?>
                 
                 <div class="float-right">
-<?php if( Region::checkAuth( array('action'=>'add') ) ){ ?>
+<?php if( ACL::checkAuth( 'add' ) ){ ?>
                     <!-- Button -->
-                    <a href="<?php echo View::url( array('action'=>'add') ); ?>" class="button">
-                    	<span>新增<?php echo $mainName; ?> <img src="<?php echo View::image_url('plus-small.gif'); ?>" width="12" height="9"></span>
+                    <a href="<?php echo url( 'add.html' ); ?>" class="button">
+                    	<span>新增<?php echo APP::$mainName; ?> <img src="<?php echo layout_url('admin', '/images/plus-small.gif'); ?>" width="12" height="9"></span>
                     </a>
 <?php } ?>
                 </div>
                 <div class="float-left">
                     <!-- Table records filtering -->
                     <a href="javascript: void(0);" rel="openSearch" class="button">
-                    	<span>內容檢索 <img src="<?php echo View::image_url('icons/mail-find.png'); ?>" width="9" height="9"></span>
+                    	<span>內容檢索 <img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" width="9" height="9"></span>
                     </a>
                 </div>
                 <div id="openSearch" style="display:none;">
@@ -33,35 +35,35 @@ include('layout_admin/tpl_header.php');
                 
                 <!-- Example table -->
                 <div class="module">
-                	<h2><span><?php echo $pager->searchInfo($searchInfo); //顯示列表的檢索範圍 ?></span></h2>
+                	<h2><span><?php echo Blocks::searchInfo($searchInfo); //顯示列表的檢索範圍 ?></span></h2>
                     
                     <div class="module-table-body">
                     	<form name="frmList" action="<?php echo ME; ?>" method="post">
                     	<input name="mode" type="hidden" value="">
                         <div class="table-apply">
-                            <?php echo $pager->itemsChecker(); //顯示列表選擇器(全選、清除...) ?>
+                            <?php echo Blocks::itemsChecker(); //顯示列表選擇器(全選、清除...) ?>
                             &nbsp;
                             <span>選取操作:</span> 
 <script>
 var batchRoutes = {
-    'active':'<?php echo url(array('action'=>'m_edit'));?>',
-    'inactive':'<?php echo url(array('action'=>'m_edit'));?>',
-    'delete':'<?php echo url(array('action'=>'m_delete'));?>',
+    'active':'<?php echo url("m_edit.html");?>',
+    'inactive':'<?php echo url("m_edit.html");?>',
+    'delete':'<?php echo url("m_delete.html");?>',
 };
 </script>
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
                                 <option value="" selected="selected">--- 選擇動作 ---</option>
-<?php if( Region::checkAuth( array('action'=>'m_edit') ) ){ ?>
+<?php if( ACL::checkAuth( 'm_edit' ) ){ ?>
                                 <option value="active">顯示文章</option>
                                 <option value="inactive">隱藏文章</option>
 <?php } ?>
-<?php if( Region::checkAuth( array('action'=>'m_delete') ) ){ ?>
+<?php if( ACL::checkAuth( 'm_delete' ) ){ ?>
                                 <option value="delete">刪除</option>
 <?php } ?>
                             </select>
                         </div>
                         <div class="pager" id="pager">
-                            <div class="info"><?php echo $pager->pageInfo($pageID, $pageRows, count($rows), $totalItems); ?></div>
+                            <div class="info"><?php echo Blocks::pageInfo($pageID, $pageRows, count($rows), $totalItems); ?></div>
                         </div>
                         <div style="clear: both;"></div>
                         <table class="">
@@ -85,17 +87,17 @@ var batchRoutes = {
                                     <td>
                                         <?php echo $r['name']; ?>
                                     </td>
-<?php if( Region::checkAuth( array('action'=>'active') ) ){ ?>
+<?php if( ACL::checkAuth( 'active' ) ){ ?>
                                     <td><?php if( $r['is_active']=='1' ){ ?>
-                                        <a href="<?php echo View::url( array('action'=>'inactive', 'params'=>array($r['id'])) ); ?>"><img src="<?php echo View::image_url('tick-circle.gif'); ?>" alt="直接顯示" width="16" height="16"></a>
+                                        <a href="<?php echo url('/inactive/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="直接顯示" width="16" height="16"></a>
                                     <?php }else{ ?>
-                                        <a href="<?php echo View::url( array('action'=>'active', 'params'=>array($r['id'])) ); ?>"><img src="<?php echo View::image_url('minus-circle.gif'); ?>" alt="暫時隱藏" width="16" height="16"></a>
+                                        <a href="<?php echo url('/active/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="暫時隱藏" width="16" height="16"></a>
                                     <?php } ?></td>
 <?php }else{ ?>
                                     <td><?php if( $r['is_active']=='1' ){ ?>
-                                        <img src="<?php echo View::image_url('tick-circle.gif'); ?>" alt="已啟用" width="16" height="16">
+                                        <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16">
                                     <?php }else{ ?>
-                                        <img src="<?php echo View::image_url('minus-circle.gif'); ?>" alt="已停用" width="16" height="16">
+                                        <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16">
                                     <?php } ?></td>
 <?php } ?>
                                     <td>
@@ -105,10 +107,10 @@ var batchRoutes = {
                                     $now=mktime();
                                     $opened_time=strtotime($r['published']);
                                     if( $now < $opened_time ){
-                                        echo '<a href="javascript: void(0);" title="尚未發佈"><img src="'.View::image_url('notification-slash.gif').'" alt="尚未發佈" width="16" height="16"></a> ';
+                                        echo '<a href="javascript: void(0);" title="尚未發佈"><img src="'.layout_url('admin', '/images/notification-slash.gif').'" alt="尚未發佈" width="16" height="16"></a> ';
                                     }
                                     if( $now >= $opened_time ){
-                                        echo '<a href="javascript: void(0);" title="已發布"><img src="'.View::image_url('tick-on-white.gif').'" alt="已發布" width="16" height="16"></a> ';
+                                        echo '<a href="javascript: void(0);" title="已發布"><img src="'.layout_url('admin', '/images/tick-on-white.gif').'" alt="已發布" width="16" height="16"></a> ';
                                     }
                                     if( !empty($r['published']) && $r['published']!='0000-00-00 00:00:00' ){
                                         echo date( 'Y-m-d H:i' , strtotime($r['published']) );
@@ -117,14 +119,14 @@ var batchRoutes = {
                                     }
                                     ?></td>
                                     <td>
-<?php if( Region::checkAuth( array('action'=>'archives') ) ){ ?>
-                                        <a href="<?php echo View::url( array('action'=>$r['id']) ); ?>" title="檢視資訊"><img src="<?php echo View::image_url('icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
+<?php if( ACL::checkAuth( 'archives' ) ){ ?>
+                                        <a href="<?php echo View::url( array('action'=>$r['id']) ); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
 <?php } ?>
-<?php if( Region::checkAuth( array('action'=>'edit') ) ){ ?>
-                                        <a href="<?php echo View::url( array('action'=>'edit', 'params'=>array($r['id'])) ); ?>" title="編輯"><img src="<?php echo View::image_url('icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
+<?php if( ACL::checkAuth( 'edit' ) ){ ?>
+                                        <a href="<?php echo url('/edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
-<?php if( Region::checkAuth( array('action'=>'delete') ) ){ ?>
-                                        <a href="<?php echo View::url( array('action'=>'delete', 'params'=>array($r['id'])) ); ?>" title="刪除"><img src="<?php echo View::image_url('bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
+<?php if( ACL::checkAuth( 'delete' ) ){ ?>
+                                        <a href="<?php echo url('/delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
 <?php } ?>
                                     </td>
                                 </tr>
@@ -142,8 +144,8 @@ var batchRoutes = {
                 
 <!--
                      <div class="pagination">           
-                		<a href="" class="button"><span><img src="<?php echo View::image_url('arrow-stop-180-small.gif'); ?>" alt="First" width="12" height="9"> First</span></a> 
-                        <a href="" class="button"><span><img src="<?php echo View::image_url('arrow-180-small.gif'); ?>" alt="Previous" width="12" height="9"> Prev</span></a>
+                		<a href="" class="button"><span><img src="<?php echo layout_url('admin', '/images/arrow-stop-180-small.gif'); ?>" alt="First" width="12" height="9"> First</span></a> 
+                        <a href="" class="button"><span><img src="<?php echo layout_url('admin', '/images/arrow-180-small.gif'); ?>" alt="Previous" width="12" height="9"> Prev</span></a>
                         <div class="numbers">
                             <span>Page:</span> 
                             <a href="">1</a> 
@@ -164,14 +166,14 @@ var batchRoutes = {
                             <span>|</span> 
                             <a href="">99</a>
                         </div> 
-                        <a href="" class="button"><span>Next <img src="<?php echo View::image_url('arrow-000-small.gif'); ?>" alt="Next" width="12" height="9"></span></a> 
-                        <a href="" class="button last"><span>Last <img src="<?php echo View::image_url('arrow-stop-000-small.gif'); ?>" alt="Last" width="12" height="9"></span></a>
+                        <a href="" class="button"><span>Next <img src="<?php echo layout_url('admin', '/images/arrow-000-small.gif'); ?>" alt="Next" width="12" height="9"></span></a> 
+                        <a href="" class="button last"><span>Last <img src="<?php echo layout_url('admin', '/images/arrow-stop-000-small.gif'); ?>" alt="Last" width="12" height="9"></span></a>
                         <div style="clear: both;"></div> 
                      </div>
 -->                
                      <div class="pagination">
                         <?php
-                            echo $pager->render( $pageID, $totalItems );
+                            echo Blocks::render( $pageID, $totalItems );
                         ?>
                         
                         <div style="clear: both;"></div> 

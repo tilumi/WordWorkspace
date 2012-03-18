@@ -11,10 +11,12 @@ if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
+APP::$pageTitle = '新聞中心';
+APP::$mainTitle = '新聞中心 News';
+APP::$mainName = '公告';
+
 $modelPath = APP::$handler.'_model.php';
-if( file_exists($modelPath) ){
-    include( $modelPath );
-}
+if( file_exists($modelPath) ){ include( $modelPath ); }
 
 if( in_array( $action , $registedAction ) ){
     //設定action的別名轉換
@@ -32,8 +34,7 @@ if( in_array( $action , $registedAction ) ){
 
 
 $viewTpl = APP::$handler.'='.$action.'.php';
-if( file_exists($viewTpl) )
-    include( $viewTpl );
+if( file_exists($viewTpl) ){ include( $viewTpl ); }
 
 /******************************************************************************/
 
@@ -41,14 +42,15 @@ function index(){
     View::setTitle($mainTitle);
     
     //初始化
-    if( ! isset(APP::$SESSION[ APP::$region ][ APP::$plugin ][ APP::$controller ]) ){
-        APP::$SESSION[ APP::$region ][ APP::$plugin ][ APP::$controller ] = array();
-        $session=& APP::$SESSION[ APP::$region ][ APP::$plugin ][ APP::$controller ];
+    $SESS = $_SESSION['settings'];
+    if( ! isset($SESSION[ APP::$prefix ][ APP::$app ]) ){
+        $SESS[ APP::$prefix ][ APP::$app ] = array();
+        $session=& $SESS[ APP::$prefix ][ APP::$app ];
         $session['pageRows'] = PAGEROWS;
         $session['pageID'] = 1;
         $session['search'] = array();
     }
-    $session=& APP::$SESSION[ APP::$region ][ APP::$plugin ][ APP::$controller ];
+    $session=& $SESS[ APP::$prefix ][ APP::$app ];
     
     //Pager
     $pageRows = $session['pageRows'];
@@ -63,7 +65,20 @@ function index(){
     }
     
     //Search
-    $form=Form::get('search');
+    $form=Form::create('frmSearch', 'get', APP::$ME );
+    $form->addElement('header', '', '內容檢索' );
+    $form->addElement('text', 'name', '標題', array('class'=>'input-long'));
+    $form->addElement('text', 'author', '作者', array('class'=>'input-long'));
+    
+    $options = array(
+        ''=>'--- 選擇狀態 ---',
+        '1'=>'顯示',
+        '0'=>'隱藏',
+    );
+    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input'));
+    $buttons=Form::buttonsSearchForm( false );
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
     $submits=$form->getSubmitValues();
     if( count($submits)>0 ){
         $session['search']=$submits;
@@ -82,7 +97,7 @@ function index(){
         if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='顯示狀態為"<span>'.$_[$value].'</span>"'; }
     }
     
-    list($rows, $totalItems) = Model::call('pagelist', $submits, $pageID, $pageRows);
+    list($rows, $totalItems) = News::pagelist($submits, $pageID, $pageRows);
     
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
