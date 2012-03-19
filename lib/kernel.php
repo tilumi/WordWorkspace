@@ -243,7 +243,7 @@ class Model{
         $where_list=array();
         if( is_array($identify) ){
             foreach($identify as $ide){
-                $where_list[]=$ide.'='.$fields[$ide];
+                $where_list[]=$ide.'='.self::quote($fields[$ide], 'text');
                 unset($fields[$ide]);
             }
         }
@@ -529,7 +529,8 @@ class View{
             if( substr($url,0,1)=='/' ){
                 //視為根目錄路徑，表示要走程式化路徑 (由程式產生)
                 $absolute_url=true;
-                $_link['href']=$url;
+                $url=url($url);
+                $_link['href']='_'.$url;
                 $contents.=self::link($_link, $absolute_url)."\n";
                 continue;
             }
@@ -553,6 +554,7 @@ class View{
             if( substr($url,0,1)=='/' ){
                 //視為根目錄路徑，表示要走程式化路徑 (由程式產生)
                 $absolute_url=true;
+                $url=url('_'.$url);
                 $contents.=self::script($url, $absolute_url)."\n";
                 continue;
             }

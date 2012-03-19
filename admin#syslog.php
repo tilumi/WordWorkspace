@@ -11,9 +11,9 @@ if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
-APP::$pageTitle = '新聞中心';
-APP::$mainTitle = '新聞中心 News';
-APP::$mainName = '公告';
+APP::$pageTitle = '系統紀錄';
+APP::$mainTitle = '系統紀錄 News';
+APP::$mainName = '紀錄';
 
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
@@ -39,7 +39,7 @@ if( file_exists($viewTpl) ){ include( $viewTpl ); }
 /******************************************************************************/
 
 function index(){
-    View::setTitle($mainTitle);
+    View::setTitle(APP::$mainTitle);
     
     //初始化
     $SESS = & $_SESSION['Pager'];
@@ -62,15 +62,7 @@ function index(){
     //Search
     $form=Form::create('frmSearch', 'post', APP::$ME );
     $form->addElement('header', '', '內容檢索' );
-    $form->addElement('text', 'name', '標題', array('class'=>'input-long'));
-    $form->addElement('text', 'author', '作者', array('class'=>'input-long'));
-    
-    $options = array(
-        ''=>'--- 選擇狀態 ---',
-        '1'=>'顯示',
-        '0'=>'隱藏',
-    );
-    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input'));
+    $form->addElement('text', 'name', '紀錄內容', array('class'=>'input-long'));
     $buttons=Form::buttonsSearchForm( false );
     $form->addGroup($buttons, null, null, '&nbsp;');
     
@@ -90,13 +82,10 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='name' ){ $searchInfo[]='<u>標題</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='author' ){ $searchInfo[]='<u>作者</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>系統紀錄</u> 含 "<span>'.$value.'</span>" '; }
     }
     
-    list($rows, $totalItems) = News::pagelist($submits, $pageID, $pageRows);
-    
+    list($rows, $totalItems) = Syslog::pagelist($submits, $pageID, $pageRows);
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 

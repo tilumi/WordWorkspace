@@ -15,6 +15,7 @@ class RoutingConfigs{
                 'news'=>array('name'=>'news'),
                 'managers/groups'=>array('name'=>'groups'),
                 'managers'=>array('name'=>'managers'),
+                'syslog'=>array('name'=>'syslog'),
                 '__default__'=>array('name'=>'main'),
             ),
             'main'=>array(

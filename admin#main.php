@@ -9,6 +9,8 @@ $registedAction = array(
     'login',
     'logout',
     'passwd',
+    'userinfo',
+    'settings',
 );
 if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
@@ -112,7 +114,10 @@ function logout(){
 
 function passwd(){
     View::setTitle('變更密碼');
-/*    $form=AuthComponent::getChangePasswordForm( '變更密碼' );
+    APP::load('vendor', 'auth.component');
+    
+    $form=AuthComponent::getChangePasswordForm( '變更密碼' );
+    $SESSION = & $_SESSION['admin'];
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -120,8 +125,8 @@ function passwd(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = $form->process( array( &$this->Auth , 'changePassword') ); 
-            $userid=$_SESSION['admin']['userid'];
+            $errmsg = $form->process( array( 'AuthComponent' , 'changePassword') ); 
+            $userid=$SESSION['userid'];
             if( $errmsg === true ){
                 APP::syslog( $userid.' 已變更密碼', APP::$prior['notice'], 'login');
                 redirect( '.' , '密碼已變更成功' , 'success' );
@@ -132,6 +137,99 @@ function passwd(){
     }
     $form=Form::getHtml($form);
     
-    APP::$appBuffer = array($form);*/
+    APP::$appBuffer = array($form);
 }
+function userinfo(){
+    View::setTitle('設定帳戶資訊');
+    
+    $form=Form::create('frmUserInfo', 'post', APP::$ME );
+    
+    $form->addElement('header', '', '帳戶資訊' );
+    $form->addElement('hidden', 'id');
+    $form->addElement('text', 'username', '用戶名稱', array('class'=>'input-short'));
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    $form->addRule('username', '用戶名稱 必填', 'required', null, 'client');
+    
+    $id=$_SESSION['admin']['id'];
+    $data=Main::getUserinfo( $id );
+    
+    $submits = $form->getSubmitValues();
+    if( count($submits)>0 ){
+        if( ! isset($submits['commit']) ){
+            redirect( '.' , '使用者取消' , 'info' );
+        }
+        if( $form->validate() ){
+            $errmsg = $form->process( array( 'Main' , 'userinfo' ) ); 
+            $userid=$_SESSION['admin']['userid'];
+            if( $errmsg === true ){
+                APP::syslog( $userid.' 更新了帳戶資訊', APP::$prior['notice'], 'login');
+                redirect( '.' , '帳戶資訊已更新成功' , 'success' );
+            }
+            APP::syslog( $userid.' 嘗試更新帳戶失敗。失敗訊息: '.$errmsg , APP::$prior['error'], 'login');
+            redirect( '' , $errmsg , 'error' );
+        }
+    }
+    //$form->setDefaults($data);
+    $form->setDefaults( $data );
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array($form);
+}
+function settings(){
+    View::setTitle('快速設定');
+    
+    $form=Form::create('frmUserInfo', 'post', APP::$ME );
+    
+    $form->addElement('header', '', '快速設定帳戶' );
+    $form->addElement('hidden', 'id');
+    $form->addElement('text', 'username', '用戶名稱', array('class'=>'input-short'));
+    
+    $form->addElement('password', 'password', '請輸入原密碼', array('class'=>'input-medium'));
+    $form->addElement('password', 'password1', '密碼', array('class'=>'input-medium password'));
+    $form->addElement('password', 'password2', '再輸入一次', array('class'=>'input-medium'));
+    
+    $form->addRule('id','目標帳戶不可留空', 'required', '', 'client');
+    $form->addRule('password','您必須輸入原密碼', 'required', '', 'client');
+    $form->addRule('password1','您必須輸入新密碼', 'required', '', 'client');
+    $form->addRule('password1','密碼必須為6位以上字母或數字', 'rangelength', array(6,64), 'client');
+    $form->addRule(array('password1','password2'), '兩次密碼輸入不相符', 'compare', '', 'client');
+
+    $form->addRule('username', '用戶名稱 必填', 'required', null, 'client');
+    
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    $id=$_SESSION['admin']['id'];
+    $data=Main::getUserinfo( $id );
+    $data=array(
+        'id'=>$data['id'],
+        'username'=>$data['username'],
+    );
+    
+    $submits = $form->getSubmitValues();
+    if( count($submits)>0 ){
+        if( ! isset($submits['commit']) ){
+            redirect( '.' , '使用者取消' , 'info' );
+        }
+        if( $form->validate() ){
+            $errmsg = $form->process( array( 'Main' , 'userinfo' ) ); 
+            $userid=$_SESSION['admin']['userid'];
+            if( $errmsg === true ){
+                APP::syslog( $userid.' 更新了帳戶資訊', APP::$prior['notice'], 'login');
+                redirect( '.' , '帳戶資訊已更新成功' , 'success' );
+            }
+            APP::syslog( $userid.' 嘗試更新帳戶失敗。失敗訊息: '.$errmsg , APP::$prior['error'], 'login');
+            redirect( '' , $errmsg , 'error' );
+        }
+    }
+    //$form->setDefaults($data);
+    $form->setDefaults( $data );
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array($form);
+}
+
 ?>

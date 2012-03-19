@@ -3,7 +3,23 @@ list( $logs ) = APP::$appBuffer;
 
 include('layout_admin/tpl_header.php');
 ?>
+<script>
+$("a[rel='openSearch']").colorbox({
+    transition:"none", width:"50%",  href:"#openSearch", opacity:0.2,
+    onLoad:function(){ $('#openSearch').css('display','block'); },
+    onCleanup:function(){ $('#openSearch').css('display','none'); },
+});
+var url = encodeURI( '<?php echo url( '/settings.html' ); ?>' );
+$("a[rel='settings']").colorbox({
+    inline:true,
+    /*fixed: true,*/
+    transition: "none",
+    opacity: 0.1,
+    width:"490px",
+    href: url
+});
 
+</script>
             <div class="grid_12">
                 <?php echo redirect_message(); ?>
             </div>
@@ -14,38 +30,37 @@ include('layout_admin/tpl_header.php');
                 	<span>新聞中心</span>
                 </a>
                 
-<!--
-            	<a href="<?php echo url( array('plugin'=>'products') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/products/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/packing-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>商品管理</span>
                 </a>
                 
-            	<a href="<?php echo url( array('plugin'=>'essences') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/essences/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/Search-Images-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>作品精選</span>
                 </a>
                 
-            	<a href="<?php echo url( array('plugin'=>'orders') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/orders/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/ordering-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>訂單管理</span>
                 </a>
                 
-            	<a href="<?php echo url( array('plugin'=>'albums') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/albums/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/pictures-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>相簿管理</span>
                 </a>
 
-            	<a href="<?php echo url( array('plugin'=>'musics') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/musics/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/folder-music-icon-64.png'); ?>" alt="edit" width="64" height="64">
                 	<span>歌曲管理</span>
                 </a>
 
-            	<a href="<?php echo url( array('plugin'=>'downloads') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/downloads/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/Globe-Download-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>檔案下載</span>
                 </a>
 
-            	<a href="<?php echo url( array('plugin'=>'comments') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/comments/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/select-language-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>留言管理</span>
                 </a>
@@ -55,12 +70,11 @@ include('layout_admin/tpl_header.php');
                 	<span>條碼系統</span>
                 </a>
                 
-            	<a href="<?php echo url( array('plugin'=>'songs', 'action'=>'archives') ); ?>" class="dashboard-module">
+            	<a href="<?php echo url('/songs/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/folder-music-icon-64.png'); ?>" alt="edit" width="64" height="64">
                 	<span>歌曲管理</span>
                 </a>
--->
-            	<a href="<?php echo url( 'chpasswd.html' ); ?>" class="dashboard-module">
+            	<a href="<?php echo url( 'passwd.html' ); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/preferences-desktop-user-password.png'); ?>" alt="edit" width="64" height="64">
                 	<span>變更密碼</span>
                 </a>
@@ -120,14 +134,14 @@ include('layout_admin/tpl_header.php');
                                     <th style="width:100px;">名稱: </th>
                                     <td>
                                         <?php echo $_SESSION['admin']['username']; ?>
-                                        <a style="float:right;" href="<?php echo url( '/userinfo.html' );?>">設定我的名稱</a>
+                                        <a style="float:right;" rel="settings" href="<?php echo url( '/userinfo.html' );?>">設定我的名稱</a>
                                     </td>
                                 </tr>
                                 <tr class="odd">
                                     <th>帳號: </th>
                                     <td>
                                         <?php echo $_SESSION['admin']['userid'];?>
-                                        <a style="float:right;" href="<?php echo url( '/passwd.html' );?>">變更密碼</a>
+                                        <a style="float:right;" rel="settings" href="<?php echo url( '/passwd.html' );?>">變更密碼</a>
                                     </td>
                                 </tr>
                                 <tr>
@@ -181,7 +195,7 @@ include('layout_admin/tpl_header.php');
         }
 ?>
                                 <tr>
-                                    <td colspan="3"><a class="float-right" href="<?php echo url(array('plugin'=>'syslog')); ?>">更多動態 ...</a></td>
+                                    <td colspan="3"><a class="float-right" href="<?php echo url('/syslog/'); ?>">更多動態 ...</a></td>
                                 </tr>
                             </table>
 <!--

@@ -82,7 +82,7 @@ class Blocks{
         //Calculate Template
         $template='';
         //$url=ME.'?pageID=%d';
-        $url=url( array('params'=>array('page'=>'%d') ) );
+        $url=url('./?pageID=%d');
         
         $first=''; $prev='';
         if( ! $pager->isFirstPage() ){

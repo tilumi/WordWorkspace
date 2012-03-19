@@ -3,7 +3,8 @@ if( APP::$doctype != 'html' ){
     require('error/404.php');die;
 }
 
-APP::$mainTitle='網站管理員';
+APP::$pageTitle = '網站管理員';
+APP::$mainTitle='網站管理員 Managers';
 APP::$mainName='管理員';
 
 $action = pos( APP::$params );
@@ -28,7 +29,7 @@ if( in_array( $action, $registedAction ) ){
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
 
-$modelPath = 'groups_model.php';
+$modelPath = APP::$prefix.'#groups_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
 
 if( in_array( $action , $registedAction ) ){
@@ -55,29 +56,25 @@ function index(){
     View::setHeader( 'title', APP::$mainTitle );
     
     //初始化
-    if( ! isset(APP::$SESSION[ APP::$prefix ][ APP::$app ]) ){
-        APP::$SESSION[ APP::$prefix ][ APP::$app ] = array();
-        $session=& APP::$SESSION[ APP::$prefix ][ APP::$app ];
-        $session['pageRows'] = PAGEROWS;
-        $session['pageID'] = 1;
-        $session['search'] = array();
+    $SESS = & $_SESSION['Pager'];
+    if( ! isset($SESS[ APP::$prefix ][ APP::$app ]) ){
+        $SESS[ APP::$prefix ][ APP::$app ] = array();
+        $SESS[ APP::$prefix ][ APP::$app ]['pageRows'] = PAGEROWS;
+        $SESS[ APP::$prefix ][ APP::$app ]['pageID'] = 1;
+        $SESS[ APP::$prefix ][ APP::$app ]['search'] = array();
     }
-    $session=& APP::$SESSION[ APP::$prefix ][ APP::$app ];
+    $session=& $SESS[ APP::$prefix ][ APP::$app ];
     
     //Pager
     $pageRows = $session['pageRows'];
     $pageID = $session['pageID'];
-    if( $dispatch['params']['page'] && is_numeric($dispatch['params']['page']) ){
-        $pageID=(int)$dispatch['params']['page'];
+    if( isset($_GET['pageID']) && is_numeric($_GET['pageID']) ){
+        $pageID=(int)$_GET['pageID'];
         $session['pageID']=$pageID;
-    }
-    //使網址與頁數同步
-    if( $pageID != 1 && ! isset($dispatch['params']['page'])){
-        redirect( url( array('params'=>array('page'=>$pageID)) ) );
     }
     
     //Search
-    $form=Form::create('frmSearch', 'get', ME );
+    $form=Form::create('frmSearch', 'post', APP::$ME );
     
     $form->addElement('header', '', '內容檢索' );
     
@@ -104,11 +101,14 @@ function index(){
     $buttons=Form::buttonsSearchForm( false );
     $form->addGroup($buttons, null, null, '&nbsp;');
 
+    //紀錄搜尋資料
     $submits=$form->getSubmitValues();
     if( count($submits)>0 ){
         $session['search']=$submits;
-        redirect( url( array('params'=>array('page'=>1)) ) );
+        $session['pageID'] = 1;
+        redirect('.'); //重導洗掉GET參數
     }
+    
     $submits = $session['search'];
     $form->setDefaults($submits);
     $form=Form::getHtml($form);

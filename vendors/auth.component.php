@@ -96,7 +96,7 @@ class AuthComponent{
         return $form;
     }
     function getChangePasswordForm( $header ){
-        $form=Form::create('frmChangePassword', 'post', ME );
+        $form=Form::create('frmChangePassword', 'post', APP::$ME );
         
         $form->addElement('header', '', $header );
         
@@ -120,10 +120,9 @@ class AuthComponent{
         return $form;
     }
     function changePassword( $data ){
-        $rows=Model::fetchAll($sql);
-        
         //checking password
-        $row = Model::fetchById( $data['id'] , 'administrators' );
+        $sql = "SELECT * FROM managers WHERE id=".Model::quote($data['id'], 'text');
+        $row = Model::fetchRow( $sql );
         $algorithm=$row['algorithm'];
         $check['salt']=$row['salt'];
         $check['password']=$algorithm( $check['salt'].$data['password'].$check['salt'] );
@@ -139,16 +138,7 @@ class AuthComponent{
         $data['password']=$algorithm( $salt.$data['password1'].$salt );
         unset($data['password1'],$data['password2'],$data['commit']);
         
-        $integer_fields=array('is_active','is_super_user');
-        foreach( $data as $field=>$value ){
-            if( in_array( $field , $integer_fields ) ){
-                $data[$field]=APP::$mdb->quote( $value , 'integer' );
-                continue;
-            }
-            $data[$field]=APP::$mdb->quote( $value , 'text' );
-        }
-        
-        if( Model::update( $data , 'id' , 'administrators' ) ){
+        if( Model::update( $data , 'id' , 'managers' ) ){
             return true;
         }
         return '密碼變更失敗，請再試一次';
