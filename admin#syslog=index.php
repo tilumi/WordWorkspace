@@ -4,7 +4,7 @@ include('layout_admin/helper.blocks.php');
 list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
 ?>
             <div class="grid_12">
-                <?php echo Blocks::mainTitle($mainTitle); ?>
+                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
             </div>
 
             <div class="grid_12">

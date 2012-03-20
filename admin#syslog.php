@@ -12,7 +12,7 @@ if( in_array( $action, $registedAction ) ){
 }
 
 APP::$pageTitle = '系統紀錄';
-APP::$mainTitle = '系統紀錄 News';
+APP::$mainTitle = '系統紀錄 Syslog';
 APP::$mainName = '紀錄';
 
 $modelPath = APP::$handler.'_model.php';

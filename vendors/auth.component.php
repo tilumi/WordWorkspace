@@ -61,7 +61,7 @@ class AuthComponent{
             }
         }
         
-        // When Verifying Passed, go throuth here.f
+        // When Verifying Passed, go throuth here.
         self::$AuthData = $userdata;
         self::$encryptPassword = $encrypt;
         

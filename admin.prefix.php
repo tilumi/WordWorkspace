@@ -30,7 +30,7 @@ function userLoginCheck(){
                 $SESSION['is_auth'] = true;
                 $SESSION['privileges'] = $auth->getPrivileges( $userdata['id'] );
                 
-                APP::syslog($SESSION['userid'].' 自動登入成功', APP::$prior['info'], 'login');
+                APP::syslog($SESSION['userid'].' 自動登入', APP::$prior['info'], 'login');
             }
         }
     }
