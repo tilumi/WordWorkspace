@@ -41,6 +41,7 @@ class Managers{
         $data['salt']=$salt;
         $data['password']=$algorithm( $salt.$data['password1'].$salt );
         unset($data['password1'],$data['password2']);
+       	$data['created']=date('Y-m-d H:i:s');
         
         return Model::insert($data, self::$useTable);
     }
@@ -70,6 +71,7 @@ class Managers{
             $data['salt']=$row['salt'];
             $data['password']=$algorithm( $salt.$data['password1'].$salt );
         }
+       	$data['updated']=date('Y-m-d H:i:s');
         unset($data['password1'],$data['password2']);
         
         return Model::update($data, 'id');
