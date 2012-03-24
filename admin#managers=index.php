@@ -87,7 +87,7 @@ var batchRoutes = {
                                     <th class="header" style="">人員名稱</th>
                                     <th class="header" style="">人員身分</th>
                                     <th class="header" style="width: 50px;">啟用</th>
-<?php if( ACL::checkAuth( array('action'=>'super_user') ) ){ ?>
+<?php if( ACL::checkAuth('super_user') ){ ?>
                                     <th class="header" style="width: 50px;">開發者</th>
 <?php } ?>
                                     <th class="header" style="width: 140px;">最後登入</th>

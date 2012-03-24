@@ -72,7 +72,7 @@ class Managers{
         }
         unset($data['password1'],$data['password2']);
         
-        return Model::update($data, 'id');
+        return Model::update($data, 'id', self::$useTable);
     }
     function dignity( $data ){
         if( isset($data['commit']) ){
@@ -87,14 +87,12 @@ class Managers{
         $dignities=array_unique($dignities);
         
         $fields=array();
-        $fields['admin_id']=Model::quote($admin_id ,'text');
         if( count($dignities)>0 ){
             Model::exec('START TRANSACTION');
             $sql ="DELETE FROM dignities_admins WHERE admin_id=".Model::quote( $admin_id , 'text' );
             Model::exec($sql);
             foreach($dignities as $dignity_id){
                 if( empty($dignity_id) ){ continue; }
-                $fields['dignity_id']=Model::quote($dignity_id, 'text');
                 if( ! Model::insert($fields, 'dignities_admins', false) ){
                     Model::exec('ROLLBACK');
                     return '更新失敗，請再試一次';
@@ -112,9 +110,9 @@ class Managers{
             if( self::is_last_admin($data['id']) ){ return '系統中不能沒有管理者'; }
             
             $fields=array();
-            $fields['id']=Model::quote( $data['id'] , 'text');
-            $fields['deleted']=Model::quote( '1' , 'text');
-            return Model::update($fields, 'id');
+            $fields['id']=$data['id'];
+            $fields['deleted']='1';
+            return Model::update($fields, 'id', self::$useTable);
         }
         //when $data is id list
         if( self::is_above_permit_level($data['ids']) ){ return '不能設定這個使用者'; }
@@ -190,10 +188,10 @@ class Managers{
         
         if( is_string($id) ){
             $fields=array();
-            $fields['id']=Model::quote( $id , 'text');
-            $fields['is_active']=Model::quote( '1' , 'text');
+            $fields['id']=$id;
+            $fields['is_active']='1';
             
-            return Model::update($fields, 'id');
+            return Model::update($fields, 'id', self::$useTable);
         }
         //when $id is array
         $ids=$id;
@@ -211,10 +209,10 @@ class Managers{
         
         if( is_string($id) ){
             $fields=array();
-            $fields['id']=Model::quote( $id , 'text');
-            $fields['is_active']=Model::quote( '0' , 'text');
+            $fields['id']=$id;
+            $fields['is_active']='0';
             
-            return Model::update($fields, 'id');
+            return Model::update($fields, 'id', self::$useTable);
         }
         //when $id is array
         $ids=$id;
@@ -234,10 +232,10 @@ class Managers{
         if( is_string($id) ){
             
             $fields=array();
-            $fields['id']=Model::quote( $id , 'text');
-            $fields['is_super_user']=Model::quote( '0' , 'text');
+            $fields['id']=$id;
+            $fields['is_super_user']='0';
             
-            return Model::update($fields, 'id');
+            return Model::update($fields, 'id', self::$useTable);
         }
         //when $id is array
         $ids=$id;
@@ -254,10 +252,10 @@ class Managers{
 
         if( is_string($id) ){
             $fields=array();
-            $fields['id']=Model::quote( $id , 'text');
-            $fields['is_super_user']=Model::quote( '1' , 'text');
+            $fields['id']=$id;
+            $fields['is_super_user']='1';
             
-            return Model::update($fields, 'id');
+            return Model::update($fields, 'id', self::$useTable);
         }
         //when $id is array
         $ids=$id;
@@ -277,7 +275,7 @@ class Managers{
         $ids=implode(',', $target_id);
         
         $sql ="SELECT count(id) FROM ".self::$useTable;
-        $sql.=" WHERE is_super_user='1' AND is_active='1' AND deleted='0' AND plugin='".APP::$plugin."'";
+        $sql.=" WHERE is_super_user='1' AND is_active='1' AND deleted='0'";
         $sql.=" AND id NOT IN (".$ids.")";
         $count=Model::fetchOne($sql);
         if( $count<1 ){ return true; }
@@ -293,7 +291,7 @@ class Managers{
         $ids=implode(',', $target_id);
         
         $sql ="SELECT count(id) FROM ".self::$useTable;
-        $sql.=" WHERE is_active='1' AND deleted='0' AND plugin='".APP::$plugin."'";
+        $sql.=" WHERE is_active='1' AND deleted='0'";
         $sql.=" AND id NOT IN (".$ids.")";
         $count=Model::fetchOne($sql);
         if( $count<1 ){ return true; }
@@ -301,7 +299,7 @@ class Managers{
     }
     function is_above_permit_level( $target_id ){
         //是否越權操作
-        if( ! Region::checkSuperUser() ){
+        if( ! ACL::checkSuperUser() ){
             if( is_string($target_id) ){
                 $target_id=array($target_id);
             }
@@ -321,10 +319,10 @@ class Managers{
         return false;
     }
     function getDignitiesList(){
-        return Model::call( 'Dignities', 'getList' );
+        return Dignities::getList();
     }
     function getDignitiesByAdmin(){
-        return Model::call( 'Dignities', 'getByAdmin' );
+        return Dignities::getByAdmin();
     }
     
 }
