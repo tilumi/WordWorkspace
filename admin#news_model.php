@@ -25,5 +25,32 @@ class News{
         
         return array($rows, $totalItems);
     }
+    function add( $data ){
+        if( isset($data['commit']) ){
+            unset($data['commit']);
+        }
+       	$data['id']=uniqid('News');
+       	$data['urn']=$data['name'];
+        $date=$data['published'];
+        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
+    	$data['published']=date('Y-m-d H:i:s', $timestamp);
+       	
+       	$data['author']=$_SESSION['admin']['userid'];
+       	$data['author_id']=$_SESSION['admin']['id'];
+       	$data['created']=date('Y-m-d H:i:s');
+        
+        return Model::insert($data, self::$useTable);
+    }
+    function edit( $data ){
+        if( isset($data['commit']) ){
+            unset($data['commit']);
+        }
+        $date=$data['published'];
+        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
+    	$data['published']=date('Y-m-d H:i:s', $timestamp);
+       	$data['updated']=date('Y-m-d H:i:s');
+        
+        return Model::update($data, 'id', self::$useTable);
+    }
 }
 ?>

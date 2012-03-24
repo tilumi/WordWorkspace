@@ -6,6 +6,8 @@ if( APP::$doctype != 'html' ){
 $action = pos( APP::$params );
 $registedAction = array(
     'index',
+    'add',
+    'edit',
 );
 if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
@@ -98,6 +100,131 @@ function index(){
     list($rows, $totalItems) = News::pagelist($submits, $pageID, $pageRows);
     
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
+}
+function add(){
+    View::setTitle('新增'.APP::$mainName);
+    
+    $form=Form::create('frmInsert', 'post', APP::$ME );
+    
+    $form->addElement('header', '', $header );
+    
+    $options = array(
+        'language'=>'tw',
+        'format'=>'Y-m-d H:i',
+        'minYear'=>date('Y')-5,
+        'maxYear'=>date('Y')+5,
+        'year'=>date('Y')
+    );
+    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
+    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
+    
+    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
+    //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
+    
+    $options = array(
+        '1'=>'直接顯示',
+        '0'=>'暫時隱藏',
+    );
+    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+    $form->setDefaults( array('is_active'=>0 ) );
+
+    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
+    
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
+    $form->addRule('name', '標題 必填', 'required', null, 'client');
+    $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
+    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
+    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
+    
+    $form->applyFilter('name', 'trim');
+    
+    $submits = $form->getSubmitValues();
+    if( count($submits)>0 ){
+        if( ! isset($submits['commit']) ){
+            redirect( '.' , '使用者取消' , 'info' );
+        }
+        if( $form->validate() ){
+            $errmsg = News::add($submits); 
+            if( $errmsg === true ){
+                redirect( '.' , APP::$mainName.'已新增成功' , 'success' );
+            }
+            redirect( '.' , $errmsg , 'error' );
+        }
+    }
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array( $form );
+}
+function edit(){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $sql = "SELECT * FROM news WHERE id=".Model::quote($id, 'text');
+    $data = Model::fetchRow( $sql );
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    
+    View::setTitle('編輯 '.$data['name']);
+    
+    $form=Form::create('frmUpdate', 'post', APP::$ME );
+    
+    $form->addElement('header', '', $header );
+    
+    $form->addElement('hidden', 'id');
+    $options = array(
+        'language'=>'tw',
+        'format'=>'Y-m-d H:i',
+        'minYear'=>date('Y')-5,
+        'maxYear'=>date('Y')+5,
+        'year'=>date('Y')
+    );
+    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
+    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
+    
+    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
+    //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
+    
+    $options = array(
+        '1'=>'直接顯示',
+        '0'=>'暫時隱藏',
+    );
+    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+
+    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
+    
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
+    $form->addRule('name', '標題 必填', 'required', null, 'client');
+    $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
+    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
+    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
+    
+    $submits = $form->getSubmitValues();
+    if( count($submits)>0 ){
+        if( ! isset($submits['commit']) ){
+            redirect( '.' , '使用者取消' , 'info' );
+        }
+        if( $form->validate() ){
+            $errmsg = News::edit($submits); 
+            if( $errmsg === true ){
+                redirect( '.' , APP::$mainName.'已編輯成功' , 'success' );
+            }
+            redirect( '.' , $errmsg , 'error' );
+        }
+    } 
+    $form->setDefaults($data);
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array( $form );
 }
 
 
