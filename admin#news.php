@@ -41,7 +41,7 @@ if( file_exists($viewTpl) ){ include( $viewTpl ); }
 /******************************************************************************/
 
 function index(){
-    View::setTitle($mainTitle);
+    View::setTitle(APP::$pageTitle);
     
     //初始化
     $SESS = & $_SESSION['Pager'];

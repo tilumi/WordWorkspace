@@ -489,18 +489,8 @@ class View{
         if( isset($metas['title']) && !empty($metas['title']) ){
             $title=$metas['title'];
         }
-        if( !empty($pageTitle) ){
-            if( !empty($title) ){
-                $title_replaced=str_replace( '<%pageTitle%>', $pageTitle, $title );
-                //如果沒有設置replace tag, 則直接以設定值取代
-                if( $title_replaced==$title ){
-                    $title=$pageTitle;
-                }else{
-                    $title=$title_replaced;
-                }
-            }else{
-                $title=$pageTitle;
-            }
+        if( !empty($pageTitle) && empty($title) ){
+            $title=$pageTitle;
         }
         $docTitle =$title;
         $docTitle.=( !empty($title) && !empty($sitename) )?' - ':'';
