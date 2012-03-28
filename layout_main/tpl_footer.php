@@ -1,8 +1,7 @@
 
 			<div id="footer" class="container" style="font-family: Arial;position:relative;">
-				<p>本站由 <a target="_blank" href="http://www.ccya.tw">中華基督教新時代青年會</a> 提供<br>
-                程式開發 <a target="_blank" href="http://www.morninglight.cc">MorningLight 晨光青年網</a> &nbsp;
-                版權所有 JBride資訊站 © 2011 JBride.cc. All Rights Reserved.</p>
+                <p>版權所有 J 的愛資訊站 © 2011 JBride.cc. All Rights Reserved.
+                空間提供 <a target="_blank" href="http://www.morninglight.cc">晨光青年網</a></p>
 			</div>
 		</div>
 	</div>
