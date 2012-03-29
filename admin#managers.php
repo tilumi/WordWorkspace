@@ -309,8 +309,7 @@ function dignity(){
     
     $form=Form::getHtml($form);
     
-    View::set( compact('form') );
-    View::render();
+    APP::$appBuffer = array($form);
 }
 function privileges(){
     $id = pos(APP::$params);
@@ -326,11 +325,12 @@ function privileges(){
         redirect( '.' , '不能變更這個使用者的權限' , 'attention' );
     }
     
-    LoadVendors( 'Symfony'.DS.'yaml'.DS.'sfYaml' );
+    include( 'vendors'.DS.'Symfony'.DS.'yaml'.DS.'sfYaml.php' );
     $priv=sfYaml::load( dirname(__FILE__).'/config/privileges.yml' );
     
-    $form=Form::get( 'privileges', '設定'.APP::$mainName.'權限: &nbsp; '.$data['username'].' ('.$data['userid'].')', $data, $priv );
     View::setTitle('設定'.APP::$mainName.'權限: &nbsp; '.$data['username']);
+    
+    $form=getPrivilegesForm( '設定'.APP::$mainName.'權限: &nbsp; '.$data['username'].' ('.$data['userid'].')', $data, $priv );
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -338,7 +338,7 @@ function privileges(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = Model::call( 'setPrivileges', $submits ); 
+            $errmsg = Managers::setPrivileges($submits); 
             if( $errmsg === true ){
                 $userid=$_SESSION['admin']['userid'];
                 APP::syslog($userid.' 變更'.APP::$mainName.'權限: '.$data['userid'].' 成功', APP::$prior['info'], 'managers' );
@@ -349,14 +349,64 @@ function privileges(){
             redirect( '.' , $errmsg , 'error' );
         }
     }
-    $priv=Model::call( 'loadPrivileges', $data['id'] );
+    $priv=Managers::loadPrivileges($data['id']);
     $default=array('userid'=>$data['id']) + $priv;
     $form->setDefaults( $default ); 
     
     $form=Form::getHtml($form, 'privileges');
     
-    View::set( compact('form') );
-    View::render();
+    APP::$appBuffer = array($form);
+}
+function getPrivilegesForm( $header='' , $userdata=array() , $contents=array() ){
+    $form=Form::create('frmPrivileges', 'post', ME );
+    
+    $form->addElement('header', '', $header );
+    
+    $form->addElement('hidden', 'userid', $userdata['id']);
+    foreach($contents as $key=>$priv){
+        $name=$priv['name'];
+        if( isset($priv['type']) && !empty($priv['type']) ){
+            $form->addElement('html', '<span style="font-size:14px;color:red;"><strong>'.$name.'</strong></span>');
+            $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+            continue;
+        }
+        
+        $app='';
+        if( isset($priv['app']) && !empty($priv['app']) ){
+            $app=$priv['app'];
+        }
+        
+        $methods=$priv['methods'];
+        $checkbox=array();
+        $represent=array();
+        $i=0;
+        foreach( $methods as $priv_name=>$actions ){
+            if( $plugin == 'main' ){
+                //主系統為基本權限，必須提供，因此不需列為選項
+                $checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('disabled', 'checked'), array('allow', 'allow'));
+                $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
+                continue;
+            }
+            $js_onclick='';
+            if( $i==0 ){
+                $js_onclick ="javascript: if( this.checked ){ ";
+                $js_onclick.="$('.priv_{$key}').each( function(){ this.checked='checked'; } );";
+                $js_onclick.="}else{";
+                $js_onclick.="$('.priv_{$key}').each( function(){ this.checked=''; } );";
+                $js_onclick.="}";
+            }
+            $checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('class'=>'priv_'.$key,'onclick'=>$js_onclick), array('deny', 'allow'));
+            $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
+            $i+=1;
+        }
+        $form->addGroup($checkbox, 'priv:'.$app.'', '<b>'.$name.'</b>: &nbsp;', ' ');
+        $form->addGroup($represent, 'represent['.$app.']', '', '');
+        $form->addElement('html', '<div style="clear:both;"></div>');
+    }
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    return $form;
 }
 function delete(){
     $id = pos(APP::$params);
@@ -480,7 +530,7 @@ function m_priv(){
     
     $allowed_type=array(
         'normal_user'=>'已設定為一般管理員',
-        'super_user'=>'已設定為超級管理員',
+        'super_user'=>'已設定為全域管理員',
     );
     if( ! array_key_exists($type, $allowed_type) ){
         redirect( '.' , '不允許這樣的操作' , 'attention' );
@@ -580,11 +630,11 @@ function super_user(){
 
     if( $errmsg = Model::call( 'setSuperUser', $id ) ){
         $userid=$_SESSION['admin']['userid'];
-        APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為超級管理員', APP::$prior['info'], 'managers' );
-        redirect( '.' , APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為超級管理員' , 'success' );
+        APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為全域管理員', APP::$prior['info'], 'managers' );
+        redirect( '.' , APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為全域管理員' , 'success' );
     }
     $userid=$_SESSION['admin']['userid'];
-    APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶設定為超級管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+    APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶設定為全域管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
 function _is_allowed_userid($element_value){

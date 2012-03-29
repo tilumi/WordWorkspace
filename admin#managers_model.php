@@ -56,11 +56,11 @@ class Managers{
         //檢查不正常的屬性關閉動作
         $id=$data['id'];
         if( $data['is_active']=='0' ){
-            if( self::is_last_superuser($id) ){ return '系統中不能沒有超級管理者'; }
+            if( self::is_last_superuser($id) ){ return '系統中不能沒有全域管理者'; }
             if( self::is_last_admin($id) ){ return '系統中不能沒有管理者'; }
         }
         if( $data['is_super_user']=='0' ){
-            if( self::is_last_superuser($id) ){ return '系統中不能沒有超級管理者'; }
+            if( self::is_last_superuser($id) ){ return '系統中不能沒有全域管理者'; }
             if( self::is_last_admin($id) ){ return '系統中不能沒有管理者'; }
         }
         //encrypt password
@@ -108,7 +108,7 @@ class Managers{
         if( isset($data['id']) ){
             //檢查
             if( self::is_above_permit_level($data['id']) ){ return '不能設定這個使用者'; }
-            if( self::is_last_superuser($data['id']) ){ return '系統中不能沒有超級管理者'; }
+            if( self::is_last_superuser($data['id']) ){ return '系統中不能沒有全域管理者'; }
             if( self::is_last_admin($data['id']) ){ return '系統中不能沒有管理者'; }
             
             $fields=array();
@@ -118,7 +118,7 @@ class Managers{
         }
         //when $data is id list
         if( self::is_above_permit_level($data['ids']) ){ return '不能設定這個使用者'; }
-        if( self::is_last_superuser($data['ids']) ){ return '系統中不能沒有超級管理者'; }
+        if( self::is_last_superuser($data['ids']) ){ return '系統中不能沒有全域管理者'; }
         if( self::is_last_admin($data['ids']) ){ return '系統中不能沒有管理者'; }
         $ids=$data['ids'];
         foreach( $ids as $key=>$id ){
@@ -206,7 +206,7 @@ class Managers{
     function setInactive( $id ){
         //是否越權操作
         if( self::is_above_permit_level($id) ){ return '不能設定這個使用者'; }
-        if( self::is_last_superuser($id) ){ return '系統中不能沒有超級管理者'; }
+        if( self::is_last_superuser($id) ){ return '系統中不能沒有全域管理者'; }
         if( self::is_last_admin($id) ){ return '系統中不能沒有管理者'; }
         
         if( is_string($id) ){
@@ -228,7 +228,7 @@ class Managers{
     function setNormalUser( $id ){
         //是否越權操作
         if( self::is_above_permit_level($id) ){ return '不能設定這個使用者'; }
-        if( self::is_last_superuser($id) ){ return '系統中不能沒有超級管理者'; }
+        if( self::is_last_superuser($id) ){ return '系統中不能沒有全域管理者'; }
         if( self::is_last_admin($id) ){ return '系統中不能沒有管理者'; }
         
         if( is_string($id) ){
@@ -310,7 +310,7 @@ class Managers{
             }
             $ids=implode(',', $target_id);
             
-            //一般管理者不能設定超級管理者
+            //一般管理者不能設定全域管理者
             $sql ="SELECT is_super_user FROM ".self::$useTable;
             $sql.=" WHERE id IN (".$ids.")";
             $rows=Model::fetchAll($sql);

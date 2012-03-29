@@ -176,13 +176,13 @@ if( ! ($IE6 || $IE7) ){
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
+  if (d.getElementById(id)) return;
   js = d.createElement(s); js.id = id;
   js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1&appId=256358261057256";
   fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
-</script>
+}(document, 'script', 'facebook-jssdk'));</script>
 <div class="fb-like" data-href="http://bible.jbride.cc" data-send="false" data-width="450" data-show-faces="true"></div>
+
                             </p>
                             <p>
                             或分享給你的朋友喔 ...
