@@ -8,6 +8,12 @@ $registedAction = array(
     'index',
     'add',
     'edit',
+    'delete',
+    'archives',
+    'm_edit',
+    'm_delete',
+    'active',
+    'inactive',
 );
 if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
@@ -164,8 +170,7 @@ function edit(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM news WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = News::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -225,6 +230,169 @@ function edit(){
     $form=Form::getHtml($form);
     
     APP::$appBuffer = array( $form );
+}
+function delete(){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $data = News::findById($id);
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    
+    View::setTitle('刪除 '.$data['name']);
+    
+    $form=Form::create('frmDelete', 'post', APP::$ME );
+    
+    $form->addElement('header', '', '您確定要刪除'.APP::$mainName.' '.$data['name'].' ?' );
+    
+    $form->addElement('hidden', 'id');
+    $form->addElement('static', 'name', '<b>標題名稱</b>');
+    
+    $html ='<p><img src="'.layout_url('admin', '/images/icons/edit-delete-3.png').'"></p>';
+    $html.='<p style="color:red;"><b>將會被刪除，請確認？</b></p>';
+    $form->addElement('html', '<div style="margin:10px;">'.$html.'</div>' );
+    
+    $buttons=Form::buttonsNoReset();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    $form->applyFilter('name', 'trim');
+    
+    $submits = $form->getSubmitValues();
+    if( count($submits)>0 ){
+        if( ! isset($submits['commit']) ){
+            redirect( '.' , '使用者取消' , 'info' );
+        }
+        if( $form->validate() ){
+            $errmsg = News::delete($submits); 
+            if( $errmsg === true ){
+                redirect( '.' , APP::$mainName.'已刪除' , 'success' );
+            }
+            redirect( '.' , $errmsg , 'error' );
+        }
+    } 
+    $form->setDefaults($data);
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array( $form );
+}
+function archives( $id=null ){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $data = News::findById($id);
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    View::setTitle($data['name']);
+    
+    APP::$appBuffer = array( $data );
+}
+function m_edit(){
+    $form=Form::create('frmList', 'post', ME );
+    $submits = $form->getSubmitValues();
+    
+    $type=$submits['mode'];
+    
+    $allowed_type=array(
+        'active'=>'已設定顯示',
+        'inactive'=>'已設定隱藏',
+    );
+    if( ! array_key_exists($type, $allowed_type) ){
+        redirect( '.' , '不允許這樣的操作' , 'attention' );
+    }
+    if( !isset($submits['items']) || count($submits['items'])<1 ){
+        redirect( '.', '尚未選擇執行目標，您必須先選擇項目', 'error');
+    }
+    
+    $items=$submits['items'];
+    switch( $type ){
+        case 'active':
+            $errmsg = News::setActive($items);
+            break;
+        case 'inactive':
+            $errmsg = News::setInactive($items);
+            break;
+    }
+    if( $errmsg === true ){
+        redirect('.', '指定的 '.count($items).' 項'.APP::$mainName.$allowed_type[$type] , 'success');
+    }
+    redirect('.', $errmsg , 'error');
+}
+function m_delete(){
+    $form=Form::create('frmMultiple', 'post', array('action'=>'m_delete') );
+    View::setTitle('刪除以下'.APP::$mainName);
+    
+    $submits = $form->getSubmitValues();
+    if( isset($submits['commit']) ){
+        $submits = $form->getSubmitValues();
+        $num=count($submits['ids']);
+        $errmsg = News::delete($submits); 
+        if( $errmsg === true ){
+            redirect( '.' , '指定的 '.$num.' 項'.APP::$mainName.'已刪除' , 'success' );
+        }
+        redirect('.', $errmsg , 'error');
+    }
+    if( isset($submits['cancel']) ){
+        redirect( '.' , '使用者取消' , 'info' );
+    }
+    if( !isset($submits['items']) || count($submits['items'])<1 ){
+        redirect( '.', '尚未選擇執行目標，您必須先選擇項目', 'error');
+    }
+    $items=$submits['items'];
+    $rows=News::findById( $items );
+    
+    $form=Form::create('frmMDelete', 'post', APP::$ME );
+    $form->addElement('header', '', '以下'.APP::$mainName.'都將刪除，是否確認：' );
+    $form->addElement('hidden', 'action', 'delete');
+    $i=0;
+    foreach( $rows as $item ){
+        $i+=1;
+        $form->addElement('hidden', 'ids[]', $item['id']);
+        $form->addElement('static', '', APP::$mainName.' '.$i.'.', $item['name']);
+    }
+    
+    $buttons=Form::buttonsNoReset();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    
+    $form=Form::getHtml($form);
+    
+    APP::$appBuffer = array( $form );
+}
+function active(){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $data = News::findById($id);
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    
+    if( $errmsg = News::setActive($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定顯示' , 'success' );
+    }
+    redirect( '.' , $errmsg , 'error' );
+}
+function inactive(){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $data = News::findById($id);
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    
+    $errmsg = News::setInactive($id);
+    if( $errmsg === true ){
+        redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定隱藏' , 'success' );
+    }
+    redirect( '.' , $errmsg , 'error' );
 }
 
 
