@@ -1,0 +1,37 @@
+# Setting Access Content Data
+#
+main_tag:
+    name:   系統基本功能
+    type:   header
+main:
+    name:   基本功能
+    app: main
+    methods:
+        主系統功能: [index]
+        登入: [login]
+        登出: [logout]
+        變更密碼: [passwd]
+        設定帳號: [userinfo]
+
+managers_tag:
+    name:   系統管理員帳號
+    type:   header
+managers:
+    name:   系統管理員
+    app: managers
+    methods:
+        主程式: [index]
+        新增: [add]
+        修改: [edit, m_edit, active, inactive]
+        刪除: [delete, m_delete]
+        賦予權限: [privileges]
+#        超級權限: [super_user, normal_user, m_priv]
+# 不需要將超級權限列為選項，因為只要是超級使用者就能使用
+syslog_tag:
+    name:   系統記錄
+    type:   header
+syslog:
+    name:   系統記錄
+    app: syslog
+    methods:
+        主程式: [index]

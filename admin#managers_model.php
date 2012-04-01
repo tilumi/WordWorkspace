@@ -29,6 +29,20 @@ class Managers{
         
         return array($rows, $totalItems);
     }
+    function findById( $id ){
+        if( is_array($id) ){
+            $id_list=array();
+            foreach( $id as $r ){
+                $id_list[]=Model::quote($r, 'text');
+            }
+            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).") AND deleted='0'";
+            $data = Model::fetchAll( $sql );
+            return $data;
+        }
+        $sql = "SELECT * FROM ".self::$useTable." WHERE id=".Model::quote($id, 'text')." AND deleted='0'";
+        $data = Model::fetchRow( $sql );
+        return $data;
+    }
     function add( $data ){
         if( isset($data['commit']) ){
             unset($data['commit']);
@@ -65,7 +79,7 @@ class Managers{
         }
         //encrypt password
         if( !empty($data['password1']) ){
-            $row = Model::fetchById( $data['id'] );
+            $row = self::findById( $data['id'] );
             $data['algorithm']=$row['algorithm'];
             $algorithm=$row['algorithm'];
             $data['salt']=$row['salt'];
@@ -146,7 +160,7 @@ class Managers{
         foreach( $data as $key=>$actions ){
             if( !preg_match( "/^priv/" , $key ) ){ continue; }
             foreach( $actions as $action=>$setting ){
-                list(  , $plugin , $ctrler )=explode(':', $key);
+                list(  , $app )=explode(':', $key);
                 $access='deny';
                 if( $setting=='allow' ) $access='allow';
                 
@@ -155,11 +169,11 @@ class Managers{
                 $access = Model::quote( $access, 'text' );
                 
                 $actions = array( $action );
-                if( isset($data['represent'][$plugin][$ctrler][$action]) ){
-                    $actions = explode(',', $data['represent'][$plugin][$ctrler][$action]);
+                if( isset($data['represent'][$app][$action]) ){
+                    $actions = explode(',', $data['represent'][$app][$action]);
                 }
                 foreach( $actions as $a ){
-                    $content = Model::quote( $plugin.'.'.$ctrler.'.'.$a , 'text' );
+                    $content = Model::quote( $app.'.'.$a , 'text' );
                     $sql="INSERT INTO privileges (request, content, access) VALUES ( $request , $content , $access )";
                     if( Model::exec($sql) === false ){
                         Model::exec('ROLLBACK');
@@ -179,8 +193,8 @@ class Managers{
         foreach( $rows as $row ){
             $content=$row['content'];
             $access=$row['access'];
-            list($plugin,$ctrler,$action)=explode('.', $content);
-            $priv['priv:'.$plugin.':'.$ctrler][$action]=$access;
+            list($app,$action)=explode('.', $content);
+            $priv['priv:'.$app][$action]=$access;
         }
         return $priv;
     }

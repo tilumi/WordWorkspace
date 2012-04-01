@@ -168,25 +168,25 @@ class AuthComponent{
         while( $row = APP::$mdb->fetchRow($res) ){
             $content=$row['content'];
             $access=$row['access'];
-            list($plugin,$ctrler,$action)=explode(':', $content);
-            $personal[$plugin][$ctrler][$action]=$access;
+            list($app,$action)=explode('.', $content);
+            $personal[$app][$action]=$access;
         }
         
         //檢查群組權限表是否存在，不存在就略過群組權限的處理
-        $sql= "SHOW TABLES LIKE 'dignities_admins'";
+        $sql= "SHOW TABLES LIKE 'groups_managers'";
         $res = APP::$mdb->query($sql);
         $count=APP::$mdb->numRows($res);
         $priv=array();
         if( $count>0 ){
             //群組層級(管理員身分)權限設定
-            $sql="SELECT * FROM dignities_admins WHERE admin_id=".APP::$mdb->quote( $userid , 'text')." ORDER BY sort";
+            $sql="SELECT * FROM groups_managers WHERE manager_id=".APP::$mdb->quote( $userid , 'text')." ORDER BY sort";
             $res=APP::$mdb->query($sql);
             
             $dignities=array();
             $dignities_quote=array();
             while( $row = APP::$mdb->fetchRow($res) ){
-                $dignities[]=$row['dignity_id'];
-                $dignities_quote[]=APP::$mdb->quote( $row['dignity_id'] , 'text');
+                $dignities[]=$row['group_id'];
+                $dignities_quote[]=APP::$mdb->quote( $row['group_id'] , 'text');
             }
             
             if( count($dignities_quote)>0 ){
@@ -198,8 +198,8 @@ class AuthComponent{
                     $request=$row['request'];
                     $content=$row['content'];
                     $access=$row['access'];
-                    list($plugin,$ctrler,$action)=explode(':', $content);
-                    $groups[$request][$plugin][$ctrler][$action]=$access;
+                    list($app,$action)=explode(':', $content);
+                    $groups[$request][$app][$action]=$access;
                 }
                 
                 foreach( $groups as $group ){

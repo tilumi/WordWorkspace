@@ -145,11 +145,13 @@ var batchRoutes = {
                                     }
                                     ?></td>
                                     <td>
-<?php if( ACL::checkAuth( array('action'=>'edit') ) ){ ?>
+<?php if( ACL::checkAuth('edit') ){ ?>
                                         <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="edit" width="16" height="16"></a>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'privileges') ) ){ ?>
+<?php if( ACL::checkAuth('privileges') ){ ?>
+<?php       if( $r['is_super_user']==0 ){ //只有一般人員才能設定權限 ?>
                                         <a href="<?php echo url('privileges/'.$r['id'].'.html'); ?>" title="設定權限"><img src="<?php echo layout_url('admin', '/images/user.gif'); ?>" alt="privileges" width="16" height="16"></a>
+<?php       } ?>
 <?php } ?>
 <?php if( ACL::checkAuth( array('action'=>'dignity') ) ){ ?>
                                         <a href="<?php echo url('dignity/'.$r['id'].'.html'); ?>" title="設定管理員身分"><img src="<?php echo layout_url('admin', '/images/icons/system-users-4.png'); ?>" alt="view" width="16" height="16"></a>

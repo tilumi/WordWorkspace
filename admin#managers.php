@@ -326,7 +326,7 @@ function privileges(){
     }
     
     include( 'vendors'.DS.'Symfony'.DS.'yaml'.DS.'sfYaml.php' );
-    $priv=sfYaml::load( dirname(__FILE__).'/config/privileges.yml' );
+    $priv=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
     
     View::setTitle('設定'.APP::$mainName.'權限: &nbsp; '.$data['username']);
     
@@ -358,7 +358,7 @@ function privileges(){
     APP::$appBuffer = array($form);
 }
 function getPrivilegesForm( $header='' , $userdata=array() , $contents=array() ){
-    $form=Form::create('frmPrivileges', 'post', ME );
+    $form=Form::create('frmPrivileges', 'post', APP::$ME );
     
     $form->addElement('header', '', $header );
     
