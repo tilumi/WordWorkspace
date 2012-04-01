@@ -12,7 +12,6 @@ class AuthComponent{
         'isActiveAllowed' => '1',
         'deletedCol' => 'deleted',
         'deletedAllowed' => '0',
-        'plugin' => 'managers',
         'db_fields' => '*',
     );
     static $AuthData=array();
@@ -35,11 +34,12 @@ class AuthComponent{
         }
         $rows=Model::fetchAll($sql);
         //echo count($rows).'<br>';
-        // Began Verify
+        //開始驗證
+        //如果取出超過一筆，表示資料完整性有問題，驗證失敗
         if( count($rows) != 1 ){
             return false;
         }
-        $userdata=$rows[0];
+        $userdata=pos($rows);
         if( empty($userdata['algorithm']) || empty($userdata['salt']) || empty($userdata['password']) ){
             return false;
         }
@@ -52,16 +52,16 @@ class AuthComponent{
                 return false;
             }
             $encrypt = $algorithm( $salt.$password.$salt );
-            if( $encrypt != $userdata[ self::$params['passwordCol'] ] ){
+            if( $encrypt !== $userdata[ self::$params['passwordCol'] ] ){
                 return false;
             }
         }else{
-            if( $password != $userdata[ self::$params['passwordCol'] ] ){
+            if( $password !== $userdata[ self::$params['passwordCol'] ] ){
                 return false;
             }
         }
         
-        // When Verifying Passed, go throuth here.
+        // When Verify Passed, go throuth here.
         self::$AuthData = $userdata;
         self::$encryptPassword = $encrypt;
         
@@ -87,7 +87,7 @@ class AuthComponent{
         //$form->addRule( 'userid', '管理者名稱長度區間', 'rangelength', array( 2,32 ), 'client');
         //$form->addRule( 'userid', '管理者名稱只允許英文和數字', 'alphanumeric', '', 'client');
         //$form->addRule('userid', '管理者名稱必須是中文', 'regex', '/^[\x{4e00}-\x{9fff}]+$/u', '');
-        $form->addRule('userid', '管理者名稱必須是中文或英文', 'regex', '/^[a-zA-Z\x{4e00}-\x{9fff}]+$/u', '');
+        $form->addRule( 'userid', '管理者名稱只允許包含中文、英文、數字或底線"_"', 'regex', '/^[a-zA-Z0-9\_\x{4e00}-\x{9fff}]+$/u', '');
         $form->addRule( 'password', '密碼必填', 'required', '', 'client');
         //$form->addRule( 'password', '密碼長度區間', 'rangelength', array(6,64), 'client');
         
@@ -120,7 +120,7 @@ class AuthComponent{
         return $form;
     }
     function changePassword( $data ){
-        //checking password
+        //確認密碼輸入後變更密碼
         $sql = "SELECT * FROM managers WHERE id=".Model::quote($data['id'], 'text');
         $row = Model::fetchRow( $sql );
         $algorithm=$row['algorithm'];
@@ -129,19 +129,40 @@ class AuthComponent{
         if( $check['password'] != $row['password'] ){
             return '原密碼輸入錯誤';
         }
+        if( $data['password1'] !== $data['password2'] ){
+            return '兩次密碼輸入不同';
+        }
         
+        
+        if( self::passwd( $data['id'], $data['password1'] ) ){
+            return true;
+        }
+        return '密碼變更失敗，請再試一次';
+    }
+    function passwd( $id, $password ){
+        //直接變更密碼
         //encrypt password
-        $algorithm='sha1';
-        $salt=$algorithm(uniqid());
-        $data['algorithm']=$algorithm;
-        $data['salt']=$salt;
-        $data['password']=$algorithm( $salt.$data['password1'].$salt );
-        unset($data['password1'],$data['password2'],$data['commit']);
+        $data=array();
+        $data['id']=$id;
+        $encrypt=self::encrypt( $password );
+        $data['algorithm']=$encrypt['algorithm'];
+        $data['salt']=$encrypt['salt'];
+        $data['password']=$encrypt['encrypt'];
         
         if( Model::update( $data , 'id' , 'managers' ) ){
             return true;
         }
-        return '密碼變更失敗，請再試一次';
+        return false;
+    }
+    function encrypt( $password ){
+        //產生加密資訊
+        $algorithm='sha1';
+        $salt=$algorithm(uniqid());
+        $data['algorithm']=$algorithm;
+        $data['salt']=$salt;
+        $data['encrypt']=$algorithm( $salt.$password.$salt );
+        
+        return $data;
     }
     function getAuthData(){
         $authdata=self::$AuthData;

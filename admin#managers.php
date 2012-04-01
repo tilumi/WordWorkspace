@@ -165,7 +165,7 @@ function add(){
     $form->addRule( 'userid', '管理者名稱長度區間', 'rangelength', array( 2,32 ), 'client');
     //$form->addRule( 'userid', '管理者名稱只允許英文和數字', 'alphanumeric', '', 'client');
     //$form->addRule('userid', '管理者名稱必須是中文', 'regex', '/^[\x{4e00}-\x{9fff}]+$/u', '');
-    $form->addRule('userid', '管理者名稱必須是中文或英文', 'regex', '/^[a-zA-Z\x{4e00}-\x{9fff}]+$/u', '');
+    $form->addRule('userid', '管理者名稱只允許包含中文、英文、數字或底線"_"', 'regex', '/^[a-zA-Z0-9\_\x{4e00}-\x{9fff}]+$/u', '');
     $form->addRule('username', '人員名稱 必填', 'required', null, 'client');
     $form->addRule('password1','您必須輸入密碼', 'required', '', 'client');
     $form->addRule('password1','密碼必須為6位以上字母或數字', 'rangelength', array(6,64), 'client');

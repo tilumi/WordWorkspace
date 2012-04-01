@@ -47,13 +47,13 @@ class Managers{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-        //encrypt password
-        $algorithm='sha1';
-        $salt=$algorithm(uniqid());
         $data['id']=uniqid('Manager');
-        $data['algorithm']=$algorithm;
-        $data['salt']=$salt;
-        $data['password']=$algorithm( $salt.$data['password1'].$salt );
+        //將密碼進行加密，並儲存回傳的加密參數
+        APP::load('vendor', 'auth.component');
+        $encrypt=AuthComponent::encrypt( $data['password1'] );
+        $data['algorithm']=$encrypt['algorithm'];
+        $data['salt']=$encrypt['salt'];
+        $data['password']=$encrypt['encrypt'];
         unset($data['password1'],$data['password2']);
        	$data['created']=date('Y-m-d H:i:s');
         
@@ -78,12 +78,13 @@ class Managers{
             if( self::is_last_admin($id) ){ return '系統中不能沒有管理者'; }
         }
         //encrypt password
-        if( !empty($data['password1']) ){
-            $row = self::findById( $data['id'] );
-            $data['algorithm']=$row['algorithm'];
-            $algorithm=$row['algorithm'];
-            $data['salt']=$row['salt'];
-            $data['password']=$algorithm( $salt.$data['password1'].$salt );
+        if( ! empty($data['password1']) ){
+            if( $data['password1'] !== $data['password2'] ){
+                return "兩次密碼輸入不同，沒有任何資料被修改";
+            }
+            //直接更新及儲存密碼
+            APP::load('vendor', 'auth.component');
+            AuthComponent::passwd( $id, $data['password1'] );
         }
        	$data['updated']=date('Y-m-d H:i:s');
         unset($data['password1'],$data['password2']);

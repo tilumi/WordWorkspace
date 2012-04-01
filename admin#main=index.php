@@ -50,11 +50,6 @@ $("a[rel='settings']").colorbox({
                 	<span>相簿管理</span>
                 </a>
 
-            	<a href="<?php echo url('/musics/'); ?>" class="dashboard-module">
-                	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/folder-music-icon-64.png'); ?>" alt="edit" width="64" height="64">
-                	<span>歌曲管理</span>
-                </a>
-
             	<a href="<?php echo url('/downloads/'); ?>" class="dashboard-module">
                 	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/Globe-Download-icon.png'); ?>" alt="edit" width="64" height="64">
                 	<span>檔案下載</span>
