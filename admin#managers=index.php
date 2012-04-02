@@ -62,15 +62,15 @@ var batchRoutes = {
 </script>
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
                                 <option value="" selected="selected">--- 選擇動作 ---</option>
-<?php if( ACL::checkAuth( array('action'=>'active') ) ){ ?>
+<?php if( ACL::checkAuth('active') ){ ?>
                                 <option value="active">啟用帳號</option>
                                 <option value="inactive">停用帳號</option>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'super_user') ) ){ ?>
+<?php if( ACL::checkAuth('super_user') ){ ?>
                                 <option value="normal_user">設定為「管理員」層級</option>
                                 <option value="super_user">設定為「開發者」層級</option>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'delete') ) ){ ?>
+<?php if( ACL::checkAuth('delete') ){ ?>
                                 <option value="delete">刪除</option>
 <?php } ?>
                             </select>
@@ -153,13 +153,13 @@ var batchRoutes = {
                                         <a href="<?php echo url('privileges/'.$r['id'].'.html'); ?>" title="設定權限"><img src="<?php echo layout_url('admin', '/images/user.gif'); ?>" alt="privileges" width="16" height="16"></a>
 <?php       } ?>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'dignity') ) ){ ?>
+<?php if( ACL::checkAuth('dignity') ){ ?>
                                         <a href="<?php echo url('dignity/'.$r['id'].'.html'); ?>" title="設定管理員身分"><img src="<?php echo layout_url('admin', '/images/icons/system-users-4.png'); ?>" alt="view" width="16" height="16"></a>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'view') ) ){ ?>
+<?php if( ACL::checkAuth('view') ){ ?>
                                         <a href="<?php echo url('view/'.$r['id'].'.html'); ?>" title="檢視資訊及權限"><img src="<?php echo layout_url('admin', '/images/icons/application-view-list.png'); ?>" alt="view" width="16" height="16"></a>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'delete') ) ){ ?>
+<?php if( ACL::checkAuth('delete') ){ ?>
                                         <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="delete" width="16" height="16"></a>
 <?php } ?>
                                     </td>
@@ -167,7 +167,7 @@ var batchRoutes = {
 <?php } ?>
 <?php if( count($rows)<1 ){ ?>
                                 <tr class="even">
-<?php if( ACL::checkAuth( array('action'=>'super_user') ) ){ ?>
+<?php if( ACL::checkAuth('super_user') ){ ?>
                                     <td colspan="8" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>
 <?php }else{ ?>
                                     <td colspan="7" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>

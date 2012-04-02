@@ -35,3 +35,15 @@ syslog:
     app: syslog
     methods:
         主程式: [index]
+
+news_tag:
+    name:   新聞中心
+    type:   header
+news:
+    name:   新聞中心
+    app: news
+    methods:
+        主程式: [index]
+        新增: [add]
+        修改: [edit, m_edit, active, inactive]
+        刪除: [delete, m_delete]

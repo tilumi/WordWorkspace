@@ -76,7 +76,7 @@ foreach($mainmenu as $item){
     if( ! method_exists('ACL','checkAuth') ){
         continue;
     }
-    if( ! ACL::checkAuth($item['link']) ){
+    if( ! ACL::checkAuth($item['id']) ){
         continue;
     }
     //開始產生MENU
@@ -169,7 +169,7 @@ img, div, input  { behavior: url(<?php echo layout_url('admin', '/js/ie6/iepngfi
 <?php if( method_exists('ACL','checkLogin') && ACL::checkLogin() ){ ?>
                         <a href="<?php echo url( '/logout.html' );?>" id="logout">登出</a>
                         <a href="<?php echo url( '/passwd.html' );?>">變更密碼</a>
-<?php       if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers' ) ){ ?>
+<?php       if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers.index' ) ){ ?>
                         <a href="<?php echo url( '/managers/' );?>">系統管理員</a>
 <?php       } } ?>
                         <a href="<?php echo url( '_/' );?>" target="_blank">網站前台</a>
