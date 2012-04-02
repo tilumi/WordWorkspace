@@ -86,19 +86,20 @@ class APP{
         }
         return $item_id;
     }
-    function syslog($message, $prior='Notice', $type='MESSAGE'){
+    function syslog($message, $prior='Notice', $type='MESSAGE', $custom_userid=''){
         $mdb=self::$mdb;
         
         $userid='<--SYSTEM-->';
         if( isset($_SESSION['admin']['userid']) )
             $userid=$_SESSION['admin']['userid'];
+        if( ! empty($custom_userid) )
+            $userid=$custom_userid;
         
         APP::load('vendor', 'auth.component');
         $ip=AuthComponent::getUserClientIP();
         
         $fields=array();
         $fields['id']=$mdb->quote( uniqid('LOG' ), 'text' );
-        $fields['plugin']=$mdb->quote( 'syslog' , 'text' );
         if( !empty($type) ) $fields['type']=$mdb->quote( strtoupper($type) , 'text' );
         if( !empty($prior) ) $fields['prior']=$mdb->quote( $prior , 'text' );
         if( !empty($userid) ) $fields['userid']=$mdb->quote( $userid , 'text' );

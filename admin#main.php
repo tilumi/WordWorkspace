@@ -93,7 +93,14 @@ function login(){
             APP::syslog($logmsg, APP::$prior['info'], 'login');
         	redirect( $goto , '親愛的 '.$SESSION['username'].', 歡迎回來！' , 'success' );
         }
-        APP::syslog( '某人使用帳號 '.$userid.' 嘗試登入失敗', APP::$prior['warning'], 'login');
+        $sql="SELECT * FROM managers WHERE userid=".Model::quote($userid, 'text');
+        $rows=Model::fetchAll($sql);
+        $custom_userid='';
+        if( count($rows)>0 ){
+            $r=pos($rows);
+            $custom_userid=$r['userid'];
+        }
+        APP::syslog( '某人使用帳號 '.$userid.' 嘗試登入失敗', APP::$prior['warning'], 'login', $custom_userid);
         redirect( '_/'.APP::$routing['ME'] , '你的帳號密碼有誤，請再試一次' , 'error' );
     }
     
