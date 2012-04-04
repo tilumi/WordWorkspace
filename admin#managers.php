@@ -461,7 +461,7 @@ function delete(){
     APP::$appBuffer = array($form);
 }
 function m_edit(){
-    $form=Form::create('frmList', 'post', ME );
+    $form=Form::create('frmList', 'post', APP::$ME );
     $submits = $form->getSubmitValues();
     
     $type=$submits['mode'];
@@ -480,10 +480,10 @@ function m_edit(){
     }
     switch( $type ){
         case 'active':
-            $errmsg = Model::call( 'setActive', $items );
+            $errmsg = Managers::setActive($items);
             break;
         case 'inactive':
-            $errmsg = Model::call( 'setInactive', $items );
+            $errmsg = Managers::setInactive($items);
             break;
     }
     if( $errmsg === true ){
@@ -523,14 +523,14 @@ function m_delete(){
     View::render();
 }
 function m_priv(){
-    $form=Form::create('frmList', 'post', ME );
+    $form=Form::create('frmList', 'post', APP::$ME );
     $submits = $form->getSubmitValues();
     
     $type=$submits['mode'];
     
     $allowed_type=array(
-        'normal_user'=>'已設定為一般管理員',
-        'super_user'=>'已設定為全域管理員',
+        'normaluser'=>'已設定為一般管理員',
+        'superuser'=>'已設定為全域管理員',
     );
     if( ! array_key_exists($type, $allowed_type) ){
         redirect( '.' , '不允許這樣的操作' , 'attention' );
@@ -541,11 +541,11 @@ function m_priv(){
         redirect('.', '尚未選擇執行目標，您必須先選擇執行的項目', 'error');
     }
     switch( $type ){
-        case 'normal_user':
-            $errmsg = Model::call( 'setNormalUser', $items );
+        case 'normaluser':
+            $errmsg = Managers::setNormalUser($items);
             break;
-        case 'super_user':
-            $errmsg = Model::call( 'setSuperUser', $items );
+        case 'superuser':
+            $errmsg = Managers::setSuperUser($items);
             break;
     }
     if( $errmsg === true ){
@@ -558,15 +558,17 @@ function m_priv(){
     redirect('.', $errmsg , 'error');
 }
 function active(){
+    $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = Model::fetchById( $id );
+    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
+    $data = Model::fetchRow( $sql );
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    if( $errmsg = Model::call( 'setActive', $id ) ){
+    if( $errmsg = Managers::setActive($id) ){
         $userid=$_SESSION['admin']['userid'];
         APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為啟用', APP::$prior['info'], 'managers' );
         redirect( '.' , APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為啟用' , 'success' );
@@ -586,7 +588,7 @@ function inactive(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $errmsg = Model::call( 'setInactive', $id );
+    $errmsg = Managers::setInactive($id);
     if( $errmsg === true ){
         $userid=$_SESSION['admin']['userid'];
         APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為停用', APP::$prior['info'], 'managers' );
@@ -596,7 +598,7 @@ function inactive(){
     APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶設定為停用失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
-function normal_user(){
+function normaluser(){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
@@ -607,7 +609,7 @@ function normal_user(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $errmsg = Model::call( 'setNormalUser', $id );
+    $errmsg = Managers::setNormalUser($id);
     if( $errmsg === true ){
         $userid=$_SESSION['admin']['userid'];
         APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為一般管理員', APP::$prior['info'], 'managers' );
@@ -617,7 +619,7 @@ function normal_user(){
     APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶設定為一般管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
-function super_user(){
+function superuser(){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
@@ -628,7 +630,7 @@ function super_user(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
 
-    if( $errmsg = Model::call( 'setSuperUser', $id ) ){
+    if( $errmsg = Managers::setSuperUser($id) ){
         $userid=$_SESSION['admin']['userid'];
         APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為全域管理員', APP::$prior['info'], 'managers' );
         redirect( '.' , APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為全域管理員' , 'success' );

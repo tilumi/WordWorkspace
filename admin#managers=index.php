@@ -45,7 +45,7 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                 	<h2><span><?php echo Blocks::searchInfo($searchInfo); //顯示列表的檢索範圍 ?></span></h2>
                     
                     <div class="module-table-body">
-                    	<form name="frmList" action="<?php echo ME; ?>" method="post">
+                    	<form name="frmList" action="<?php echo APP::$ME; ?>" method="post">
                     	<input name="mode" type="hidden" value="">
                         <div class="table-apply">
                             <?php echo Blocks::itemsChecker(); //顯示列表選擇器(全選、清除...) ?>
@@ -53,11 +53,11 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                             <span>選取操作:</span> 
 <script>
 var batchRoutes = {
-    'active':'<?php echo url(array('action'=>'m_edit'));?>',
-    'inactive':'<?php echo url(array('action'=>'m_edit'));?>',
-    'delete':'<?php echo url(array('action'=>'m_delete'));?>',
-    'normal_user':'<?php echo url(array('action'=>'m_priv'));?>',
-    'super_user':'<?php echo url(array('action'=>'m_priv'));?>',
+    'active':'<?php echo url('m_edit');?>',
+    'inactive':'<?php echo url('m_edit');?>',
+    'delete':'<?php echo url('m_delete');?>',
+    'normaluser':'<?php echo url('m_priv');?>',
+    'superuser':'<?php echo url('m_priv');?>',
 };
 </script>
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
@@ -67,8 +67,8 @@ var batchRoutes = {
                                 <option value="inactive">停用帳號</option>
 <?php } ?>
 <?php if( ACL::checkAuth('super_user') ){ ?>
-                                <option value="normal_user">設定為「管理員」層級</option>
-                                <option value="super_user">設定為「開發者」層級</option>
+                                <option value="normaluser">設定為「管理員」層級</option>
+                                <option value="superuser">設定為「全域管理員」層級</option>
 <?php } ?>
 <?php if( ACL::checkAuth('delete') ){ ?>
                                 <option value="delete">刪除</option>
@@ -131,9 +131,9 @@ var batchRoutes = {
 <?php } ?>
 <?php if( ACL::checkAuth('super_user') ){ ?>
                                     <td><?php if( $r['is_super_user']=='1' ){ ?>
-                                        <a href="<?php echo url('normal_user/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-on-white.gif'); ?>" alt="開發者" width="16" height="16"></a>
+                                        <a href="<?php echo url('normaluser/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-on-white.gif'); ?>" alt="開發者" width="16" height="16"></a>
                                     <?php }else{ ?>
-                                        <a href="<?php echo url('super_user/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/cross-on-white.gif'); ?>" alt="管理員" width="16" height="16"></a>
+                                        <a href="<?php echo url('superuser/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/cross-on-white.gif'); ?>" alt="管理員" width="16" height="16"></a>
                                     <?php } ?></td>
 <?php } ?>
                                     <td><?php
