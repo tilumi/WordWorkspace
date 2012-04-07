@@ -4,6 +4,12 @@ include('layout_admin/helper.blocks.php');
 list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
 ?>
             <div class="grid_12">
+<p>
+<?php echo View::anchor('..', 'Home'); ?>
+ »
+<?php echo APP::$mainTitle; ?>
+</p>
+
                 <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
             </div>
 

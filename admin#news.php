@@ -108,7 +108,8 @@ function index(){
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 function add(){
-    View::setTitle('新增'.APP::$mainName);
+    APP::$pageTitle='新增'.APP::$mainName;
+    View::setTitle(APP::$pageTitle);
     
     $form=Form::create('frmInsert', 'post', APP::$ME );
     
@@ -175,7 +176,8 @@ function edit(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    View::setTitle('編輯 '.$data['name']);
+    APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['name'];
+    View::setTitle(APP::$pageTitle);
     
     $form=Form::create('frmUpdate', 'post', APP::$ME );
     
@@ -241,7 +243,8 @@ function delete(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    View::setTitle('刪除 '.$data['name']);
+    APP::$pageTitle='刪除'.APP::$mainName.'確認：'.$data['name'];
+    View::setTitle(APP::$pageTitle);
     
     $form=Form::create('frmDelete', 'post', APP::$ME );
     
@@ -287,7 +290,8 @@ function archives( $id=null ){
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    View::setTitle($data['name']);
+    APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['name'];
+    View::setTitle(APP::$pageTitle);
     
     APP::$appBuffer = array( $data );
 }
@@ -324,7 +328,9 @@ function m_edit(){
 }
 function m_delete(){
     $form=Form::create('frmMultiple', 'post', array('action'=>'m_delete') );
-    View::setTitle('刪除以下'.APP::$mainName);
+    
+    APP::$pageTitle='批次刪除'.APP::$mainName.'確認';
+    View::setTitle(APP::$pageTitle);
     
     $submits = $form->getSubmitValues();
     if( isset($submits['commit']) ){

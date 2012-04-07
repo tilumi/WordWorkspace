@@ -12,8 +12,10 @@ $mainName = APP::$mainName;
  »
 <?php echo View::anchor('.', $mainTitle); ?>
  »
-多筆<?php echo APP::$mainName;?>刪除確認
+<?php echo APP::$pageTitle; ?>
 </p>
+
+                <?php echo Blocks::mainTitle( APP::$pageTitle ); ?>
 
 <?php echo redirect_message(); ?>
 
