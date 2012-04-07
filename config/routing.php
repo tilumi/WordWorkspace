@@ -1,6 +1,8 @@
 <?php
 class RoutingConfigs{
     //路徑的前綴名稱
+    static $maps=array(); //正查表 app->path，系統自動產生，請勿移除
+    static $r_maps=array(); //反查表 path->app，系統自動產生，請勿移除
     static $prefixs=array(
             'administrator'=>array(
                 'name'=>'admin',

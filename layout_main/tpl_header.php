@@ -9,7 +9,7 @@
 
 			<div id="header" class="container">
 				<div id="logo">
-					<h1><a href="<?php echo url('/');?>">The Bible 線上聖經</a></h1>
+					<h1><a href="<?php echo url('/');?>">Jbride& 線上聖經</a></h1>
 				</div>
 			</div>
 <style>

@@ -2,7 +2,7 @@
 			<div id="topnav" style="font-family: Arial;">
                 <div class="float-left">
 <?php if( isset( $homeIndex ) && $homeIndex ){ ?>
-                    <em class="home">The Bible 線上聖經</em>
+                    <em class="home">線上聖經 Jbride&</em>
 <?php } ?>
                 </div>
                 <div class="float-right">

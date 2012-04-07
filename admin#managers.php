@@ -203,8 +203,7 @@ function edit(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -277,8 +276,7 @@ function dignity(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -316,8 +314,7 @@ function privileges(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -413,8 +410,7 @@ function delete(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -562,8 +558,7 @@ function active(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -582,8 +577,7 @@ function inactive(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -603,8 +597,7 @@ function normaluser(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -612,11 +605,11 @@ function normaluser(){
     $errmsg = Managers::setNormalUser($id);
     if( $errmsg === true ){
         $userid=$_SESSION['admin']['userid'];
-        APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為一般管理員', APP::$prior['info'], 'managers' );
+        APP::syslog($userid.' 將 '.$data['userid'].' ('.$data['username'].') 設定為一般管理員', APP::$prior['info'], 'managers' );
         redirect( '.' , APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為一般管理員' , 'success' );
     }
     $userid=$_SESSION['admin']['userid'];
-    APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶設定為一般管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+    APP::syslog($userid.' 將 '.$data['userid'].' ('.$data['username'].') 設定為一般管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
 function superuser(){
@@ -624,19 +617,18 @@ function superuser(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $sql = "SELECT * FROM managers WHERE id=".Model::quote($id, 'text');
-    $data = Model::fetchRow( $sql );
+    $data = Managers::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
 
     if( $errmsg = Managers::setSuperUser($id) ){
         $userid=$_SESSION['admin']['userid'];
-        APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為全域管理員', APP::$prior['info'], 'managers' );
+        APP::syslog($userid.' 將 '.$data['userid'].' ('.$data['username'].') 設定為全域管理員', APP::$prior['info'], 'managers' );
         redirect( '.' , APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶已設定為全域管理員' , 'success' );
     }
     $userid=$_SESSION['admin']['userid'];
-    APP::syslog($userid.' '.APP::$mainName.' '.$data['userid'].' ('.$data['username'].') 帳戶設定為全域管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+    APP::syslog($userid.' 將 '.$data['userid'].' ('.$data['username'].') 設定為全域管理員失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
 function _is_allowed_userid($element_value){

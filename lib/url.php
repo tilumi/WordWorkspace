@@ -134,7 +134,7 @@ function url( $href ){
                 $base .= APP::$prefixFull.'/';
             }
             if( APP::$app != 'main' ){
-                $base .= APP::$app.'/';
+                $base .= RoutingConfigs::$maps[ APP::$app ].'/';
             }
             //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
             if( ! empty($base) && ! empty($href) ){
@@ -155,7 +155,7 @@ function url( $href ){
                 $base .= APP::$prefixFull.'/';
             }
             if( APP::$app != 'main' ){
-                $base .= APP::$app.'/';
+                $base .= RoutingConfigs::$maps[ APP::$app ].'/';
             }
             $href = $base.$href;
         }

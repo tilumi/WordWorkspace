@@ -60,13 +60,19 @@ class Routing{
             return array('error'=>'404');
         }
         
+        //建立路徑對應表
+        $routingTable = RoutingConfigs::$apps[ $prefix ];
+        foreach( $routingTable as $path=>$config ){
+            RoutingConfigs::$maps[ $config['name'] ]=$path;
+            RoutingConfigs::$r_maps[ $path ]=$config['name'];
+        }
+        
         $p_app = $p;
         if( $prefix!=='main' ){
             $p_app = substr($p, strlen($prefixFull)+1 );
         }
         
         $app='main';
-        $routingTable = RoutingConfigs::$apps[ $prefix ];
         $default = array('name'=>'main');
         if( isset($routingTable['__default__']) ){
             $default=$routingTable['__default__'];
