@@ -129,7 +129,8 @@ function index(){
 }
 
 function add(){
-    View::setHeader( 'title', '新增'.APP::$mainTitle );
+    APP::$pageTitle='新增'.APP::$mainName;
+    View::setHeader( 'title', APP::$pageTitle );
     
     $form=Form::create('frmInsert', 'post', APP::$ME );
     
@@ -208,7 +209,8 @@ function edit(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    View::setTitle('編輯'.APP::$mainName.': &nbsp; '.$data['username']);
+    APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['username'];
+    View::setHeader( 'title', APP::$pageTitle );
 
     $form=Form::create('frmUpdate', 'post', APP::$ME );
     
@@ -281,8 +283,10 @@ function dignity(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $form=Form::get( 'dignity', '設定'.APP::$mainName.'身分' );
-    View::setTitle('設定'.APP::$mainName.'身分：'.$data['username']);
+    APP::$pageTitle='設定'.APP::$mainName.'群組：'.$data['username'];
+    View::setHeader( 'title', APP::$pageTitle );
+
+    $form=Form::get( 'dignity', APP::$pageTitle );
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -322,10 +326,11 @@ function privileges(){
         redirect( '.' , '不能變更這個使用者的權限' , 'attention' );
     }
     
-    include( 'vendors'.DS.'Symfony'.DS.'yaml'.DS.'sfYaml.php' );
+    APP::load( 'vendor', 'Symfony'.DS.'yaml'.DS.'sfYaml' );
     $priv=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
     
-    View::setTitle('設定'.APP::$mainName.'權限: &nbsp; '.$data['username']);
+    APP::$pageTitle='設定'.APP::$mainName.'權限：'.$data['username'];
+    View::setHeader( 'title', APP::$pageTitle );
     
     $form=getPrivilegesForm( '設定'.APP::$mainName.'權限: &nbsp; '.$data['username'].' ('.$data['userid'].')', $data, $priv );
     
@@ -415,7 +420,8 @@ function delete(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    View::setTitle('刪除'.APP::$mainName.': &nbsp; '.$data['username']);
+    APP::$pageTitle='刪除'.APP::$mainName.'：'.$data['username'];
+    View::setHeader( 'title', APP::$pageTitle );
     
     $form=Form::create('frmDelete', 'post', APP::$ME );
     

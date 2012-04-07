@@ -5,8 +5,6 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 ?>
 
             <div class="grid_12">
-                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
-                
 <?php if( ACL::checkAuth('groups.index') ){ ?>
                 <div class="float-right">
                     <a href="<?php echo url( 'groups/' ); ?>" class="button">
@@ -14,6 +12,14 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                     </a>
                 </div>
 <?php } ?>
+<p>
+<?php echo View::anchor('..', 'Home'); ?>
+ »
+<?php echo APP::$mainTitle; ?>
+</p>
+
+                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
+                
             </div>
 
             <div class="grid_12">

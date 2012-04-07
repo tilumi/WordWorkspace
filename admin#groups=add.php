@@ -10,10 +10,15 @@ $mainName = APP::$mainName;
 <p>
 <?php echo View::anchor('..', 'Home'); ?>
  »
+<?php echo View::anchor('/managers/', '系統管理員 Managers'); ?>
+ »
 <?php echo View::anchor('.', $mainTitle); ?>
  »
-新增<?php echo $mainName; ?>
+<?php echo APP::$pageTitle; ?>
 </p>
+
+                <?php echo Blocks::mainTitle(APP::$pageTitle); ?>
+
 
 <?php echo redirect_message(); ?>
 

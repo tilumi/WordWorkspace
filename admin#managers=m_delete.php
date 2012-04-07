@@ -5,8 +5,10 @@
  »
 <?php echo View::anchor('.', $mainTitle); ?>
  »
-多筆刪除確認
+<?php echo APP::$pageTitle; ?>
 </p>
+
+                <?php echo Blocks::mainTitle(APP::$pageTitle); ?>
 
 <?php echo redirect_message(); ?>
 

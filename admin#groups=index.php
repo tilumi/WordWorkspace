@@ -6,15 +6,25 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 
 
             <div class="grid_12">
-                <?php echo Blocks::mainTitle(APP::$mainTitle); ?>
-                
-                <div class="float-right">
 <?php if( ACL::checkAuth('managers.index') ){ ?>
+                <div class="float-right">
                     <a href="<?php echo View::url('/managers/'); ?>" class="button">
                     	<span>返回 系統管理員 <img src="<?php echo layout_url('admin', '/images/user.gif'); ?>" alt="New article" width="12" height="12"></span>
                     </a>
-<?php } ?>
                 </div>
+<?php } ?>
+
+<p>
+<?php echo View::anchor('..', 'Home'); ?>
+ »
+<?php echo View::anchor('/managers/', '系統管理員 Managers'); ?>
+ »
+<?php echo APP::$mainTitle; ?>
+</p>
+
+
+                <?php echo Blocks::mainTitle(APP::$mainTitle); ?>
+                
             </div>
 
             <div class="grid_12">
