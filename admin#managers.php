@@ -12,6 +12,7 @@ $registedAction = array(
     'index',
     'add',
     'edit',
+    'view',
     'delete',
     'privileges',
     'm_edit',
@@ -313,6 +314,18 @@ function dignity(){
     
     APP::$appBuffer = array($form);
 }
+function view(){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $data = Managers::findById($id);
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $priv=Managers::loadFullACLs($id);
+    pr($priv);die;
+}
 function privileges(){
     $id = pos(APP::$params);
     if( empty($id) ){
@@ -383,7 +396,7 @@ function getPrivilegesForm( $header='' , $userdata=array() , $contents=array() )
         $represent=array();
         $i=0;
         foreach( $methods as $priv_name=>$actions ){
-            if( $plugin == 'main' ){
+            if( $app == 'main' ){
                 //主系統為基本權限，必須提供，因此不需列為選項
                 $checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('disabled', 'checked'), array('allow', 'allow'));
                 $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );

@@ -199,6 +199,51 @@ class Managers{
         }
         return $priv;
     }
+    function loadFullACLs( $userid ){
+        //取出實際的權限資料
+        $priv_actived=self::loadPrivileges($userid);
+        
+        //取出帳戶資料
+        $data=self::findById($userid);
+        
+        //判斷是否是全域管理者
+        $super_user=false;
+        if( $data['is_super_user']==='1' ) $super_user=true;
+        
+        //取出權限表
+        APP::load( 'vendor', 'Symfony'.DS.'yaml'.DS.'sfYaml' );
+        $priv_acls=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
+        
+        //計算完整的權限狀態
+        $acls=array();
+        foreach($priv_acls as $key=>$priv){
+            $name=$priv['name'];
+            if( isset($priv['type']) && !empty($priv['type']) ){
+                $acls[$key]=$priv;
+                continue;
+            }
+            
+            $app='';
+            if( isset($priv['app']) && !empty($priv['app']) ){
+                $app=$priv['app'];
+            }
+            
+            $acls[$key]=$priv;
+            $methods = $acls[$key]['methods'];
+            foreach( $methods as $priv_name=>$actions ){
+                $action = pos($actions);
+                if( $super_user ){
+                    $acls[$key]['methods'][$priv_name]='allow';
+                    continue;
+                }
+                $acls[$key]['methods'][$priv_name]='deny';
+                if( isset($priv_actived['priv:'.$app][$action]) && $priv_actived['priv:'.$app][$action]==='allow' ){
+                    $acls[$key]['methods'][$priv_name]='allow';
+                }
+            }
+        }
+        return $acls;
+    }
     function setActive( $id ){
         //是否越權操作
         if( self::is_above_permit_level($id) ){ return '不能設定這個使用者'; }

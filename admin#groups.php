@@ -299,7 +299,7 @@ function getPrivilegesForm( $header='' , $userdata=array() , $contents=array() )
         $represent=array();
         $i=0;
         foreach( $methods as $priv_name=>$actions ){
-            if( $plugin == 'main' ){
+            if( $app == 'main' ){
                 //主系統為基本權限，必須提供，因此不需列為選項
                 $checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('disabled', 'checked'), array('allow', 'allow'));
                 $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
