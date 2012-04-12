@@ -323,8 +323,60 @@ function view(){
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $priv=Managers::loadFullACLs($id);
-    pr($priv);die;
+    APP::$pageTitle='檢視'.APP::$mainName.'資訊：'.$data['username'];
+    $privs=Managers::loadFullACLs($id);
+    
+    $form=Form::create('frmPrivs', 'post', APP::$ME );
+    getACLsForm($form, '檢視'.APP::$mainName.'權限', $privs);
+    
+    $privs_html=Form::getHtml($form, 'rollcalls');
+    
+    APP::$appBuffer = array($privs_html);
+}
+function getACLsForm( $form , $header='' , $privs ){
+    $form->addElement('header', '', $header );
+    
+    $privsType=array(
+        'allow'=>'允許',
+        'deny'=>'拒絕',
+    );
+    $privsClassName=array(
+        'allow'=>'submit-green',
+        'deny'=>'submit-red',
+    );
+    $style='width:80px;';
+    
+    $form->addElement('html', '圖例：');
+    $form->addElement('button', '', '允許', array('class'=>'submit-green', 'style'=>$style));
+    $form->addElement('button', '', '拒絕', array('class'=>'submit-red', 'style'=>$style));
+    $form->addElement('html', '<div style="height:20px;"></div>');
+    
+    //pr($privs);die;
+    foreach( $privs as $priv ){
+        if( $priv['type']==='header' ){
+            $form->addElement('html', '<h1 style="font-size:18px;font-weight:bold;margin:10px 0 0 0;">'.$priv['name'].'</h1>'."\n");
+            continue;
+        }
+        
+        $form->addElement('html', '<div style="float:left;height:20px;line-height:20px;font-weight:bold;margin:10px 0 0 0;">'.$priv['name'].'： &nbsp;</div>'."\n");
+        foreach( $priv['methods'] as $name=>$value ){
+            $elements=array();
+            if( $data['type']!='normal' ){
+                $elements[] = &HTML_QuickForm::createElement('button', 'button', $name, array(
+                        'class'=>$privsClassName[ $value ].' ',
+                        'style'=>'margin-top:8px;',
+                    )
+                );
+            }else{
+                $elements[] = &HTML_QuickForm::createElement('button', 'button', $data['member_name'], array('class'=>$attendClassName[ $data['status'] ].' '.$type, 'id'=>'btn-'.$data['id'], 'onclick'=>$js_onclick, 'style'=>$style));
+            }
+            $form->addGroup($elements, '', '', '');
+        }
+        $form->addElement('html', '<div style="height:20px;">&nbsp;</div>');
+        
+    }
+    
+    return $form;
 }
 function privileges(){
     $id = pos(APP::$params);
