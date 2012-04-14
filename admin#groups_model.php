@@ -158,7 +158,7 @@ class Groups{
         return Model::exec($sql);
     }
     function getList(){
-        $sql ="SELECT * FROM ".Model::$useTable." WHERE plugin='".APP::$plugin."'";
+        $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
         $sql.=" AND deleted='0' AND is_active='1' ORDER BY sort";
         $rows=Model::fetchAll($sql);
         $list=array();
@@ -168,7 +168,7 @@ class Groups{
         return $list;
     }
     function getInfo(){
-        $sql ="SELECT * FROM ".self::$useTable." WHERE plugin='".APP::$plugin."'";
+        $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
         $sql.=" AND deleted='0' AND is_active='1' ORDER BY sort";
         $rows=Model::fetchAll($sql);
         $list=array();
@@ -177,16 +177,16 @@ class Groups{
         }
         return $list;
     }
-    function getByAdmin(){
-        $list=Model::call('getInfo');
+    function getByManagers(){
+        $list=self::getInfo();
         
-        $sql="SELECT * FROM dignities_admins ORDER BY admin_id, sort";
+        $sql="SELECT * FROM groups_managers ORDER BY manager_id, sort";
         $rows=Model::fetchAll($sql);
-        $admins=array();
+        $managers=array();
         foreach( $rows as $r){
-            $admins[ $r['admin_id'] ][]=$list[ $r['dignity_id'] ];
+            $managers[ $r['manager_id'] ][]=$list[ $r['group_id'] ];
         }
-        return $admins;
+        return $managers;
     }
 }
 ?>

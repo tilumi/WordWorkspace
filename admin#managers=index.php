@@ -1,7 +1,7 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
+list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo, $groups ) = APP::$appBuffer;
 ?>
 
             <div class="grid_12">
@@ -115,8 +115,8 @@ var batchRoutes = {
                                     </td>
                                     <td>
                                         <?php
-                                        if( isset($dignities[ $r['id'] ]) ){
-                                            echo $dignities[ $r['id'] ][0]['name'];
+                                        if( isset($groups[ $r['id'] ]) ){
+                                            echo $groups[ $r['id'] ][0]['name'];
                                         }else{
                                             echo '<span style="color:#999;">(未指定)</span>';
                                         }
@@ -159,8 +159,8 @@ var batchRoutes = {
                                         <a href="<?php echo url('privileges/'.$r['id'].'.html'); ?>" title="設定權限"><img src="<?php echo layout_url('admin', '/images/user.gif'); ?>" alt="privileges" width="16" height="16"></a>
 <?php       } ?>
 <?php } ?>
-<?php if( ACL::checkAuth('dignity') ){ ?>
-                                        <a href="<?php echo url('dignity/'.$r['id'].'.html'); ?>" title="設定管理員身分"><img src="<?php echo layout_url('admin', '/images/icons/system-users-4.png'); ?>" alt="view" width="16" height="16"></a>
+<?php if( ACL::checkAuth('group') ){ ?>
+                                        <a href="<?php echo url('group/'.$r['id'].'.html'); ?>" title="設定群組"><img src="<?php echo layout_url('admin', '/images/icons/system-users-4.png'); ?>" alt="view" width="16" height="16"></a>
 <?php } ?>
 <?php if( ACL::checkAuth('view') ){ ?>
                                         <a href="<?php echo url('view/'.$r['id'].'.html'); ?>" title="檢視資訊及權限"><img src="<?php echo layout_url('admin', '/images/icons/application-view-list.png'); ?>" alt="view" width="16" height="16"></a>

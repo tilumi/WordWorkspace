@@ -91,26 +91,32 @@ class Managers{
         
         return Model::update($data, 'id', self::$useTable);
     }
-    function dignity( $data ){
+    function setGroup( $data ){
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
         
-        $dignities=$data['dignities'];
-        $admin_id=$data['id'];
-        if( is_string($dignities) ){
-            $dignities=array( $dignities );
+        $groups=$data['groups'];
+        $manager_id=$data['id'];
+        if( is_string($groups) ){
+            $groups=array( $groups );
         }
-        $dignities=array_unique($dignities);
+        $groups=array_unique($groups);
         
         $fields=array();
-        if( count($dignities)>0 ){
+        if( count($groups)>0 ){
             Model::exec('START TRANSACTION');
-            $sql ="DELETE FROM dignities_admins WHERE admin_id=".Model::quote( $admin_id , 'text' );
+            $sql ="DELETE FROM groups_managers WHERE manager_id=".Model::quote( $manager_id , 'text' );
             Model::exec($sql);
-            foreach($dignities as $dignity_id){
-                if( empty($dignity_id) ){ continue; }
-                if( ! Model::insert($fields, 'dignities_admins', false) ){
+            foreach($groups as $group_id){
+                if( empty($group_id) ){ continue; }
+                $fields=array(
+                    'manager_id'=>$manager_id,
+                    'group_id'=>$group_id,
+                    'sort'=>0,
+                );
+                
+                if( ! Model::insert($fields, 'groups_managers') ){
                     Model::exec('ROLLBACK');
                     return '更新失敗，請再試一次';
                 }
@@ -380,11 +386,11 @@ class Managers{
         }
         return false;
     }
-    function getDignitiesList(){
-        return Dignities::getList();
+    function getGroupsList(){
+        return Groups::getList();
     }
-    function getDignitiesByAdmin(){
-        return Dignities::getByAdmin();
+    function getGroupsByManagers(){
+        return Groups::getByManagers();
     }
     
 }

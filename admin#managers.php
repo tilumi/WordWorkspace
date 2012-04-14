@@ -14,6 +14,7 @@ $registedAction = array(
     'edit',
     'view',
     'delete',
+    'group',
     'privileges',
     'm_edit',
     'm_delete',
@@ -124,9 +125,9 @@ function index(){
     }
     
     list($rows, $totalItems) = Managers::pagelist($submits, $pageID, $pageRows);
-    //$dignities=Model::call('getDignitiesByAdmin');
+    $groups=Managers::getGroupsByManagers();
     
-    APP::$appBuffer = array($rows,$totalItems,$pageID,$pageRows,$form,$searchInfo,$dignities);
+    APP::$appBuffer = array($rows,$totalItems,$pageID,$pageRows,$form,$searchInfo,$groups);
 }
 
 function add(){
@@ -274,7 +275,7 @@ function edit(){
     
     APP::$appBuffer = array($form);
 }
-function dignity(){
+function group(){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
@@ -287,27 +288,39 @@ function dignity(){
     APP::$pageTitle='設定'.APP::$mainName.'群組：'.$data['username'];
     View::setHeader( 'title', APP::$pageTitle );
 
-    $form=Form::get( 'dignity', APP::$pageTitle );
+    $form=Form::create('frmDignity', 'post', APP::$ME );
+    
+    $form->addElement('header', '', $header );
+    
+    $form->addElement('hidden', 'id');
+    $options = array(''=>'--- 請選擇群組 ---') + Managers::getGroupsList();
+    $form->addElement('select', 'groups', '指定群組', $options, array('class'=>'input-short'));
+    
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    $form->applyFilter('name', 'trim');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
         if( ! isset($submits['commit']) ){
             redirect( '.' , '使用者取消' , 'info' );
         }
+        
         if( $form->validate() ){
-            $errmsg = Model::call( 'dignity', $submits ); 
+            $errmsg = Managers::setGroup($submits); 
             if( $errmsg === true ){
                 $userid=$_SESSION['admin']['userid'];
-                APP::syslog($userid.' 設定'.APP::$mainName.'身分: '.$submits['userid'].' 成功', APP::$prior['info'], 'managers' );
-                redirect( '.' , APP::$mainName.'已設定身分成功' , 'success' );
+                APP::syslog($userid.' 設定'.APP::$mainName.'群組: '.$data['userid'].' 成功', APP::$prior['info'], 'managers' );
+                redirect( '.' , APP::$mainName.$data['userid'].'已設定群組' , 'success' );
             }
             $userid=$_SESSION['admin']['userid'];
-            APP::syslog($userid.' 設定'.APP::$mainName.'身分: '.$submits['userid'].' 失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+            APP::syslog($userid.' 設定'.APP::$mainName.'群組: '.$data['userid'].' 失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
             redirect( '' , $errmsg , 'error' );
         }
     } 
-    $dignities=Model::call('getDignitiesByAdmin');
-    $data['dignities']=$dignities[ $data['id'] ][0];
+    $groups=Managers::getGroupsByManagers();
+    $data['groups']=$groups[ $data['id'] ][0]['id'];
     $form->setDefaults($data);
     
     $form=Form::getHtml($form);
@@ -330,7 +343,7 @@ function view(){
     
     $privs_html=Form::getHtml($form, 'rollcalls');
     
-    APP::$appBuffer = array($privs_html);
+    APP::$appBuffer = array($data, $privs_html);
 }
 function getACLsForm( $header='' , $privs ){
     $form=Form::create('frmPrivs', 'post', APP::$ME );
