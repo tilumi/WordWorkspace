@@ -21,7 +21,6 @@ $mainName = APP::$mainName;
 <?php echo redirect_message(); ?>
 
 
-<?php echo $privs_html; ?>
 
                 <div class="module">
                 	<h2><span>檢視<?php echo $mainName; ?></span></h2>
@@ -44,9 +43,15 @@ $mainName = APP::$mainName;
                     </div> <!-- End .module-body -->
                 </div> <!-- End .module -->
 
+
+<?php echo $privs_html; ?>
+                
+
+
         		<div style="clear: both;"></div>
             </div> <!-- End .grid_12 -->
-                
+
+
 <?php
 include('layout_admin/tpl_footer.php');
 ?>
