@@ -69,7 +69,7 @@ $mainName = APP::$mainName;
                             <tr>
                                 <th>啟用狀態: </th>
                                 <td>
-                                    <?php if( $r['is_active']=='1' ){ ?>
+                                    <?php if( $data['is_active']=='1' ){ ?>
                                         <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16"> 啟用中
                                     <?php }else{ ?>
                                         <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16"> 已停用
