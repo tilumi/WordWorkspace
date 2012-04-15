@@ -7,7 +7,7 @@ main:
     name:   基本功能
     app: main
     methods:
-        主系統功能: [index]
+        主系統: [index]
         登入: [login]
         登出: [logout]
         變更密碼: [passwd]
@@ -24,9 +24,21 @@ managers:
         新增: [add]
         修改: [edit, m_edit, active, inactive]
         刪除: [delete, m_delete]
+        檢視: [view]
+        檢視權限: [view_privileges]
+        設定群組: [group]
         賦予權限: [privileges]
 #        超級權限: [super_user, normal_user, m_priv]
 # 不需要將超級權限列為選項，因為只要是超級使用者就能使用
+groups:
+    name:   管理員群組
+    app: groups
+    methods:
+        主程式: [index]
+        新增: [add]
+        修改: [edit, m_edit, active, inactive]
+        刪除: [delete, m_delete]
+        賦予權限: [privileges]
 syslog_tag:
     name:   系統記錄
     type:   header

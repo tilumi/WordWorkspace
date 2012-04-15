@@ -14,6 +14,7 @@ $registedAction = array(
     'edit',
     'view',
     'delete',
+    'group',
     'privileges',
     'm_edit',
     'm_delete',
@@ -124,9 +125,9 @@ function index(){
     }
     
     list($rows, $totalItems) = Managers::pagelist($submits, $pageID, $pageRows);
-    //$dignities=Model::call('getDignitiesByAdmin');
+    $groups=Managers::getGroupsByManagers();
     
-    APP::$appBuffer = array($rows,$totalItems,$pageID,$pageRows,$form,$searchInfo,$dignities);
+    APP::$appBuffer = array($rows,$totalItems,$pageID,$pageRows,$form,$searchInfo,$groups);
 }
 
 function add(){
@@ -274,7 +275,7 @@ function edit(){
     
     APP::$appBuffer = array($form);
 }
-function dignity(){
+function group(){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
@@ -287,27 +288,39 @@ function dignity(){
     APP::$pageTitle='設定'.APP::$mainName.'群組：'.$data['username'];
     View::setHeader( 'title', APP::$pageTitle );
 
-    $form=Form::get( 'dignity', APP::$pageTitle );
+    $form=Form::create('frmDignity', 'post', APP::$ME );
+    
+    $form->addElement('header', '', $header );
+    
+    $form->addElement('hidden', 'id');
+    $options = array(''=>'--- 請選擇群組 ---') + Managers::getGroupsList();
+    $form->addElement('select', 'groups', '指定群組', $options, array('class'=>'input-short'));
+    
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    $form->applyFilter('name', 'trim');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
         if( ! isset($submits['commit']) ){
             redirect( '.' , '使用者取消' , 'info' );
         }
+        
         if( $form->validate() ){
-            $errmsg = Model::call( 'dignity', $submits ); 
+            $errmsg = Managers::setGroup($submits); 
             if( $errmsg === true ){
                 $userid=$_SESSION['admin']['userid'];
-                APP::syslog($userid.' 設定'.APP::$mainName.'身分: '.$submits['userid'].' 成功', APP::$prior['info'], 'managers' );
-                redirect( '.' , APP::$mainName.'已設定身分成功' , 'success' );
+                APP::syslog($userid.' 設定'.APP::$mainName.'群組: '.$data['userid'].' 成功', APP::$prior['info'], 'managers' );
+                redirect( '.' , APP::$mainName.$data['userid'].'已設定群組' , 'success' );
             }
             $userid=$_SESSION['admin']['userid'];
-            APP::syslog($userid.' 設定'.APP::$mainName.'身分: '.$submits['userid'].' 失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+            APP::syslog($userid.' 設定'.APP::$mainName.'群組: '.$data['userid'].' 失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
             redirect( '' , $errmsg , 'error' );
         }
     } 
-    $dignities=Model::call('getDignitiesByAdmin');
-    $data['dignities']=$dignities[ $data['id'] ][0];
+    $groups=Managers::getGroupsByManagers();
+    $data['groups']=$groups[ $data['id'] ][0]['id'];
     $form->setDefaults($data);
     
     $form=Form::getHtml($form);
@@ -326,45 +339,48 @@ function view(){
     APP::$pageTitle='檢視'.APP::$mainName.'資訊：'.$data['username'];
     $privs=Managers::loadFullACLs($id);
     
-    $form=Form::create('frmPrivs', 'post', APP::$ME );
-    getACLsForm($form, '檢視'.APP::$mainName.'權限', $privs);
+    $form=getACLsForm( '檢視'.APP::$mainName.'權限', $privs );
     
     $privs_html=Form::getHtml($form, 'rollcalls');
     
-    APP::$appBuffer = array($privs_html);
+    APP::$appBuffer = array($data, $privs_html);
 }
-function getACLsForm( $form , $header='' , $privs ){
+function getACLsForm( $header='' , $privs ){
+    $form=Form::create('frmPrivs', 'post', APP::$ME );
     $form->addElement('header', '', $header );
     
     $privsType=array(
         'allow'=>'允許',
         'deny'=>'拒絕',
+        'inherit'=>'個別設定',
     );
     $privsClassName=array(
         'allow'=>'submit-green',
         'deny'=>'submit-red',
+        'inherit'=>'submit-gray',
     );
-    $style='width:80px;';
     
+    $style='width:80px;';
     $form->addElement('html', '圖例：');
-    $form->addElement('button', '', '允許', array('class'=>'submit-green', 'style'=>$style));
-    $form->addElement('button', '', '拒絕', array('class'=>'submit-red', 'style'=>$style));
+    foreach( $privsClassName as $key=>$pcn ){
+        $form->addElement('button', '', $privsType[$key], array('class'=>$pcn, 'style'=>$style));
+    }
     $form->addElement('html', '<div style="height:20px;"></div>');
     
     //pr($privs);die;
     foreach( $privs as $priv ){
         if( $priv['type']==='header' ){
-            $form->addElement('html', '<h1 style="font-size:18px;font-weight:bold;margin:10px 0 0 0;">'.$priv['name'].'</h1>'."\n");
+            $form->addElement('html', '<div style="font-size:16px;color:red;font-weight:bold;padding:0;margin:0px 0 0 0;">'.$priv['name'].'</div>'."\n");
             continue;
         }
         
-        $form->addElement('html', '<div style="float:left;height:20px;line-height:20px;font-weight:bold;margin:10px 0 0 0;">'.$priv['name'].'： &nbsp;</div>'."\n");
+        //$form->addElement('html', '<div style="float:left;height:20px;line-height:20px;font-weight:bold;margin:10px 0 0 0;">'.$priv['name'].'： &nbsp;</div>'."\n");
         foreach( $priv['methods'] as $name=>$value ){
             $elements=array();
             if( $data['type']!='normal' ){
                 $elements[] = &HTML_QuickForm::createElement('button', 'button', $name, array(
                         'class'=>$privsClassName[ $value ].' ',
-                        'style'=>'margin-top:8px;',
+                        'style'=>'margin-top:8px;width:80px;',
                     )
                 );
             }else{
@@ -392,12 +408,14 @@ function privileges(){
     }
     
     APP::load( 'vendor', 'Symfony'.DS.'yaml'.DS.'sfYaml' );
-    $priv=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
+    $acls=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
     
     APP::$pageTitle='設定'.APP::$mainName.'權限：'.$data['username'];
     View::setHeader( 'title', APP::$pageTitle );
     
-    $form=getPrivilegesForm( '設定'.APP::$mainName.'權限: &nbsp; '.$data['username'].' ('.$data['userid'].')', $data, $priv );
+    $privs=Managers::loadPrivileges($data['id']);
+    
+    $form=getPrivilegesForm( '設定'.APP::$mainName.'權限: &nbsp; '.$data['username'].' ('.$data['userid'].')', $data, $acls, $privs );
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -416,20 +434,208 @@ function privileges(){
             redirect( '.' , $errmsg , 'error' );
         }
     }
-    $priv=Managers::loadPrivileges($data['id']);
-    $default=array('userid'=>$data['id']) + $priv;
+    $default=array('userid'=>$data['id']) + $privs;
     $form->setDefaults( $default ); 
     
-    $form=Form::getHtml($form, 'privileges');
+    //$form=Form::getHtml($form, 'privileges');
+    $form=Form::getHtml($form, 'rollcalls');
     
     APP::$appBuffer = array($form);
 }
-function getPrivilegesForm( $header='' , $userdata=array() , $contents=array() ){
+function getPrivForm( $header='' , $userdata=array() , $privs=array() ){
     $form=Form::create('frmPrivileges', 'post', APP::$ME );
+    $form->addElement('header', '', $header );
+
+    $privsType=array(
+        'allow'=>'允許',
+        'deny'=>'拒絕',
+        'inherit'=>'個別設定',
+    );
+    $privsClassName=array(
+        'allow'=>'submit-green',
+        'deny'=>'submit-red',
+        'inherit'=>'submit-gray',
+    );
     
+    $style='width:80px;';
+    $form->addElement('html', '圖例：');
+    foreach( $privsClassName as $key=>$pcn ){
+        $form->addElement('button', '', $privsType[$key], array('class'=>$pcn, 'style'=>$style));
+    }
+    $form->addElement('html', '<div style="height:20px;"></div>');
+    
+    $form->addElement('hidden', 'userid', $userdata['id']);
+    
+    $form->addElement('hidden', 'location_id', $location_id );
+    //$form->addElement('hidden', 'church_id', $church_id );
+    $memberType=array(
+        'associator'=>'會員',
+        'student'=>'新生',
+        'stray'=>'休息人員',
+    );
+    $style='width:80px;';
+    
+    $form->addElement('html', '圖例：');
+    $form->addElement('button', '', '缺席', array('class'=>'submit-gray', 'style'=>$style));
+    $form->addElement('button', '', '出席', array('class'=>'submit-green', 'style'=>$style));
+    $form->addElement('button', '', '線上', array('class'=>'submit-blue', 'style'=>$style));
+    $form->addElement('html', '<div style="height:20px;"></div>');
+    $jogDeps=$this->MyModel->getJogDepsList();
+    $js_onclick="javascript: changeStatus(this);";
+    $attendClassName=array(
+        'yes'=>'submit-green',
+        'no'=>'submit-gray',
+        'online'=>'submit-blue',
+    );
+    
+    foreach( $members as $type=>$deps ){
+        $att_yes=0;
+        $att_online=0;
+        $att_no=0;
+        foreach( $deps as $dep_id=>$assocs ){
+            foreach( $assocs as $member_id=>$data ){
+                if( $data['status']=='yes' ){ $att_yes+=1; }
+                if( $data['status']=='no' ){ $att_no+=1; }
+                if( $data['status']=='online' ){ $att_online+=1; }
+            }
+        }
+        $inner_text =$memberType[$type].' ( ';
+        $inner_text.='出席: <span class="'.$type.'-yes">'.$att_yes.'</span> 人';
+        $inner_text.='，線上: <span class="'.$type.'-online">'.$att_online.'</span> 人';
+        $inner_text.='，缺席: <span class="'.$type.'-no">'.$att_no.'</span> 人 )';
+        $form->addElement('html', '<span style="font-weight:bold;font-size:14px;width:400px;"><img src="'.image_url('icons/system-users-4.png').'"> '.$inner_text.'</span>'."\n");
+        $form->addElement('html', '&nbsp;&nbsp;');
+        
+        $type_total=0;
+        $input_name='rollcalls';
+        
+        $form->addElement('html', '<div id="form_'.$type.'">');
+        foreach( $deps as $dep_id=>$assocs ){
+            $form->addElement('html', '<div style="font-weight:bold;margin:10px 0 0 0;color:#999">'.$jogDeps[$dep_id].'</div>'."\n");
+            foreach( $assocs as $member_id=>$data ){
+                $elements=array();
+                $elements[]=&HTML_QuickForm::createElement('html', '<input type="hidden" id="origin-'.$data['id'].'" name='.$input_name.'['.$data['id'].'][origin] value="'.$data['status'].'">'."\n");
+                $elements[]=&HTML_QuickForm::createElement('html', '<input type="hidden" id="current-'.$data['id'].'" name='.$input_name.'['.$data['id'].'][current] value="'.$data['status'].'">'."\n");
+                if( $data['type']!='normal' ){
+                    $elements[] = &HTML_QuickForm::createElement('button', 'button', $data['member_name'], array(
+                            'class'=>$attendClassName[ $data['status'] ].' '.$type,
+                            'id'=>'btn-'.$data['id'],
+                            'style'=>$style.'color:yellow;',
+                            'onmouseover'=>"return overlib('"."已出訪至<b>".$data['church_name']."</b>"."');",
+                            'onmouseout'=>"return nd();",
+                        )
+                    );
+                }else{
+                    $elements[] = &HTML_QuickForm::createElement('button', 'button', $data['member_name'], array('class'=>$attendClassName[ $data['status'] ].' '.$type, 'id'=>'btn-'.$data['id'], 'onclick'=>$js_onclick, 'style'=>$style));
+                }
+                $form->addGroup($elements, '', '', '');
+            }
+            $type_total+=1;
+        }
+        if( $type_total<1 ){
+            $form->addElement('html', '<div style="height:70px;line-height:70px;">沒有可顯示的人員</div>');
+        }
+        $form->addElement('html', '<div style="height:20px;">&nbsp;</div>');
+        $buttons=array();
+        $buttons[] = &HTML_QuickForm::createElement('submit', 'commit', '送出', array('class'=>'submit-red'));
+        $form->addGroup($buttons, null, null, '&nbsp;');
+        $form->addElement('html', '<br><br><br>');
+        
+        $form->addElement('html', '</div>'); // for id="form_associator" etc.
+    }
+    
+    return $form;
+}
+function getPrivilegesForm( $header='' , $userdata=array() , $privs=array(), $settings=array() ){
+    $form=Form::create('frmPrivileges', 'post', APP::$ME );
     $form->addElement('header', '', $header );
     
     $form->addElement('hidden', 'userid', $userdata['id']);
+
+    $privsType=array(
+        'allow'=>'允許',
+        'deny'=>'拒絕',
+        'neutral'=>'個別設定',
+    );
+    $privsClassName=array(
+        'allow'=>'submit-green',
+        'deny'=>'submit-red',
+        //'neutral'=>'submit-gray',
+    );
+    
+    $style='width:80px;';
+    $form->addElement('html', '<div>圖例：</div>');
+    foreach( $privsClassName as $key=>$pcn ){
+        $form->addElement('button', '', $privsType[$key], array('class'=>$pcn, 'style'=>$style));
+    }
+    $form->addElement('html', '<div style="height:20px;clear:both;"></div>');
+    
+    $i=0;
+    foreach($privs as $key=>$priv){
+        $name=$priv['name'];
+        if( isset($priv['type']) && $priv['type']==='header' ){
+            $form->addElement('html', '<span style="font-size:14px;color:red;"><strong>'.$name.'</strong></span>');
+            $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+            continue;
+        }
+        
+        $app='';
+        if( isset($priv['app']) && !empty($priv['app']) ){
+            $app=$priv['app'];
+        }
+        
+        $text_indent=str_repeat('&nbsp; ', 2);
+        $methods=$priv['methods'];
+        $checkbox=array();
+        $setup=array();
+        $represent=array();
+        $js_onclick="javascript: changeStatus(this);";
+        //加入標題
+        $form->addElement('html', $text_indent.'<span style="font-size:12px;"><strong>'.$name.'</strong></span>');
+        if( $app !== 'main' ){
+            $form->addElement('html', $text_indent.'<a href="javascript:void(0);" onclick="javascript: setStatus(\'area-'.$key.'\', \'allow\'); " class="submit-green">全部允許</a>');
+            $form->addElement('html', str_repeat('&nbsp; ', 1).'<a href="javascript:void(0);" onclick="javascript: setStatus(\'area-'.$key.'\', \'deny\'); " class="submit-green">全部拒絕</a>');
+        }
+        $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+        foreach( $methods as $priv_name=>$actions ){
+            $i+=1;
+            if( $app == 'main' ){
+                //主系統為基本權限，必須提供，因此不需列為選項
+                //$checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('disabled', 'checked'), array('allow', 'allow'));
+                $checkbox[]=&HTML_QuickForm::createElement('button', '', $priv_name, array('class'=>$privsClassName['allow'].' area-'.$key, 'id'=>'btn-'.$i, 'onclick'=>"alert('這是系統基本賦予的權限，不能關閉')", 'style'=>$style));
+                $setup[]=&HTML_QuickForm::createElement('hidden', $actions[0], 'allow', array('id'=>'current-'.$i) );
+                $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
+                continue;
+            }
+            $action=pos($actions);
+            
+            $auth_type='deny';
+            if( $settings['priv:'.$app][$action]==='allow' ){
+                $auth_type='allow';
+            }
+            //$checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('class'=>'priv_'.$key,'onclick'=>$js_onclick), array('deny', 'allow'));
+            $checkbox[]=&HTML_QuickForm::createElement('button', '', $priv_name, array('class'=>$privsClassName[$auth_type].' area-'.$key, 'id'=>'btn-'.$i, 'onclick'=>$js_onclick, 'style'=>$style));
+            $setup[]=&HTML_QuickForm::createElement('hidden', $actions[0], $auth_type, array('id'=>'current-'.$i) );
+            $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
+        }
+        $form->addElement('html', $text_indent.$text_indent);
+        $form->addGroup($checkbox, '', '<b>'.$name.'</b>: &nbsp;', ' ');
+        $form->addGroup($setup, 'priv:'.$app.'', '', '');
+        $form->addGroup($represent, 'represent['.$app.']', '', '');
+        $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+    }
+    $form->addElement('html', '<div style="height:40px;"></div>');
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    return $form;
+}
+function getNoJsPrivilegesForm( $header='' , $userdata=array() , $contents=array() ){
+    $form=Form::create('frmPrivileges', 'post', APP::$ME );
+    $form->addElement('header', '', $header );
+    
+    $form->addElement('hidden', 'userid', $userdata['id']);
+
     foreach($contents as $key=>$priv){
         $name=$priv['name'];
         if( isset($priv['type']) && !empty($priv['type']) ){
