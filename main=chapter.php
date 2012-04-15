@@ -2,6 +2,7 @@
 list( $rows , $nav ) = APP::$appBuffer;
 $tab_id = $nav['book_id'];
 $book_on_top = $nav;
+$fixing_topnav = true;
 include('layout_main/tpl_header-style2.php');
 
 $prev_url='';
