@@ -57,6 +57,45 @@ $(document).ready( function(){
     });
     
     //自動產生捲軸刻度
+    /*var key=0;
+    $('#menu a').each( function(){
+    	var scrollPane = $( "#menu-container" ),
+		    scrollContent = $( "#menu" ),
+		    scrollBar = $( ".scroll-bar" ),
+            scrollBarWarp = $( ".scroll-bar-warp" );
+        var oLeft=this.offsetLeft + ($(this).width() / 2);
+        var name=this.name;
+        var sh=name.substring( 0, name.indexOf('(') );
+        var pos=Math.round( oLeft / scrollContent.width() * scrollBar.width() );
+        var style1='background:#176ba7;';
+        var pos1=pos;
+        var style2='top:1px;color:#fff;line-height:12px;';
+        var pos2=pos-5;
+        
+        nsh=sh;
+        if( nsh.indexOf('記')>=0 && nsh.length>3 ){
+            nsh = nsh.replace('記','');
+        }
+        if( nsh==='約伯記' ){
+            nsh = nsh.replace('記','');
+        }
+        if( nsh.indexOf('書')>=0 && nsh.length>3 && nsh!=='約書亞' && nsh.indexOf('彼得')<0 ){
+            nsh = nsh.replace('書','');
+        }
+        if( nsh==='約珥書' || nsh==='約拿書' || nsh==='彌迦書' || nsh==='那鴻書' || nsh==='哈該書' ){
+            nsh = nsh.replace('書','');
+        }
+        if( nsh.indexOf('帖撒羅尼迦')>=0 ){
+            nsh = nsh.replace('帖撒羅尼迦','帖撒羅');
+        }
+        if( nsh==='耶利米哀歌' ){
+            nsh = '耶利米哀';
+        }
+        
+        scrollBar.append('<div class="grad-tags" style="left:'+pos2+'px;'+style2+'">'+nsh+'</div>');
+        key=key+1;
+    });*/
+    //自動產生捲軸刻度v1
     /*
     var key=0;
     $('#menu a').each( function(){
