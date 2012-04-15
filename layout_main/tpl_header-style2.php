@@ -6,7 +6,7 @@
     background-attachment:fixed;
 }
 .lite #wrapper-bgtop{
-    background:url(<?php echo layout_url('main', '/images/bg3_02-0.jpg')?>) center top;
+    background:url(<?php echo layout_url('main', '/images/bg3_02-0.jpg')?>) center top no-repeat;
     background-attachment:fixed;
 }
 .lite #page{
