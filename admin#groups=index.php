@@ -74,8 +74,8 @@ var batchRoutes = {
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
                                 <option value="" selected="selected">--- 選擇動作 ---</option>
 <?php if( ACL::checkAuth('m_edit') ){ ?>
-                                <option value="active">顯示文章</option>
-                                <option value="inactive">隱藏文章</option>
+                                <option value="active">啟用<?php echo APP::$mainName;?></option>
+                                <option value="inactive">停用<?php echo APP::$mainName;?></option>
 <?php } ?>
 <?php if( ACL::checkAuth('m_delete') ){ ?>
                                 <option value="delete">刪除</option>
@@ -93,7 +93,7 @@ var batchRoutes = {
                                     <th class="header" style="">名稱</th>
                                     <th class="header" style="">說明</th>
                                     <th class="header" style="width: 50px;">排序</th>
-                                    <th class="header" style="width: 50px;">顯示</th>
+                                    <th class="header" style="width: 50px;">啟用</th>
                                     <th style="width: 100px;"></th>
                                 </tr>
                             </thead>

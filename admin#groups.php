@@ -579,11 +579,11 @@ function active(){
     
     if( $errmsg = Groups::setActive($id) ){
         $userid=$_SESSION['admin']['userid'];
-        APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 已設定為直接顯示', APP::$prior['info'], 'managers' );
-        redirect( '.' , APP::$mainName.' '.$data['name'].' 已設定為直接顯示' , 'success' );
+        APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 已設定為啟用', APP::$prior['info'], 'managers' );
+        redirect( '.' , APP::$mainName.' '.$data['name'].' 已設定為啟用' , 'success' );
     }
     $userid=$_SESSION['admin']['userid'];
-    APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 設定為直接顯示失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+    APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 設定為啟用失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
 function inactive(){
@@ -599,11 +599,11 @@ function inactive(){
     $errmsg = Groups::setInactive($id);
     if( $errmsg === true ){
         $userid=$_SESSION['admin']['userid'];
-        APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 已設定為暫時隱藏', APP::$prior['info'], 'managers' );
-        redirect( '.' , APP::$mainName.' '.$data['name'].' 已設定為暫時隱藏' , 'success' );
+        APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 已設定為停用', APP::$prior['info'], 'managers' );
+        redirect( '.' , APP::$mainName.' '.$data['name'].' 已設定為停用' , 'success' );
     }
     $userid=$_SESSION['admin']['userid'];
-    APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 設定為暫時隱藏失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
+    APP::syslog($userid.' '.APP::$mainName.' '.$data['name'].' 設定為停用失敗。錯誤訊息: '.$errmsg, APP::$prior['error'], 'managers' );
     redirect( '.' , $errmsg , 'error' );
 }
 

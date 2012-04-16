@@ -13,8 +13,22 @@ main:
         變更密碼: [passwd]
         設定帳號: [userinfo]
 
+news_tag:
+    name:   前台網站管理
+    type:   header
+news:
+    name:   新聞中心
+    app: news
+    methods:
+        主程式: [index]
+        檢視: [archives]
+        新增: [add]
+        修改: [edit, m_edit, active, inactive]
+        刪除: [delete, m_delete]
+
+
 managers_tag:
-    name:   系統管理員帳號
+    name:   後台系統管理
     type:   header
 managers:
     name:   系統管理員
@@ -39,24 +53,9 @@ groups:
         修改: [edit, m_edit, active, inactive]
         刪除: [delete, m_delete]
         賦予權限: [privileges]
-syslog_tag:
-    name:   系統記錄
-    type:   header
 syslog:
     name:   系統記錄
     app: syslog
     methods:
         主程式: [index]
 
-news_tag:
-    name:   新聞中心
-    type:   header
-news:
-    name:   新聞中心
-    app: news
-    methods:
-        主程式: [index]
-        檢視: [archives]
-        新增: [add]
-        修改: [edit, m_edit, active, inactive]
-        刪除: [delete, m_delete]

@@ -105,7 +105,7 @@ $mainName = APP::$mainName;
 <?php if( ACL::checkAuth('edit') ){ ?>
                 <input type="button" class="submit-blue" value="編輯資訊" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
-<?php if( ACL::checkAuth('privileges') ){ ?>
+<?php if( ACL::checkAuth('privileges') && $data['is_super_user']==0 ){ ?>
                 <input type="button" class="submit-blue" value="變更權限" onclick="javascript: location.href='<?php echo url('./privileges/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
 <?php if( ACL::checkAuth('group') ){ ?>
@@ -128,7 +128,7 @@ $mainName = APP::$mainName;
 <?php if( ACL::checkAuth('edit') ){ ?>
                 <input type="button" class="submit-blue" value="編輯資訊" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
-<?php if( ACL::checkAuth('privileges') ){ ?>
+<?php if( ACL::checkAuth('privileges') && $data['is_super_user']==0 ){ ?>
                 <input type="button" class="submit-blue" value="變更權限" onclick="javascript: location.href='<?php echo url('./privileges/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
 <?php if( ACL::checkAuth('group') ){ ?>

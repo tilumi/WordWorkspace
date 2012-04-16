@@ -130,8 +130,8 @@ class Groups{
     function setActive( $id ){
         if( is_string($id) ){
             $fields=array();
-            $fields['id']=Model::quote( $id , 'text');
-            $fields['is_active']=Model::quote( '1' , 'text');
+            $fields['id']=$id;
+            $fields['is_active']='1';
             
             return Model::update($fields, 'id', self::$useTable);
         }
@@ -146,8 +146,8 @@ class Groups{
     function setInactive( $id ){
         if( is_string($id) ){
             $fields=array();
-            $fields['id']=Model::quote( $id , 'text');
-            $fields['is_active']=Model::quote( '0' , 'text');
+            $fields['id']=$id;
+            $fields['is_active']='0';
             
             return Model::update($fields, 'id', self::$useTable);
         }
