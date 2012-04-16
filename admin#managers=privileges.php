@@ -19,6 +19,12 @@ $mainName = APP::$mainName;
 
 <?php echo redirect_message(); ?>
 
+<style>
+input.submit-locked{
+    color:orange;
+    border:2px solid orange;
+}
+</style>
 <script>
 function changeStatus( btn ){
     var btn_id=btn.id;
@@ -60,6 +66,8 @@ function setStatus( className, type ){
     }
 }
 </script>
+
+
 <?php //echo $formrender->getFormHtml($form, 'privileges'); ?>
 <?php echo $form; ?>
 

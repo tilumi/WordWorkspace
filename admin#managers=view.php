@@ -23,22 +23,38 @@ $mainName = APP::$mainName;
             </div> <!-- End .grid_12 -->
 
 
-            <div class="grid_5">
+            <div class="grid_7">
                 <div class="module">
                 	<h2><span>檢視<?php echo $mainName; ?></span></h2>
                     
                     <div class="module-table-body">
                         <table>
                             <tr>
+                                <th>用戶名稱: </th>
+                                <td>
+                                    <?php echo $data['username'];?>
+                                </td>
+                                <th>啟用狀態: </th>
+                                <td>
+                                    <?php if( $data['is_active']=='1' ){ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16"> 啟用中
+                                    <?php }else{ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16"> 已停用
+                                    <?php } ?>
+                                </td>
+                            </tr>
+                            <tr class="odd">
                                 <th style="width:100px;">帳號: </th>
                                 <td>
                                     <?php echo $data['userid']; ?>
                                 </td>
-                            </tr>
-                            <tr class="odd">
-                                <th>用戶名稱: </th>
+                                <th>全域管理員: </th>
                                 <td>
-                                    <?php echo $data['username'];?>
+                                    <?php if( $data['is_super_user']=='1' ){ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/tick-on-white.gif'); ?>" alt="開發者" width="16" height="16"> 全域管理員
+                                    <?php }else{ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/cross-on-white.gif'); ?>" alt="管理員" width="16" height="16"> 一般管理員
+                                    <?php } ?>
                                 </td>
                             </tr>
                             <tr>
@@ -52,11 +68,14 @@ $mainName = APP::$mainName;
                                     }
                                     ?>
                                 </td>
+                                <th>建立帳號日期: </th>
+                                <td>
+                                    <?php echo substr($data['created'], 0, 16);?>
+                                </td>
                             </tr>
                             <tr class="odd">
                                 <th>上次登入位址: </th>
                                 <td>
-                                    <?php echo $data['last_login_ip'];?>
                                     <?php
                                     if( ! empty($data['last_login_ip']) ){
                                         echo $data['last_login_ip'];
@@ -65,34 +84,6 @@ $mainName = APP::$mainName;
                                     }
                                     ?>
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>啟用狀態: </th>
-                                <td>
-                                    <?php if( $data['is_active']=='1' ){ ?>
-                                        <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16"> 啟用中
-                                    <?php }else{ ?>
-                                        <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16"> 已停用
-                                    <?php } ?>
-                                </td>
-                            </tr>
-                            <tr class="odd">
-                                <th>全域管理員: </th>
-                                <td>
-                                    <?php if( $data['is_super_user']=='1' ){ ?>
-                                        <img src="<?php echo layout_url('admin', '/images/tick-on-white.gif'); ?>" alt="開發者" width="16" height="16"> 全域管理員
-                                    <?php }else{ ?>
-                                        <img src="<?php echo layout_url('admin', '/images/cross-on-white.gif'); ?>" alt="管理員" width="16" height="16"> 一般管理員
-                                    <?php } ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>建立日期: </th>
-                                <td>
-                                    <?php echo substr($data['created'], 0, 16);?>
-                                </td>
-                            </tr>
-                            <tr class="odd">
                                 <th>最後更新日期: </th>
                                 <td>
                                     <?php
@@ -110,13 +101,16 @@ $mainName = APP::$mainName;
             </div> <!-- End .grid_5 -->
 
             <div class="grid_12" style="text-align:center;height:40px;">
+                <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
 <?php if( ACL::checkAuth('edit') ){ ?>
                 <input type="button" class="submit-blue" value="編輯資訊" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
 <?php if( ACL::checkAuth('privileges') ){ ?>
                 <input type="button" class="submit-blue" value="變更權限" onclick="javascript: location.href='<?php echo url('./privileges/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
-                <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
+<?php if( ACL::checkAuth('group') ){ ?>
+                <input type="button" class="submit-blue" value="設定群組" onclick="javascript: location.href='<?php echo url('./group/'.$data['id'].'.html'); ?>';" />
+<?php } ?>
             </div> <!-- End .grid_12 -->
 
 
@@ -130,13 +124,16 @@ $mainName = APP::$mainName;
             </div> <!-- End .grid_12 -->
 
             <div class="grid_12" style="text-align:center;height:40px;">
+                <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
 <?php if( ACL::checkAuth('edit') ){ ?>
                 <input type="button" class="submit-blue" value="編輯資訊" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
 <?php if( ACL::checkAuth('privileges') ){ ?>
                 <input type="button" class="submit-blue" value="變更權限" onclick="javascript: location.href='<?php echo url('./privileges/'.$data['id'].'.html'); ?>';" />
 <?php } ?>
-                <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
+<?php if( ACL::checkAuth('group') ){ ?>
+                <input type="button" class="submit-blue" value="設定群組" onclick="javascript: location.href='<?php echo url('./group/'.$data['id'].'.html'); ?>';" />
+<?php } ?>
             </div> <!-- End .grid_12 -->
 
 <?php } ?>

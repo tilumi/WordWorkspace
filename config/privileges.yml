@@ -56,6 +56,7 @@ news:
     app: news
     methods:
         主程式: [index]
+        檢視: [archives]
         新增: [add]
         修改: [edit, m_edit, active, inactive]
         刪除: [delete, m_delete]

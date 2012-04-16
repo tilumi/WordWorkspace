@@ -155,12 +155,17 @@ class Managers{
         }
         //pr($data);die;
         $userid=$data['userid'];
-        $request=Model::quote($userid, 'text');
+        $request=$userid;
         unset($data['userid']);
+        
+        //取得群組設定
+        $sql="SELECT group_id FROM groups_managers WHERE manager_id=".Model::quote($userid, 'text');
+        $group_id=Model::fetchOne($sql);
+        $group=Groups::loadPrivileges($group_id);
         
         //pr($data);die;
         Model::exec('START TRANSACTION');
-        $sql="DELETE FROM privileges WHERE request=".$request;
+        $sql="DELETE FROM privileges WHERE request=".Model::quote($request, 'text');
         Model::exec($sql);
         
         $fields=array();
@@ -168,26 +173,39 @@ class Managers{
             if( !preg_match( "/^priv/" , $key ) ){ continue; }
             foreach( $actions as $action=>$setting ){
                 list(  , $app )=explode(':', $key);
-                $access='deny';
-                if( $setting=='allow' ) $access='allow';
+                $access='';
+                if( $setting==='allow' ) $access='allow';
+                if( $setting==='deny' ) $access='deny';
+                if( $setting==='deny-locked' ) continue; //拒絕鎖定的設定直接跳過，因為將直接繼承群組的設定
+                if( $access==='' ){ continue; }
                 
-                if( $access!='allow' ){ continue; }
-                
-                $access = Model::quote( $access, 'text' );
+                $fields['request']=$request;
+                $fields['access']=$access;
                 
                 $actions = array( $action );
                 if( isset($data['represent'][$app][$action]) ){
                     $actions = explode(',', $data['represent'][$app][$action]);
                 }
                 foreach( $actions as $a ){
-                    $content = Model::quote( $app.'.'.$a , 'text' );
-                    $sql="INSERT INTO privileges (request, content, access) VALUES ( $request , $content , $access )";
-                    if( Model::exec($sql) === false ){
-                        Model::exec('ROLLBACK');
-                        return '歐喔！不明原因的失敗，請再試一次. Error Code 1';
+                    $write_in = true;
+                    if( $access === $group['priv:'.$app][$a] ){
+                        //與群組重複的設定就跳過
+                        $write_in = false;
                     }
+                    if( $access === 'deny' && $group['priv:'.$app][$a]==='neutral' ){
+                        //群組沒給，自行設定也沒給的就跳過
+                        $write_in = false;
+                    }
+                    if( ! $write_in ){ continue; }
+                    $content = $app.'.'.$a;
+                    $fields['content']=$content;
+                    $rows[]=$fields;
                 }
             }
+        }
+        if( count($rows)>0 && Model::inserts($rows, 'privileges') === false ){
+            Model::exec('ROLLBACK');
+            return '歐喔！不明原因的失敗，請再試一次. Error Code 1';
         }
         Model::exec('COMMIT');
         return true;
@@ -196,14 +214,74 @@ class Managers{
         $sql="SELECT * FROM privileges WHERE request=".Model::quote( $userid , 'text');
         $rows=Model::fetchAll($sql);
         
-        $priv=array();
+        $personal=array();
         foreach( $rows as $row ){
             $content=$row['content'];
             $access=$row['access'];
             list($app,$action)=explode('.', $content);
-            $priv['priv:'.$app][$action]=$access;
+            $personal['priv:'.$app][$action]=$access;
         }
-        return $priv;
+
+        //檢查群組權限表是否存在，不存在就略過群組權限的處理
+        $sql= "SHOW TABLES LIKE 'groups_managers'";
+        $res = Model::query($sql);
+        $count=Model::numRows($res);
+        $priv=array();
+        if( $count>0 ){
+            //群組層級(管理員身分)權限設定
+            $sql="SELECT * FROM groups_managers WHERE manager_id=".Model::quote( $userid , 'text')." ORDER BY sort";
+            $res=Model::query($sql);
+            
+            $dignities=array();
+            $dignities_quote=array();
+            while( $row = Model::fetchRow($res) ){
+                $dignities[]=$row['group_id'];
+                $dignities_quote[]=Model::quote( $row['group_id'] , 'text');
+            }
+            
+            if( count($dignities_quote)>0 ){
+                $sql="SELECT * FROM privileges WHERE request IN (".implode(',', $dignities_quote).")";
+                $res=Model::query($sql);
+                
+                $groups=array();
+                while( $row = APP::$mdb->fetchRow($res) ){
+                    $request=$row['request'];
+                    $content=$row['content'];
+                    $access=$row['access'];
+                    list($app,$action)=explode('.', $content);
+                    if( $access==='deny' ){ $access='deny-locked'; }
+                    if( $access==='neutral' ){ $access='deny'; }
+                    $groups[$request]['priv:'.$app][$action]=$access;
+                }
+                
+                foreach( $groups as $group ){
+                    $priv=$priv+$group;
+                }
+            }
+        }
+        //權限表最後結算
+        $privs=array();
+        foreach( $priv as $auth_app=>$actions ){
+            foreach( $actions as $auth_action=>$auth_value ){
+                $auth_u = $personal[$auth_app][$auth_action];
+                $auth_g = $priv[$auth_app][$auth_action];
+                if( $auth_g==='deny-locked' ){
+                    $privs[$auth_app][$auth_action]=$auth_g;
+                    continue;
+                }
+                if( $auth_g==='deny' && $auth_u==='allow' ){
+                    $privs[$auth_app][$auth_action]='allow';
+                    continue;
+                }
+                if( $auth_g==='allow' && $auth_u==='deny' ){
+                    $privs[$auth_app][$auth_action]='deny';
+                    continue;
+                }
+                $privs[$auth_app][$auth_action]=$auth_g;
+            }
+        }
+
+        return $privs;
     }
     function loadFullACLs( $userid ){
         //取出實際的權限資料

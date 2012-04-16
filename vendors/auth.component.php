@@ -219,7 +219,9 @@ class AuthComponent{
                     $request=$row['request'];
                     $content=$row['content'];
                     $access=$row['access'];
-                    list($app,$action)=explode(':', $content);
+                    list($app,$action)=explode('.', $content);
+                    if( $access==='deny' ){ $access='deny-locked'; }
+                    if( $access==='neutral' ){ $access='deny'; }
                     $groups[$request][$app][$action]=$access;
                 }
                 
@@ -228,9 +230,29 @@ class AuthComponent{
                 }
             }
         }
-        $priv=$priv+$personal;
-        
-        return $priv;
+        //權限表最後結算
+        $privs=array();
+        foreach( $priv as $auth_app=>$actions ){
+            foreach( $actions as $auth_action=>$auth_value ){
+                $auth_u = $personal[$auth_app][$auth_action];
+                $auth_g = $priv[$auth_app][$auth_action];
+                if( $auth_g==='deny-locked' ){
+                    $privs[$auth_app][$auth_action]='deny';
+                    continue;
+                }
+                if( $auth_g==='deny' && $auth_u==='allow' ){
+                    $privs[$auth_app][$auth_action]='allow';
+                    continue;
+                }
+                if( $auth_g==='allow' && $auth_u==='deny' ){
+                    $privs[$auth_app][$auth_action]='deny';
+                    continue;
+                }
+                $privs[$auth_app][$auth_action]=$auth_g;
+            }
+        }
+
+        return $privs;
     }
     function getUserClientIP(){
         $ip=false;

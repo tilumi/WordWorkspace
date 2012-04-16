@@ -243,20 +243,22 @@ function privileges(){
         redirect( '.' , '不能變更這個使用者的權限' , 'attention' );
     }
     
-    APP::$pageTitle='權限設定：'.$data['name'];
+    APP::$pageTitle='設定'.APP::$mainName.'權限：'.$data['name'];
     
     APP::load( 'vendor', 'Symfony'.DS.'yaml'.DS.'sfYaml' );
-    $priv=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
+    $acls=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
     
-    $form=getPrivilegesForm( '設定'.APP::$mainName.'權限: &nbsp; '.$data['name'], $data, $priv );
+    $privs=Groups::loadPrivileges($data['id']);
+    $form=getPrivilegesForm( '設定'.APP::$mainName.'權限: &nbsp; '.$data['name'], $data, $acls, $privs );
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
         if( ! isset($submits['commit']) ){
             redirect( '.' , '使用者取消' , 'info' );
         }
+        //pr($submits);die;
         if( $form->validate() ){
-            $errmsg = Managers::setPrivileges($submits); 
+            $errmsg = Groups::setPrivileges($submits); 
             if( $errmsg === true ){
                 $userid=$_SESSION['admin']['userid'];
                 APP::syslog($userid.' 變更'.APP::$mainName.'權限: '.$data['userid'].' 成功', APP::$prior['info'], 'managers' );
@@ -267,15 +269,111 @@ function privileges(){
             redirect( '.' , $errmsg , 'error' );
         }
     }
-    $priv=Managers::loadPrivileges($data['id']);
-    $default=array('userid'=>$data['id']) + $priv;
+    $default=array('userid'=>$data['id']) + $privs;
     $form->setDefaults( $default ); 
     
-    $form=Form::getHtml($form, 'privileges');
+    $form=Form::getHtml($form, 'rollcalls');
     
     APP::$appBuffer = array($form);
 }
-function getPrivilegesForm( $header='' , $userdata=array() , $contents=array() ){
+function getPrivilegesForm( $header='' , $userdata=array() , $privs=array(), $settings=array() ){
+    $form=Form::create('frmPrivileges', 'post', APP::$ME );
+    $form->addElement('header', '', $header );
+    
+    $form->addElement('hidden', 'userid', $userdata['id']);
+
+    $privsType=array(
+        'allow'=>'允許',
+        'deny'=>'拒絕',
+        'neutral'=>'不給予',
+    );
+    $privsClassName=array(
+        'allow'=>'submit-green',
+        'neutral'=>'submit-gray',
+        'deny'=>'submit-red',
+    );
+    $privsHelp=array(
+        'allow'=>'預設允許使用，但可被更改',
+        'deny'=>'不允許使用，且不得被更改',
+        'neutral'=>'預設不允許使用，但可被更改',
+    );
+    
+    $style='width:80px;';
+    $form->addElement('html', '<div>圖例：</div>');
+    foreach( $privsClassName as $key=>$pcn ){
+        $form->addElement('button', '', $privsType[$key], array('class'=>$pcn, 'style'=>$style));
+        $form->addElement('html', $privsHelp[$key].' &nbsp; ');
+    }
+    $form->addElement('html', '<div style="height:20px;clear:both;"></div>');
+    
+    $i=0;
+    foreach($privs as $key=>$priv){
+        $name=$priv['name'];
+        if( isset($priv['type']) && $priv['type']==='header' ){
+            $form->addElement('html', '<span style="font-size:14px;color:red;"><strong>'.$name.'</strong></span>');
+            $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+            continue;
+        }
+        
+        $app='';
+        if( isset($priv['app']) && !empty($priv['app']) ){
+            $app=$priv['app'];
+        }
+        
+        $text_indent=str_repeat('&nbsp; ', 2);
+        $methods=$priv['methods'];
+        $checkbox=array();
+        $setup=array();
+        $represent=array();
+        $js_onclick="javascript: changeStatus(this);";
+        //加入標題
+        $form->addElement('html', $text_indent.'<span style="font-size:12px;"><strong>'.$name.'</strong></span>');
+        //附加快捷按鈕
+        if( $app !== 'main' ){
+            $form->addElement('html', $text_indent.'<a href="javascript:void(0);" onclick="javascript: setStatus(\'area-'.$key.'\', \'allow\'); ">全允許</a>');
+            $form->addElement('html', str_repeat('&nbsp; ', 1).'<a href="javascript:void(0);" onclick="javascript: setStatus(\'area-'.$key.'\', \'deny\'); ">全拒絕</a>');
+            $form->addElement('html', str_repeat('&nbsp; ', 1).'<a href="javascript:void(0);" onclick="javascript: setStatus(\'area-'.$key.'\', \'neutral\'); ">全不給予</a>');
+        }
+        //附加說明
+        if( $app === 'main' ){
+            $form->addElement('html', $text_indent.'這是系統賦予的基本權限，不能關閉');
+        }
+        $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+        foreach( $methods as $priv_name=>$actions ){
+            $i+=1;
+            if( $app == 'main' ){
+                //主系統為基本權限，必須提供，因此不需列為選項
+                //$checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('disabled', 'checked'), array('allow', 'allow'));
+                $checkbox[]=&HTML_QuickForm::createElement('button', '', $priv_name, array('class'=>$privsClassName['allow'].' area-'.$key, 'id'=>'btn-'.$i, 'onclick'=>"alert('這是系統基本賦予的權限，不能關閉')", 'style'=>$style));
+                $setup[]=&HTML_QuickForm::createElement('hidden', $actions[0], 'allow', array('id'=>'current-'.$i) );
+                $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
+                continue;
+            }
+            $action=pos($actions);
+            
+            $auth_type='neutral';
+            if( $settings['priv:'.$app][$action]==='allow' ){ $auth_type='allow'; }
+            if( $settings['priv:'.$app][$action]==='deny' ){ $auth_type='deny'; }
+            if( $settings['priv:'.$app][$action]==='neutral' ){ $auth_type='neutral'; }
+            
+            //$checkbox[]=&HTML_QuickForm::createElement('advcheckbox', $actions[0], '', $priv_name, array('class'=>'priv_'.$key,'onclick'=>$js_onclick), array('deny', 'allow'));
+            $checkbox[]=&HTML_QuickForm::createElement('button', '', $priv_name, array('class'=>$privsClassName[$auth_type].' area-'.$key, 'id'=>'btn-'.$i, 'onclick'=>$js_onclick, 'style'=>$style));
+            $setup[]=&HTML_QuickForm::createElement('hidden', $actions[0], $auth_type, array('id'=>'current-'.$i) );
+            $represent[]=&HTML_QuickForm::createElement('hidden', $actions[0], implode(',', $actions) );
+        }
+        $form->addElement('html', $text_indent.$text_indent);
+        $form->addGroup($checkbox, '', '<b>'.$name.'</b>: &nbsp;', ' ');
+        $form->addGroup($setup, 'priv:'.$app.'', '', '');
+        $form->addGroup($represent, 'represent['.$app.']', '', '');
+        $form->addElement('html', '<div style="clear:both;height:10px;"></div>');
+    }
+    $form->addElement('html', '<div style="height:40px;"></div>');
+    $buttons=Form::buttons();
+    $form->addGroup($buttons, null, null, '&nbsp;');
+    
+    return $form;
+}
+function getNoJsPrivilegesForm( $header='' , $userdata=array() , $contents=array() ){
     $form=Form::create('frmPrivileges', 'post', APP::$ME );
     
     $form->addElement('header', '', $header );

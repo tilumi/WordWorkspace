@@ -73,40 +73,43 @@ class Groups{
             unset($data['commit']);
         }
         //pr($data);die;
-        $userid=$data['userid'];
-        $request=Model::quote($userid, 'text');
+        $request=$data['userid'];
         unset($data['userid']);
         
         //pr($data);die;
         Model::exec('START TRANSACTION');
-        $sql="DELETE FROM privileges WHERE request=".$request;
+        $sql="DELETE FROM privileges WHERE request=".Model::quote($request, 'text');
         Model::exec($sql);
         
-        $fields=array();
+        $rows=array();
         foreach( $data as $key=>$actions ){
+            $fields=array();
             if( !preg_match( "/^priv/" , $key ) ){ continue; }
             foreach( $actions as $action=>$setting ){
                 list(  , $app )=explode(':', $key);
-                $access='deny';
-                if( $setting=='allow' ) $access='allow';
+                $access='';
+                if( $setting==='allow' ) $access='allow';
+                if( $setting==='deny' ) $access='deny';
+                if( $setting==='neutral' ) $access='neutral';
+                if( $access==='' ){ continue; }
                 
-                if( $access!='allow' ){ continue; }
-                
-                $access = Model::quote( $access, 'text' );
+                $fields['request']=$request;
+                $fields['access']=$access;
                 
                 $actions = array( $action );
                 if( isset($data['represent'][$app][$action]) ){
                     $actions = explode(',', $data['represent'][$app][$action]);
                 }
                 foreach( $actions as $a ){
-                    $content = Model::quote( $app.'.'.$a , 'text' );
-                    $sql="INSERT INTO privileges (request, content, access) VALUES ( $request , $content , $access )";
-                    if( Model::exec($sql) === false ){
-                        Model::exec('ROLLBACK');
-                        return '歐喔！不明原因的失敗，請再試一次. Error Code 1';
-                    }
+                    $content = $app.'.'.$a;
+                    $fields['content']=$content;
+                    $rows[]=$fields;
                 }
             }
+        }
+        if( Model::inserts($rows, 'privileges') === false ){
+            Model::exec('ROLLBACK');
+            return '歐喔！不明原因的失敗，請再試一次. Error Code 1';
         }
         Model::exec('COMMIT');
         return true;
