@@ -13,6 +13,7 @@ $registedAction = array(
     'add',
     'edit',
     'delete',
+    'view',
     'privileges',
     'm_edit',
     'm_delete',
@@ -229,6 +230,83 @@ function edit(){
     $form=Form::getHtml($form);
     
     APP::$appBuffer = array($form);
+}
+function view(){
+    $id = pos(APP::$params);
+    if( empty($id) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    $data = Groups::findById($id);
+    if( !(is_array($data) && count($data)>0) ){
+        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
+    }
+    APP::$pageTitle='檢視'.APP::$mainName.'資訊：'.$data['name'];
+    $privs=Groups::loadFullACLs($id);
+    
+    $form=getACLsForm( '檢視'.APP::$mainName.'權限', $privs );
+    
+    $privs_html=Form::getHtml($form, 'rollcalls');
+    
+    APP::$appBuffer = array($data, $privs_html);
+}
+function getACLsForm( $header='' , $privs ){
+    $form=Form::create('frmPrivs', 'post', APP::$ME );
+    $form->addElement('header', '', $header );
+    
+    $privsType=array(
+        'allow'=>'允許',
+        'deny'=>'拒絕',
+        'neutral'=>'不給予',
+    );
+    $privsClassName=array(
+        'allow'=>'submit-green',
+        'neutral'=>'submit-gray',
+        'deny'=>'submit-red',
+    );
+    $privsHelp=array(
+        'allow'=>'預設允許使用，但可被更改',
+        'deny'=>'不允許使用，且不得被更改',
+        'neutral'=>'預設不允許使用，但可被更改',
+    );
+    
+    $text_indent=str_repeat('&nbsp; ', 2);
+    $style='width:80px;';
+    $form->addElement('html', '圖例：');
+    foreach( $privsClassName as $key=>$pcn ){
+        $form->addElement('button', '', $privsType[$key], array('class'=>$pcn, 'style'=>$style));
+        $form->addElement('html', $privsHelp[$key].' &nbsp; ');
+    }
+    $form->addElement('html', '<div style="height:20px;"></div>');
+    
+    //pr($privs);die;
+    foreach( $privs as $priv ){
+        if( $priv['type']==='header' ){
+            $form->addElement('html', '<div style="font-size:16px;color:red;font-weight:bold;padding:0;margin:0px 0 0 0;">'.$priv['name'].'</div>'."\n");
+            continue;
+        }
+        
+        //加入標題
+        $form->addElement('html', $text_indent.'<span style="font-size:12px;"><strong>'.$priv['name'].'</strong></span><br>');
+        //$form->addElement('html', '<div style="float:left;height:20px;line-height:20px;font-weight:bold;margin:10px 0 0 0;">'.$priv['name'].'： &nbsp;</div>'."\n");
+        $form->addElement('html', $text_indent.$text_indent);
+        foreach( $priv['methods'] as $name=>$value ){
+            $elements=array();
+            if( $data['type']!='normal' ){
+                $elements[] = &HTML_QuickForm::createElement('button', 'button', $name, array(
+                        'class'=>$privsClassName[ $value ].' ',
+                        'style'=>'margin-top:8px;width:80px;',
+                    )
+                );
+            }else{
+                $elements[] = &HTML_QuickForm::createElement('button', 'button', $data['member_name'], array('class'=>$attendClassName[ $data['status'] ].' '.$type, 'id'=>'btn-'.$data['id'], 'onclick'=>$js_onclick, 'style'=>$style));
+            }
+            $form->addGroup($elements, '', '', '');
+        }
+        $form->addElement('html', '<div style="height:20px;">&nbsp;</div>');
+        
+    }
+    
+    return $form;
 }
 function privileges(){
     $id = pos(APP::$params);

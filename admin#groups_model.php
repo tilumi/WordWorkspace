@@ -127,6 +127,46 @@ class Groups{
         }
         return $priv;
     }
+    function loadFullACLs( $userid ){
+        //取出實際的權限資料
+        $priv_actived=self::loadPrivileges($userid);
+        
+        //取出帳戶資料
+        $data=self::findById($userid);
+        
+        //取出權限表
+        APP::load( 'vendor', 'Symfony'.DS.'yaml'.DS.'sfYaml' );
+        $priv_acls=sfYaml::load( dirname(__FILE__).DS.'config'.DS.'privileges.yml' );
+        
+        //計算完整的權限狀態
+        $acls=array();
+        foreach($priv_acls as $key=>$priv){
+            $name=$priv['name'];
+            if( isset($priv['type']) && !empty($priv['type']) ){
+                $acls[$key]=$priv;
+                continue;
+            }
+            
+            $app='';
+            if( isset($priv['app']) && !empty($priv['app']) ){
+                $app=$priv['app'];
+            }
+            
+            $acls[$key]=$priv;
+            $methods = $acls[$key]['methods'];
+            foreach( $methods as $priv_name=>$actions ){
+                $action = pos($actions);
+                $acls[$key]['methods'][$priv_name]='neutral';
+                if( isset($priv_actived['priv:'.$app][$action]) && $priv_actived['priv:'.$app][$action]==='allow' ){
+                    $acls[$key]['methods'][$priv_name]='allow';
+                }
+                if( isset($priv_actived['priv:'.$app][$action]) && $priv_actived['priv:'.$app][$action]==='deny' ){
+                    $acls[$key]['methods'][$priv_name]='deny';
+                }
+            }
+        }
+        return $acls;
+    }
     function setActive( $id ){
         if( is_string($id) ){
             $fields=array();
