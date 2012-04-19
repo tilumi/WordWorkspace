@@ -181,17 +181,9 @@ function edit(){
     $form->addElement('header', '', $header );
     
     $form->addElement('hidden', 'id');
-    $options = array(
-        'language'=>'tw',
-        'format'=>'Y-m-d H:i',
-        'minYear'=>date('Y')-5,
-        'maxYear'=>date('Y')+5,
-        'year'=>date('Y')
-    );
-    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
-    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
-    
-    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
+    $form->addElement('text', 'sort', '排序', array('class'=>'input-short', 'style'=>'width:50px;'));
+    $form->setdefaults( array('sort'=>0) );
+    $form->addElement('text', 'name', APP::$mainName.'名稱', array('class'=>'input-medium'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
     $options = array(
@@ -199,17 +191,36 @@ function edit(){
         '0'=>'暫時隱藏',
     );
     $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+    $form->setDefaults( array('is_active'=>0 ) );
 
-    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
+    $form->addElement('file', 'photo', APP::$mainName.'封面');
+    if( $data['has_cover']==='1' ){
+        $html='';
+        $i=0;
+        foreach( Albums::$thumbs as $size=>$thumb ){
+            $i+=1; if( $i>3 ){continue;}
+            $url=repos_url( Albums::$upload_dir.$data['id'].'/cover/photo-'.$size.'.jpg?time='.mktime() );
+            $html.='<img src="'.$url.'"> <b>'.$size.'</b> ';
+        }
+        $form->addElement('static', '', '', $html );
+        $form->addElement('checkbox', 'remove', '', ' 移除圖片');
+    }
+    $image_jpg='<img src="'.layout_url('admin', '/images/mime/file-extension-jpg-icon.png').'" alt="JPG">';
+    $image_png='<img src="'.layout_url('admin', '/images/mime/file-extension-png-icon.png').'" alt="PNG">';
+    $form->addElement('static', '', '', '限 '.$image_jpg.' / '.$image_png.'');
+    
+    $form->addElement('textarea', 'info', APP::$mainName.'說明', array('cols'=>90, 'rows'=>10));
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
-    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
+    $form->addRule('sort', '排序 必填', 'required', null, 'client');
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
     $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
     $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
+    
+    $form->applyFilter('name', 'trim');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){

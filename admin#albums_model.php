@@ -98,11 +98,49 @@ class Albums{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
-       	$data['updated']=date('Y-m-d H:i:s');
+        APP::load('vendor', 'thumb');
+        APP::load('pear', 'HTTP/Upload');
         
+        $submits = $data;
+        
+        $data=array();
+       	$data['id']=$submits['id'];
+       	$id=$data['id'];
+       	$data['sort']=$submits['sort'];
+       	$data['urn']=slug($submits['name']);
+       	$data['name']=$submits['name'];
+       	$data['is_active']=$submits['is_active'];
+       	$data['info']=$submits['info'];
+       	$data['created']=date('Y-m-d H:i:s');
+       	
+       	$upload_dir = repos_path( self::$upload_dir );
+       	$base_dir = $upload_dir.$id.'/cover/';
+    	$thumbs=self::$thumbs;
+    	
+    	$upload=new HTTP_Upload();
+    	$photo=$upload->getFiles('photo');
+    	if($photo->isValid()){
+    		if( !is_dir($base_dir) ){ mkdirs($base_dir); }
+    		
+    		$photo->setName('photo-origin.'.strtolower($photo->upload['ext']));
+    		$file_name=$photo->moveTo($base_dir);
+            
+    		$src=$base_dir.'/'.$file_name;
+    		foreach( $thumbs as $size=>$thumb ){
+                $output_type=$thumb['output_type'];
+            	$dst=$base_dir.'/photo-'.$size.'.'.$output_type;
+                
+            	$w=$thumb['width'];$h=$thumb['height'];
+                $c=$thumb['zoom_crop'];$q=$thumb['quality'];
+            	$v_name=thumb($src, $dst, $w, $h, $c, $q, $output_type);
+            }
+            $data['has_cover']='1';
+    	}
+    	if( isset($submits['remove']) && $submits['remove']=='1' ){
+            rmdirs($base_dir);
+            $data['has_cover']='0';
+        }
+    	
         return Model::update($data, 'id', self::$useTable);
     }
     function delete( $data ){
