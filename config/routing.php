@@ -15,6 +15,8 @@ class RoutingConfigs{
     static $apps=array(
             'admin'=>array(
                 'news'=>array('name'=>'news'),
+                'albums/*/photos'=>array('name'=>'album_photos'),
+                'albums'=>array('name'=>'albums'),
                 'managers/groups'=>array('name'=>'groups'),
                 'managers'=>array('name'=>'managers'),
                 'syslog'=>array('name'=>'syslog'),

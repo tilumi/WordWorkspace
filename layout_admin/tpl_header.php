@@ -14,6 +14,7 @@ $topmenu=array(
 $mainmenu=array(
     array('name'=>'主控面板', 'link'=>'/', 'id'=>'main.index' ), 
     array('name'=>'新聞中心', 'link'=>'/news/', 'id'=>'news.index' ),
+    array('name'=>'相簿管理', 'link'=>'/albums/', 'id'=>'albums.index' ),
     array('name'=>'系統紀錄', 'link'=>'/syslog/', 'id'=>'syslog.index' ),
     array('name'=>'操作說明', 'link'=>'/doc/', 'id'=>'docs.index' ),
     /*

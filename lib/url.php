@@ -182,6 +182,34 @@ function layout_url( $layout, $href ){
     
     return false;
 }
+function repos_url( $href ){
+    //如果傳入的參數是字串，則以字串URL方式處理
+    if( is_string($href) ){
+        if( substr($href, 0, 1)!='/' ){
+            $href = '/'.$href;
+        }
+        return txturl('/cabinets'.$href);
+    }
+    if( ! is_array($href) ){
+        return false;
+    }
+    
+    return false;
+}
+function repos_path( $href ){
+    //如果傳入的參數是字串，則以字串URL方式處理
+    if( is_string($href) ){
+        if( substr($href, 0, 1)!='/' ){
+            $href = '/'.$href;
+        }
+        return './cabinets'.$href;
+    }
+    if( ! is_array($href) ){
+        return false;
+    }
+    
+    return false;
+}
 function txturl( $href ){
     $href=trim($href);
     $href_abs=$href;
