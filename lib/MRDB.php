@@ -9,7 +9,7 @@ class MRDB{
     }
     function connect( $name='main' ){
         $profile=$this->_profiles[$name];
-        $engine=$profile['engine'];//預留參數，目前僅支援mysql
+        //$engine=$profile['engine'];//預留參數，目前僅支援mysql
         $host=$profile['host'];
         $dbname=$profile['dbname'];
         $username=$profile['username'];

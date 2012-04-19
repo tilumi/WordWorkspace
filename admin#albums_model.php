@@ -4,15 +4,11 @@ class Albums{
     static $upload_dir='/albums/';
     static $thumbs=array(
         '80x80'=>array('width'=>80,'height'=>80,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '120x80'=>array('width'=>120,'height'=>80,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '162x99'=>array('width'=>162,'height'=>99,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '210x140'=>array('width'=>210,'height'=>140,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '214x134'=>array('width'=>214,'height'=>134,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '242x162'=>array('width'=>242,'height'=>162,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '255x170'=>array('width'=>255,'height'=>170,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '438x270'=>array('width'=>438,'height'=>270,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
-        '450x450'=>array('width'=>450,'height'=>450,'quality'=>70,'zoom_crop'=>2,'output_type'=>'jpg'),
-        '800x680'=>array('width'=>800,'height'=>650,'quality'=>70,'zoom_crop'=>2,'output_type'=>'jpg'),
+        '120x90'=>array('width'=>120,'height'=>90,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
+        '400'=>array('width'=>400,'height'=>400,'quality'=>70,'zoom_crop'=>2,'output_type'=>'jpg'),
+        '800'=>array('width'=>800,'height'=>800,'quality'=>70,'zoom_crop'=>2,'output_type'=>'jpg'),
+        '1200'=>array('width'=>1200,'height'=>1200,'quality'=>70,'zoom_crop'=>2,'output_type'=>'jpg'),
+        '1600'=>array('width'=>1600,'height'=>1600,'quality'=>70,'zoom_crop'=>2,'output_type'=>'jpg'),
     );
     
     function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
@@ -82,7 +78,7 @@ class Albums{
     	if($photo->isValid()){
     		if( !is_dir($base_dir) ){ mkdirs($base_dir); }
     		
-    		$photo->setName('photo_origin.'.strtolower($photo->upload['ext']));
+    		$photo->setName('photo-origin.'.strtolower($photo->upload['ext']));
     		$file_name=$photo->moveTo($base_dir);
             
     		$src=$base_dir.'/'.$file_name;

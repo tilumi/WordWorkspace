@@ -24,7 +24,7 @@ $sizeLimits = array(
 
 define ('CACHE_SIZE', 250);		// number of files to store before clearing cache
 define ('CACHE_CLEAR', 5);		// maximum number of files to delete on each cache clear
-define ('CACHE_DIR', '../cache');
+define ('CACHE_DIR', dirname(dirname(__FILE__)).'/cabinets/cache');
 define ('VERSION', '1.09');		// version number (to force a cache refresh
 
 $imageFilters = array(
@@ -41,7 +41,9 @@ $imageFilters = array(
 	"11" => array(IMG_FILTER_SMOOTH, 0),
 );
 
-$quality=75;
+class Thumb{
+    static $quality=75;
+}
 
 function thumb($src, $dst, $width=0, $height=0, $zoom_crop=0, $quality=75, $output_type='jpg'){
     //zoom_crop:0 純縮圖（含等比縮圖和變形縮圖）
@@ -64,7 +66,8 @@ if( ! function_exists('mkdirs') ){
 }
 
 function thumbnail($src, $width=0, $height=0, $zoom_crop=0, $quality=75, $output_type='jpg'){
-    global $quality;
+    
+    Thumb::$quality = $quality;
     
     // sort out image source
     //$src = get_request("src", "");
@@ -322,7 +325,7 @@ function thumbnail($src, $width=0, $height=0, $zoom_crop=0, $quality=75, $output
  */
 function save_image($mime_type, $image_resized, $cache_dir, $output_type='jpg') {
 
-	global $quality;
+    $quality = Thumb::$quality;
 
 	// check to see if we can write to the cache directory
 	$is_writable = 0;
@@ -366,7 +369,7 @@ function save_image($mime_type, $image_resized, $cache_dir, $output_type='jpg') 
 
 function show_image($mime_type, $image_resized, $cache_dir) {
 
-	global $quality;
+    $quality = Thumb::$quality;
 
 	// check to see if we can write to the cache directory
 	$is_writable = 0;

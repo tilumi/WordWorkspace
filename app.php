@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
 
 //設定環境
 define('TIMEZONE', "Asia/Taipei");
@@ -105,11 +106,6 @@ include( DIRCONFIG.'layouts.php' );
 $_default = array_merge( $_default , APP::$layoutsConfigs['default'] );
 $prefix=APP::$routing['prefix'];
 View::$layoutConfigs = array_merge( $_default , APP::$layoutsConfigs[ $prefix ] );
-
-$layout='main';
-if( View::$layoutConfigs['has_layout'] ){
-    $layout=View::$layoutConfigs['layout'];
-}
 
 
 marktime( 'Core' , 'Parse Layout Configs');

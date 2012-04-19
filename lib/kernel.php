@@ -604,14 +604,8 @@ class Form{
     /*****  Below Only For PEAR::QuickForm  *****/
     
     function create( $name='frm', $method='post' , $action='' ){
-        if( CACHE ){
-            //APP::$dataCache->setLifeTime(300);
-            //$form = APP::$dataCache->call( 'Form::createFormObject', $name, $method, $action );
-            /* 無法Cache: unserialize failed */
-            $form = Form::createFormObject( $name, $method, $action );
-        }else{
-            $form = Form::createFormObject( $name, $method, $action );
-        }
+        $form = Form::createFormObject( $name, $method, $action );
+
         return $form;
     }
     function createFormObject( $name, $method, $action ){

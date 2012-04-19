@@ -31,7 +31,7 @@ function parseMenuItem($item, $markup=false, $submenu_key=null){
     $tmp="";
     $hidden=false;
     if( is_array($item) ){
-        if( $item['hidden']===true ){
+        if( isset($item['hidden']) && $item['hidden']===true ){
             $hidden=true;
         }
         if( isset($item['id']) && !empty($item['id']) ){

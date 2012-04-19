@@ -5,6 +5,7 @@ function redirect_message(){
     
     $redirect_messages = &$_SESSION['Redirect'];
     $ME_alias=preg_replace('/index\.html$/','', APP::$ME );
+    $RMSG='';
     if( isset($redirect_messages[ APP::$ME ]) ){ //取出
         $RMSG=$redirect_messages[ APP::$ME ];
         unset($redirect_messages[ APP::$ME ]);
@@ -13,7 +14,7 @@ function redirect_message(){
         $RMSG=$redirect_messages[ $ME_alias ];
         unset($redirect_messages[ $ME_alias ]);
     }
-    if( $RMSG['timeout'] < mktime() ){ //如果逾期就刪除
+    if( isset($RMSG['timeout']) && $RMSG['timeout'] < mktime() ){ //如果逾期就刪除
         unset($RMSG);
     }
     if( isset($RMSG) && is_array( $RMSG ) ){
