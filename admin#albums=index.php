@@ -82,7 +82,7 @@ table td{
                         	<thead>
                                 <tr>
                                     <th class="header" style="width: 50px;">#</th>
-                                    <th class="header" style="width: 100px;"><?php echo APP::$mainName;?>封面</th>
+                                    <th class="header" style="width: 85px;"><?php echo APP::$mainName;?>封面</th>
                                     <th class="header" style=""><?php echo APP::$mainName;?>名稱</th>
                                     <th class="header" style="width: 50px;">顯示</th>
                                     <th class="header" style="width: 120px;">建檔</th>
@@ -97,7 +97,7 @@ table td{
                                     	<input name="items[]" value="<?php echo $r['id']; ?>" type="checkbox">
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
-                                    <td>
+                                    <td style="height:85px;">
                                     <?php if( $r['has_cover']=='1' ){ ?>
                                         <img src="<?php echo repos_url('/albums/'.$r['id'].'/cover/photo-80x80.jpg'); ?>">
                                     <?php } ?>
