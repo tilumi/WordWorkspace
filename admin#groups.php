@@ -129,10 +129,11 @@ function add(){
     
     if( ACL::checkAuth( array('action'=>'active') ) ){
         $options = array(
-            '1'=>'直接顯示',
-            '0'=>'暫時隱藏',
+            '1'=>'啟用',
+            '0'=>'停用',
         );
-        $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+        $form->addElement('select', 'is_active', '啟用狀態', $options, array('class'=>'input-short'));
+        $form->setDefaults( array('is_active'=>0 ) );
     }
     
     $buttons=Form::buttons();
@@ -190,11 +191,11 @@ function edit(){
     $form->addElement('text', 'sort', '排序', array('class'=>'input'));
     
     if( ACL::checkAuth( array('action'=>'active') ) ){
-        $options = array(
-            '1'=>'直接顯示',
-            '0'=>'暫時隱藏',
-        );
-        $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+        $radio=array();
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 啟用', '1');
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 停用', '0');
+        $form->addGroup($radio, '', '啟用狀態', ' ');
+        $form->setDefaults( array('is_active'=>0 ) );
     }
     
     $buttons=Form::buttons();

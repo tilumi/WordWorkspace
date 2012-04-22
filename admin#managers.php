@@ -147,18 +147,17 @@ function add(){
     $form->setDefaults( array('username'=>'' ) );
     
     if( ACL::checkAuth('active') ){
-        $options = array(
-            '1'=>'帳號啟用',
-            '0'=>'暫時停用',
-        );
-        $form->addElement('select', 'is_active', '啟用狀態', $options, array('class'=>'input-short'));
+        $radio=array();
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 帳號啟用', '1');
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 停用', '0');
+        $form->addGroup($radio, '', '啟用狀態', ' ');
+        $form->setDefaults( array('is_active'=>0 ) );
     }
     if( ACL::checkAuth('super_user') ){
-        $options = array(
-            '0'=>'管理員',
-            '1'=>'開發者',
-        );
-        $form->addElement('select', 'is_super_user', '人員層級', $options, array('class'=>'input-short'));
+        $radio=array();
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_super_user', '', ' 管理員', '0');
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_super_user', '', ' 全域管理員', '1');
+        $form->addGroup($radio, '', '帳號層級', ' ');
     }
     
     $buttons=Form::buttons();
@@ -225,18 +224,16 @@ function edit(){
     $form->addElement('text', 'username', '人員名稱', array('class'=>'input-short'));
     
     if( ACL::checkAuth('active') ){
-        $options = array(
-            '1'=>'帳號啟用',
-            '0'=>'暫時停用',
-        );
-        $form->addElement('select', 'is_active', '啟用狀態', $options, array('class'=>'input-short'));
+        $radio=array();
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 帳號啟用', '1');
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 停用', '0');
+        $form->addGroup($radio, '', '啟用狀態', ' ');
     }
     if( ACL::checkAuth('super_user') ){
-        $options = array(
-            '0'=>'管理員',
-            '1'=>'開發者',
-        );
-        $form->addElement('select', 'is_super_user', '人員層級', $options, array('class'=>'input-short'));
+        $radio=array();
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_super_user', '', ' 管理員', '0');
+        $radio[]=&HTML_QuickForm::createElement('radio', 'is_super_user', '', ' 全域管理員', '1');
+        $form->addGroup($radio, '', '帳號層級', ' ');
     }
     $form->addElement('password', 'password1', '密碼 (如不變更請留空)', array('class'=>'input-short password'));
     $form->addElement('password', 'password2', '再輸入一次', array('class'=>'input-short'));

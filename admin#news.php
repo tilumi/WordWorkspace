@@ -128,11 +128,10 @@ function add(){
     $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $options = array(
-        '1'=>'直接顯示',
-        '0'=>'暫時隱藏',
-    );
-    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+    $radio=array();
+    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
+    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
+    $form->addGroup($radio, '', '顯示', ' ');
     $form->setDefaults( array('is_active'=>0 ) );
 
     $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
@@ -197,11 +196,10 @@ function edit(){
     $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $options = array(
-        '1'=>'直接顯示',
-        '0'=>'暫時隱藏',
-    );
-    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input-short'));
+    $radio=array();
+    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
+    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
+    $form->addGroup($radio, '', '顯示狀態', ' ');
 
     $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
     
