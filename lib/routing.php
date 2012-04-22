@@ -78,10 +78,37 @@ class Routing{
             $default=$routingTable['__default__'];
         }
         
+        //取出並比對Routing資料
         $match=false;
         $app='';
         $app_path='';
+        $path_vars=array();
         foreach( $routingTable as $path=>$config ){
+            //二級以上動態路由的判定
+            if( strpos($path, '*') !== false ){
+                $re_path='^'.preg_quote($path).'/';
+                $re_path=str_replace('/', '\/', $re_path);
+                $re_path=str_replace('\*', '([^\/]+?)', $re_path);
+                $re_path='/'.$re_path.'/';
+                //print($re_path).'<br>';
+                if( preg_match_all( $re_path, $p_app, $matches ) ){
+                    
+                    $match=true;
+                    $app = $config['name'];
+                    $app_path = array_shift($matches);
+                    $app_path = substr($app_path[0], 0, -1);
+                    /*echo '<pre>';
+                    print_r($matches).'</pre><br>';*/
+                    //將比對出來的變數一一儲存下來
+                    //動態路由內的變數，將依序插入APP::$params陣列的前方
+                    foreach( $matches as $key=>$p_match ){
+                        $path_vars[] = $p_match[0];
+                    }
+                    break;
+                }
+                if( $match ) continue;
+            }
+            //一般路由
             if( $path.'/' === substr($p_app, 0, strlen($path)+1) ){
                 $match=true;
                 $app = $config['name'];
@@ -89,6 +116,7 @@ class Routing{
                 break;
             }
         }
+        //echo 'app_path: '.$app_path.'<br>';
         if( ! $match ){
             $app = $default['name'];
         }
@@ -104,12 +132,17 @@ class Routing{
         
         //更新屬於參數的路徑區域
         $nodes=explode('/', $p_params);
+        /*echo '<pre>';
+        print_r($nodes).'</pre><br>';*/
         
         $handler = $app;
         if( $prefix!='main' ){
             $handler = $prefix.'#'.$handler;
         }
         
+        if( count($path_vars) ){
+            $nodes = array_merge($path_vars, $nodes);
+        }
         return array(
             'prefix'=>$prefix,
             'prefixFull'=>$prefixFull,
