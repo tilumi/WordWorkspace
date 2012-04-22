@@ -99,7 +99,7 @@ table td{
                                     </td>
                                     <td style="height:85px;">
                                     <?php if( $r['has_cover']=='1' ){ ?>
-                                        <img src="<?php echo repos_url('/albums/'.$r['id'].'/cover/photo-80x80.jpg'); ?>">
+                                        <img src="<?php echo repos_url('/albums/'.$r['id'].'/cover/photo-80x80.jpg?time='..mktime()); ?>">
                                     <?php } ?>
                                     </td>
                                     <td>
