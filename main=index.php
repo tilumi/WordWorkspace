@@ -188,7 +188,7 @@ if( ! ($IE6 || $IE7) ){
                             或分享給你的朋友喔 ...
 
 <?php $url_encode=urlencode('http://bible.jbride.cc'); ?>
-<?php $title_encode=urlencode('The Bible 線上聖經'); ?>
+<?php $title_encode=urlencode('主的愛&線上聖經'); ?>
 <?php $link="http://twitter.com/home?status=".$title_encode.$url;?>
 
 <a class="social-link normal" title="Plurk" href="javascript: void(window.open('http://www.plurk.com/?qualifier=shares&status=' .concat(encodeURIComponent(document.title)) .concat(' '). concat(encodeURIComponent(location.href)) ));">
@@ -213,7 +213,7 @@ if( ! ($IE6 || $IE7) ){
     					<div class="box5 box-style" style="display:inline-block;vertical-align:top;font-family: Arial;margin-bottom:30px;">
     						<h2 class="title">串連貼紙</h2>
     						<p>如果你喜歡我們，歡迎把這個貼紙貼到你的網站或部落格上喔 ...</p>
-    						<?php $sticker='<a href="http://bible.jbride.cc" target="_blank" title="線上聖經"><img src="http://bible.jbride.cc/layout_main/images/sticker.jpg" alt="The Bible 線上聖經"></a>'; ?>
+    						<?php $sticker='<a href="http://bible.jbride.cc" target="_blank" title="線上聖經"><img src="http://bible.jbride.cc/layout_main/images/sticker.jpg" alt="主的愛&線上聖經"></a>'; ?>
     						<p><?php echo $sticker; ?></p>
     						<textarea style="width:90%;height:100px;"><?php echo htmlspecialchars($sticker); ?></textarea>
     					</div>
