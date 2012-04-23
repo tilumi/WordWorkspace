@@ -16,6 +16,7 @@ class APP{
     
     static $routing=array();
     static $params=array();
+    static $parents=array();
     static $handler=''; //紀錄本次執行，總管負責的程式名稱（不含.php）
     static $app='';     //app (controller) 的名稱
     static $doctype=''; //副檔名格式

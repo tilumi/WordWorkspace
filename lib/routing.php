@@ -8,6 +8,7 @@ class Routing{
                 'prefixFull'=>'',
                 'app'=>'main',
                 'params'=>array('index'),
+                'parents'=>array(),
                 'doctype'=>'html',
                 'handler'=>'main',
             );
@@ -65,6 +66,11 @@ class Routing{
         foreach( $routingTable as $path=>$config ){
             RoutingConfigs::$maps[ $config['name'] ]=$path;
             RoutingConfigs::$r_maps[ $path ]=$config['name'];
+            //設定各app的母親app
+            RoutingConfigs::$parents[ $config['name'] ]='';
+            if( isset($config['parents']) ){
+                RoutingConfigs::$parents[ $config['name'] ]=$config['parents'];
+            }
         }
         
         $p_app = $p;
@@ -140,14 +146,12 @@ class Routing{
             $handler = $prefix.'#'.$handler;
         }
         
-        if( count($path_vars) ){
-            $nodes = array_merge($path_vars, $nodes);
-        }
         return array(
             'prefix'=>$prefix,
             'prefixFull'=>$prefixFull,
             'app'=>$app,
             'params'=>$nodes,
+            'parents'=>$path_vars,
             'doctype'=>$ext,
             'handler'=>$handler,
         );

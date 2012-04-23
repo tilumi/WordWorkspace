@@ -3,6 +3,7 @@ class RoutingConfigs{
     //路徑的前綴名稱
     static $maps=array(); //正查表 app->path，系統自動產生，請勿移除
     static $r_maps=array(); //反查表 path->app，系統自動產生，請勿移除
+    static $parents=array(); //母app對照表，系統自動產生，請勿移除
     static $prefixs=array(
             'administrator'=>array(
                 'name'=>'admin',
@@ -15,7 +16,7 @@ class RoutingConfigs{
     static $apps=array(
             'admin'=>array(
                 'news'=>array('name'=>'news'),
-                'albums/*/photos'=>array('name'=>'albums_photos'),
+                'albums/*/photos'=>array('name'=>'albums-photos', 'parents'=>'albums'),
                 'albums'=>array('name'=>'albums'),
                 'managers/groups'=>array('name'=>'groups'),
                 'managers'=>array('name'=>'managers'),

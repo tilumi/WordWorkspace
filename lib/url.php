@@ -95,6 +95,9 @@ function anchor( $name, $href, $options=array() ){
     $html.='<a href="'.$url.'" '.implode(' ', $attrs).'>'.$name.'</a>';
     return $html;
 }
+function get_parents_app( $app ){
+    return RoutingConfigs::$parents[ $app ];
+}
 function url( $href ){
     //如果傳入的參數是字串，則以字串URL方式處理
     if( is_string($href) ){
@@ -105,7 +108,7 @@ function url( $href ){
             $href = substr($href, 1);
             $base = '';
             if( APP::$prefix !== 'main' ){
-                $base .= APP::$prefixFull.'/';
+                $base = APP::$prefixFull.'/';
             }
             if( APP::$prefix === 'main' ){
                 $base = '/';
@@ -113,12 +116,16 @@ function url( $href ){
             $href = $base.$href;
             $status += 8;
         }
-        // ".." 永遠表示 prefix 的根目錄，或是 main app
+        // ".." 表示取得app 的母親app，若無則指 prefix 的根目錄，或是 main app
         if( $status==0 && substr($href, 0, 2)=='..' ){
             $base = '';
             $href = substr($href, 2);
-            if( APP::$prefix != 'main' ){
-                $base .= APP::$prefixFull.'/';
+            $parents_app=get_parents_app(APP::$app);
+            if( empty( $parents_app ) ){ //空字串，表示沒有母親APP，指根目錄
+                
+                if( APP::$prefix !== 'main' ){
+                    $base = APP::$prefixFull.'/';
+                }
             }
             //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
             if( ! empty($base) && ! empty($href) ){

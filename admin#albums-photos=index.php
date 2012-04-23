@@ -6,9 +6,11 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 
             <div class="grid_12">
 <p>
-<?php echo View::anchor('..', 'Home'); ?>
+<?php echo View::anchor('..', '主控面板'); ?>
  »
-<?php echo APP::$mainTitle; ?>
+<?php echo View::anchor('/albums/', '相簿管理 Albums'); ?>
+ »
+<?php echo APP::$mainName.'：'; ?>
 </p>
 
                 <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
@@ -84,10 +86,10 @@ table td{
                                     <th class="header" style="width: 50px;">#</th>
                                     <th class="header" style="width: 85px;"><?php echo APP::$mainName;?>封面</th>
                                     <th class="header" style=""><?php echo APP::$mainName;?>名稱</th>
-                                    <th style="width: 70px">相片管理</th>
                                     <th class="header" style="width: 50px;">顯示</th>
                                     <th class="header" style="width: 120px;">建檔</th>
                                     <th class="header" style="width: 170px">建檔日期</th>
+                                    <th style="width: 70px">圖片管理</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -105,9 +107,6 @@ table td{
                                     </td>
                                     <td>
                                         <?php echo $r['name']; ?>
-                                    </td>
-                                    <td>
-                                        <a href="<?php echo url($r['id'].'/photos/'); ?>"><img src="<?php echo layout_url('admin', '/images/icons/Photos-Blue-Folder-icon-64.png'); ?>"></a>
                                     </td>
 <?php if( ACL::checkAuth( 'active' ) ){ ?>
                                     <td><?php if( $r['is_active']=='1' ){ ?>
@@ -140,6 +139,9 @@ table td{
                                         echo 'Never';
                                     }
                                     ?></td>
+                                    <td>
+                                        <a href="<?php echo url($r['id'].'/'); ?>"><img src="<?php echo layout_url('admin', '/images/icons/Photos-Blue-Folder-icon-64.png'); ?>"></a>
+                                    </td>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
                                         <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>

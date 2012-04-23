@@ -59,6 +59,7 @@ APP::$routing = $routing_args;
 APP::$app     = $routing_args['app'];
 APP::$doctype = $routing_args['doctype'];
 APP::$params  = $routing_args['params'];
+APP::$parents  = $routing_args['parents'];
 APP::$handler = $routing_args['handler']; //標示總管負責的程式
 APP::$prefix  = $routing_args['prefix']; //網址前綴詞
 APP::$prefixFull = $routing_args['prefixFull']; //網址前綴全名
