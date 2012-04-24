@@ -98,6 +98,12 @@ function anchor( $name, $href, $options=array() ){
 function get_parents_app( $app ){
     return RoutingConfigs::$parents[ $app ];
 }
+function get_app_path( $app ){
+    if( isset( RoutingConfigs::$maps[ $app ] ) ){
+        return RoutingConfigs::$maps[ $app ];
+    }
+    return '';
+}
 function url( $href ){
     //如果傳入的參數是字串，則以字串URL方式處理
     if( is_string($href) ){
@@ -118,15 +124,30 @@ function url( $href ){
         }
         // ".." 表示取得app 的母親app，若無則指 prefix 的根目錄，或是 main app
         if( $status==0 && substr($href, 0, 2)=='..' ){
+            $href = preg_replace('/[\.]{2,}/', '..', $href);
             $base = '';
             $href = substr($href, 2);
-            $parents_app=get_parents_app(APP::$app);
-            if( empty( $parents_app ) ){ //空字串，表示沒有母親APP，指根目錄
-                
-                if( APP::$prefix !== 'main' ){
-                    $base = APP::$prefixFull.'/';
+            $app = APP::$app;
+            $i=0;
+            do{
+                $parents_app=get_parents_app($app);
+                if( empty( $parents_app ) ){ //空字串，表示沒有母親APP，指根目錄
+                    if( APP::$prefix !== 'main' ){
+                        $base .= APP::$prefixFull.'/';
+                    }
+                }else{
+                    $base .= get_app_path($parents_app).'/';
                 }
-            }
+                
+                $next_level=substr($href, 0, 3);
+                if( $next_level==='/..' ){
+                    $app=$parents_app;
+                }else{
+                    $parents_app='';
+                }
+                $i+=1;
+                if( $i>=10 ){ break; }
+            }while( ! empty($parents_app) );
             //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
             if( ! empty($base) && ! empty($href) ){
                 $base = substr($base, 0, -1);
