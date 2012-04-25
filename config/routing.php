@@ -18,7 +18,7 @@ class RoutingConfigs{
                 'news'=>array('name'=>'news'),
                 'albums/*/photos'=>array('name'=>'albums-photos', 'parents'=>'albums'),
                 'albums'=>array('name'=>'albums'),
-                'managers/groups'=>array('name'=>'groups'),
+                'managers/groups'=>array('name'=>'groups', 'parents'=>'managers'),
                 'managers'=>array('name'=>'managers'),
                 'syslog'=>array('name'=>'syslog'),
                 '__default__'=>array('name'=>'main'),

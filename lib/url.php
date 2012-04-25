@@ -127,27 +127,30 @@ function url( $href ){
             $href = preg_replace('/[\.]{2,}/', '..', $href);
             $base = '';
             $href = substr($href, 2);
+            if( APP::$prefix !== 'main' ){
+                $base_prefix = APP::$prefixFull.'/';
+            }
             $app = APP::$app;
-            $i=0;
-            do{
-                $parents_app=get_parents_app($app);
-                if( empty( $parents_app ) ){ //空字串，表示沒有母親APP，指根目錄
-                    if( APP::$prefix !== 'main' ){
-                        $base .= APP::$prefixFull.'/';
-                    }
-                }else{
-                    $base .= get_app_path($parents_app).'/';
-                }
+            $parents_app=get_parents_app($app);
+            if( empty($parents_app) ){
+                $base = $base_prefix;
+            }
+            while( ! empty($parents_app) ){
+                $base = $base_prefix.get_app_path($parents_app).'/';
                 
-                $next_level=substr($href, 0, 3);
-                if( $next_level==='/..' ){
-                    $app=$parents_app;
+                if( substr($href, 0, 3)==='/..' ){
+                    $parents_app=get_parents_app($parents_app);
+                    $href=substr($href, 3);
                 }else{
                     $parents_app='';
                 }
-                $i+=1;
-                if( $i>=10 ){ break; }
-            }while( ! empty($parents_app) );
+            }
+            //如果parents已經找完，還有/..的話，強制成為根目錄
+            if( substr($href, 0, 3)==='/..' ){
+                $base = $base_prefix;
+                $href = str_replace('/..', '', $href);
+            }
+            
             //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
             if( ! empty($base) && ! empty($href) ){
                 $base = substr($base, 0, -1);

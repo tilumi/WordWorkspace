@@ -110,6 +110,28 @@ class Routing{
                     foreach( $matches as $key=>$p_match ){
                         $path_vars[] = $p_match[0];
                     }
+                    //更新自身和所有母親APP的路徑
+                    $i=0;
+                    $renew_app=$app;
+                    do{
+                        $renew_path=RoutingConfigs::$maps[ $renew_app ]; //原路徑（含星號的路徑）
+                        $updated_path=vsprintf( str_replace('*', '%s', $renew_path), $path_vars ); //更新後的路徑
+                        //更新正查app->path
+                        RoutingConfigs::$maps[ $renew_app ]=$updated_path;
+                        //更新反查path->app
+                        RoutingConfigs::$r_maps[ $updated_path ]=$renew_app;
+                        unset(RoutingConfigs::$r_maps[ $renew_path ]);
+                        
+                        //檢查是否有母APP
+                        if( ! empty(RoutingConfigs::$parents[$renew_app]) ){
+                            $renew_app=RoutingConfigs::$parents[$renew_app];
+                        }else{
+                            $renew_app='';
+                        }
+                        $i+=1;
+                        if( $i>10 ){ break; }
+                    }while( ! empty($renew_app) );
+                    
                     break;
                 }
                 if( $match ) continue;
@@ -122,6 +144,14 @@ class Routing{
                 break;
             }
         }
+        /*echo '<pre>';
+        print_r(RoutingConfigs::$maps).'</pre><br>';
+        echo '<pre>';
+        print_r(RoutingConfigs::$r_maps).'</pre><br>';
+        echo '<pre>';
+        print_r(RoutingConfigs::$parents).'</pre><br>';
+        echo $i;*/
+        
         //echo 'app_path: '.$app_path.'<br>';
         if( ! $match ){
             $app = $default['name'];

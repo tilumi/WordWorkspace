@@ -6,9 +6,9 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 
             <div class="grid_12">
 <p>
-<?php echo View::anchor('..', '主控面板'); ?>
+<?php echo View::anchor('/', '主控面板'); ?>
  »
-<?php echo View::anchor('/albums/', '相簿管理 Albums'); ?>
+<?php echo View::anchor('..', '相簿管理 Albums'); ?>
  »
 <?php echo APP::$mainName.'：'; ?>
 </p>
