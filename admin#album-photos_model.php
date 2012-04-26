@@ -1,6 +1,6 @@
 <?php
 class AlbumsPhotos{
-    static $useTable='albums';
+    static $useTable='albums_photos';
     static $upload_dir='/albums/';
     static $thumbs=array(
         '80x80'=>array('width'=>80,'height'=>80,'quality'=>70,'zoom_crop'=>1,'output_type'=>'jpg'),
@@ -70,7 +70,7 @@ class AlbumsPhotos{
        	$data['created']=date('Y-m-d H:i:s');
        	
        	$upload_dir = repos_path( self::$upload_dir );
-       	$base_dir = $upload_dir.$id.'/cover/';
+       	$base_dir = $upload_dir.$id.'/photos/';
     	$thumbs=self::$thumbs;
     	
     	$upload=new HTTP_Upload();
@@ -114,7 +114,7 @@ class AlbumsPhotos{
        	$data['created']=date('Y-m-d H:i:s');
        	
        	$upload_dir = repos_path( self::$upload_dir );
-       	$base_dir = $upload_dir.$id.'/cover/';
+       	$base_dir = $upload_dir.$id.'/photos/';
     	$thumbs=self::$thumbs;
     	
     	$upload=new HTTP_Upload();

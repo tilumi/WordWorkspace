@@ -8,9 +8,11 @@ $mainName = APP::$mainName;
             <!-- Form elements -->    
             <div class="grid_12">
 <p>
-<?php echo View::anchor('..', 'Home'); ?>
+<?php echo View::anchor('/', '主控面板'); ?>
  »
-<?php echo View::anchor('.', $mainTitle); ?>
+<?php echo View::anchor('..', '相簿管理 Albums'); ?>
+ »
+<?php echo View::anchor('.', '「'.$data['name'].'」'.APP::$mainTitle); ?>
  »
 <?php echo APP::$pageTitle; ?>
 </p>

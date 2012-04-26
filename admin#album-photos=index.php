@@ -1,7 +1,7 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
+list( $data, $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
 ?>
 
             <div class="grid_12">
@@ -10,10 +10,10 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
  »
 <?php echo View::anchor('..', '相簿管理 Albums'); ?>
  »
-<?php echo APP::$mainName.'：'; ?>
+<?php echo '「'.$data['name'].'」'.APP::$mainTitle; ?>
 </p>
 
-                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
+                <?php echo Blocks::mainTitle( '「'.$data['name'].'」'.APP::$mainTitle ); ?>
             </div>
 
             <div class="grid_12">
@@ -39,7 +39,46 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
             		<div style="clear: both;"></div>
                 </div>
             </div>
+
+<style>
+.dashboard-module{
+    position:relative;
+}
+.dashboard-module .item-index{
+    position:absolute;top:10px;left:10px;
+}
+</style>
             <div class="grid_12">
+<?php foreach($rows as $key=>$r){ ?>
+            	<a href="<?php echo url( '/news/' ); ?>" class="dashboard-module">
+                	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/view-pim-news.png'); ?>" alt="edit" width="64" height="64">
+                	<span>新聞中心</span>
+                	<div class="item-index">
+                    	<input name="items[]" value="<?php echo $r['id']; ?>" type="checkbox"><br>
+                        <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
+                    </div>
+                </a>
+<?php } ?>
+            	<a href="<?php echo url( '/news/' ); ?>" class="dashboard-module">
+                	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/view-pim-news.png'); ?>" alt="edit" width="64" height="64">
+                	<span>新聞中心</span>
+                	<div class="item-index">
+                    	<input name="items[]" value="<?php echo $r['id']; ?>" type="checkbox"><br>
+                        <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
+                    </div>
+                </a>
+            	<a href="<?php echo url( '/news/' ); ?>" class="dashboard-module">
+                	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/view-pim-news.png'); ?>" alt="edit" width="64" height="64">
+                	<span>新聞中心</span>
+                </a>
+            	<a href="<?php echo url( '/news/' ); ?>" class="dashboard-module">
+                	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/view-pim-news.png'); ?>" alt="edit" width="64" height="64">
+                	<span>新聞中心</span>
+                </a>
+            	<a href="<?php echo url( '/news/' ); ?>" class="dashboard-module">
+                	<img src="<?php echo layout_url( APP::$prefix, '/images/apps/view-pim-news.png'); ?>" alt="edit" width="64" height="64">
+                	<span>新聞中心</span>
+                </a>
                 
                 <!-- Example table -->
                 <div class="module">
@@ -89,7 +128,6 @@ table td{
                                     <th class="header" style="width: 50px;">顯示</th>
                                     <th class="header" style="width: 120px;">建檔</th>
                                     <th class="header" style="width: 170px">建檔日期</th>
-                                    <th style="width: 70px">圖片管理</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -139,9 +177,6 @@ table td{
                                         echo 'Never';
                                     }
                                     ?></td>
-                                    <td>
-                                        <a href="<?php echo url($r['id'].'/'); ?>"><img src="<?php echo layout_url('admin', '/images/icons/Photos-Blue-Folder-icon-64.png'); ?>"></a>
-                                    </td>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
                                         <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>

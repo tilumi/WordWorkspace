@@ -5,7 +5,7 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 ?>
             <div class="grid_12">
 <p>
-<?php echo View::anchor('..', 'Home'); ?>
+<?php echo View::anchor('/', '主控面板'); ?>
  »
 <?php echo APP::$mainTitle; ?>
 </p>

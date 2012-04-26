@@ -13,7 +13,7 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo, $groups ) = AP
                 </div>
 <?php } ?>
 <p>
-<?php echo View::anchor('..', 'Home'); ?>
+<?php echo View::anchor('/', '主控面板'); ?>
  »
 <?php echo APP::$mainTitle; ?>
 </p>

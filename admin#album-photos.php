@@ -46,7 +46,7 @@ if( in_array( $action , $registedAction ) ){
             break;
     }
     //執行action
-    $action();
+    $action($data);
 }else{
     require('error/404.php');die;
 }
@@ -60,6 +60,7 @@ if( file_exists($viewTpl) ){ include( $viewTpl ); }
 
 function index(){
     View::setTitle(APP::$pageTitle);
+    $data=func_get_arg(0);
     
     //初始化
     $SESS = & $_SESSION['Pager'];
@@ -117,7 +118,7 @@ function index(){
     
     list($rows, $totalItems) = AlbumsPhotos::pagelist($submits, $pageID, $pageRows);
     
-    APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
+    APP::$appBuffer = array( $data, $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 function add(){
     APP::$pageTitle='新增'.APP::$mainName;
