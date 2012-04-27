@@ -35,15 +35,15 @@ $(document).keydown(function(e){
     font-size:21px;
     margin:30px 0 15px 0;
 }
-.script .verse{
-    font-family:Arial;
+#content .script .verse{
     margin-right:5px;
+}
+#content .script .words, #content .script .verse{
+	/*font-family: Georgia, "蘋果儷黑體", "微軟正黑體", "新細明體", "Times New Roman", Times, serif;*/
+	font-family: Arial, "蘋果儷黑 Pro", "新細明體", "Trebuchet MS", Tahoma, Verdana, Arial, Helvetica, sans-serif;
 }
 .even{
     background-color:#eaf4f9;
-}
-.words{
-    font-family:新細明體;
 }
 .chapNav span{ margin:0 5px; color:#ccc; }
 .subject h1.title{ margin:0; }
