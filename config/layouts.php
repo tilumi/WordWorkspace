@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 //Regions default layout config
 
 APP::$layoutsConfigs = array(

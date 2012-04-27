@@ -1,4 +1,4 @@
-﻿<?php include('tpl_metadata.php'); ?>
+<?php include('tpl_metadata.php'); ?>
 
 <body class="homepage">
 <div id="wrapper">
