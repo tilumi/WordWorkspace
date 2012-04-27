@@ -14,7 +14,10 @@ $topmenu=array(
 $mainmenu=array(
     array('name'=>'主控面板', 'link'=>'/', 'id'=>'main.index' ), 
     array('name'=>'新聞中心', 'link'=>'/news/', 'id'=>'news.index' ),
+    array('name'=>'相簿管理', 'link'=>'/albums/', 'id'=>'albums.index'),
+    array('name'=>'相片管理', 'link'=>'', 'id'=>'albums.index', 'hidden'=>true),
     array('name'=>'系統紀錄', 'link'=>'/syslog/', 'id'=>'syslog.index' ),
+    array('name'=>'操作說明', 'link'=>'/doc/', 'id'=>'docs.index' ),
     /*
     array('name'=>'文章管理', 'link'=>array('plugin'=>'articles', 'controller'=>'main'),
         'submenu'=>array(
@@ -29,7 +32,7 @@ function parseMenuItem($item, $markup=false, $submenu_key=null){
     $tmp="";
     $hidden=false;
     if( is_array($item) ){
-        if( $item['hidden']===true ){
+        if( isset($item['hidden']) && $item['hidden']===true ){
             $hidden=true;
         }
         if( isset($item['id']) && !empty($item['id']) ){
@@ -75,7 +78,7 @@ foreach($mainmenu as $item){
     if( ! method_exists('ACL','checkAuth') ){
         continue;
     }
-    if( ! ACL::checkAuth($item['link']) ){
+    if( ! ACL::checkAuth($item['id']) ){
         continue;
     }
     //開始產生MENU
@@ -168,7 +171,7 @@ img, div, input  { behavior: url(<?php echo layout_url('admin', '/js/ie6/iepngfi
 <?php if( method_exists('ACL','checkLogin') && ACL::checkLogin() ){ ?>
                         <a href="<?php echo url( '/logout.html' );?>" id="logout">登出</a>
                         <a href="<?php echo url( '/passwd.html' );?>">變更密碼</a>
-<?php       if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers' ) ){ ?>
+<?php       if( method_exists('ACL','checkAuth') ){ if( ACL::checkAuth( 'managers.index' ) ){ ?>
                         <a href="<?php echo url( '/managers/' );?>">系統管理員</a>
 <?php       } } ?>
                         <a href="<?php echo url( '_/' );?>" target="_blank">網站前台</a>

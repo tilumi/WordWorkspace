@@ -1,12 +1,10 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
+list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo, $groups ) = APP::$appBuffer;
 ?>
 
             <div class="grid_12">
-                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
-                
 <?php if( ACL::checkAuth('groups.index') ){ ?>
                 <div class="float-right">
                     <a href="<?php echo url( 'groups/' ); ?>" class="button">
@@ -14,6 +12,14 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                     </a>
                 </div>
 <?php } ?>
+<p>
+<?php echo View::anchor('/', '主控面板'); ?>
+ »
+<?php echo APP::$mainTitle; ?>
+</p>
+
+                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
+                
             </div>
 
             <div class="grid_12">
@@ -45,7 +51,7 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                 	<h2><span><?php echo Blocks::searchInfo($searchInfo); //顯示列表的檢索範圍 ?></span></h2>
                     
                     <div class="module-table-body">
-                    	<form name="frmList" action="<?php echo ME; ?>" method="post">
+                    	<form name="frmList" action="<?php echo APP::$ME; ?>" method="post">
                     	<input name="mode" type="hidden" value="">
                         <div class="table-apply">
                             <?php echo Blocks::itemsChecker(); //顯示列表選擇器(全選、清除...) ?>
@@ -53,24 +59,24 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                             <span>選取操作:</span> 
 <script>
 var batchRoutes = {
-    'active':'<?php echo url(array('action'=>'m_edit'));?>',
-    'inactive':'<?php echo url(array('action'=>'m_edit'));?>',
-    'delete':'<?php echo url(array('action'=>'m_delete'));?>',
-    'normal_user':'<?php echo url(array('action'=>'m_priv'));?>',
-    'super_user':'<?php echo url(array('action'=>'m_priv'));?>',
+    'active':'<?php echo url('m_edit');?>',
+    'inactive':'<?php echo url('m_edit');?>',
+    'delete':'<?php echo url('m_delete');?>',
+    'normaluser':'<?php echo url('m_priv');?>',
+    'superuser':'<?php echo url('m_priv');?>',
 };
 </script>
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
                                 <option value="" selected="selected">--- 選擇動作 ---</option>
-<?php if( ACL::checkAuth( array('action'=>'active') ) ){ ?>
+<?php if( ACL::checkAuth('active') ){ ?>
                                 <option value="active">啟用帳號</option>
                                 <option value="inactive">停用帳號</option>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'super_user') ) ){ ?>
-                                <option value="normal_user">設定為「管理員」層級</option>
-                                <option value="super_user">設定為「開發者」層級</option>
+<?php if( ACL::checkAuth('super_user') ){ ?>
+                                <option value="normaluser">設定為「管理員」層級</option>
+                                <option value="superuser">設定為「全域管理員」層級</option>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'delete') ) ){ ?>
+<?php if( ACL::checkAuth('delete') ){ ?>
                                 <option value="delete">刪除</option>
 <?php } ?>
                             </select>
@@ -85,10 +91,10 @@ var batchRoutes = {
                                     <th class="header" style="width: 50px;">#</th>
                                     <th class="header" style="">帳戶名稱</th>
                                     <th class="header" style="">人員名稱</th>
-                                    <th class="header" style="">人員身分</th>
+                                    <th class="header" style="">所屬群組</th>
                                     <th class="header" style="width: 50px;">啟用</th>
-<?php if( ACL::checkAuth( array('action'=>'super_user') ) ){ ?>
-                                    <th class="header" style="width: 50px;">開發者</th>
+<?php if( ACL::checkAuth('super_user') ){ ?>
+                                    <th class="header" style="width: 70px;">全域管理</th>
 <?php } ?>
                                     <th class="header" style="width: 140px;">最後登入</th>
                                     <th style="width: 120px"></th>
@@ -109,8 +115,8 @@ var batchRoutes = {
                                     </td>
                                     <td>
                                         <?php
-                                        if( isset($dignities[ $r['id'] ]) ){
-                                            echo $dignities[ $r['id'] ][0]['name'];
+                                        if( isset($groups[ $r['id'] ]) ){
+                                            echo $groups[ $r['id'] ][0]['name'];
                                         }else{
                                             echo '<span style="color:#999;">(未指定)</span>';
                                         }
@@ -131,9 +137,9 @@ var batchRoutes = {
 <?php } ?>
 <?php if( ACL::checkAuth('super_user') ){ ?>
                                     <td><?php if( $r['is_super_user']=='1' ){ ?>
-                                        <a href="<?php echo url('normal_user/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-on-white.gif'); ?>" alt="開發者" width="16" height="16"></a>
+                                        <a href="<?php echo url('normaluser/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-on-white.gif'); ?>" alt="開發者" width="16" height="16"></a>
                                     <?php }else{ ?>
-                                        <a href="<?php echo url('super_user/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/cross-on-white.gif'); ?>" alt="管理員" width="16" height="16"></a>
+                                        <a href="<?php echo url('superuser/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/cross-on-white.gif'); ?>" alt="管理員" width="16" height="16"></a>
                                     <?php } ?></td>
 <?php } ?>
                                     <td><?php
@@ -145,19 +151,21 @@ var batchRoutes = {
                                     }
                                     ?></td>
                                     <td>
-<?php if( ACL::checkAuth( array('action'=>'edit') ) ){ ?>
+<?php if( ACL::checkAuth('edit') ){ ?>
                                         <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="edit" width="16" height="16"></a>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'privileges') ) ){ ?>
+<?php if( ACL::checkAuth('privileges') ){ ?>
+<?php       if( $r['is_super_user']==0 ){ //只有一般人員才能設定權限 ?>
                                         <a href="<?php echo url('privileges/'.$r['id'].'.html'); ?>" title="設定權限"><img src="<?php echo layout_url('admin', '/images/user.gif'); ?>" alt="privileges" width="16" height="16"></a>
+<?php       } ?>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'dignity') ) ){ ?>
-                                        <a href="<?php echo url('dignity/'.$r['id'].'.html'); ?>" title="設定管理員身分"><img src="<?php echo layout_url('admin', '/images/icons/system-users-4.png'); ?>" alt="view" width="16" height="16"></a>
+<?php if( ACL::checkAuth('group') ){ ?>
+                                        <a href="<?php echo url('group/'.$r['id'].'.html'); ?>" title="設定群組"><img src="<?php echo layout_url('admin', '/images/icons/system-users-4.png'); ?>" alt="view" width="16" height="16"></a>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'view') ) ){ ?>
+<?php if( ACL::checkAuth('view') ){ ?>
                                         <a href="<?php echo url('view/'.$r['id'].'.html'); ?>" title="檢視資訊及權限"><img src="<?php echo layout_url('admin', '/images/icons/application-view-list.png'); ?>" alt="view" width="16" height="16"></a>
 <?php } ?>
-<?php if( ACL::checkAuth( array('action'=>'delete') ) ){ ?>
+<?php if( ACL::checkAuth('delete') ){ ?>
                                         <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="delete" width="16" height="16"></a>
 <?php } ?>
                                     </td>
@@ -165,7 +173,7 @@ var batchRoutes = {
 <?php } ?>
 <?php if( count($rows)<1 ){ ?>
                                 <tr class="even">
-<?php if( ACL::checkAuth( array('action'=>'super_user') ) ){ ?>
+<?php if( ACL::checkAuth('super_user') ){ ?>
                                     <td colspan="8" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>
 <?php }else{ ?>
                                     <td colspan="7" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>

@@ -16,6 +16,7 @@ class APP{
     
     static $routing=array();
     static $params=array();
+    static $parents=array();
     static $handler=''; //紀錄本次執行，總管負責的程式名稱（不含.php）
     static $app='';     //app (controller) 的名稱
     static $doctype=''; //副檔名格式
@@ -86,19 +87,20 @@ class APP{
         }
         return $item_id;
     }
-    function syslog($message, $prior='Notice', $type='MESSAGE'){
+    function syslog($message, $prior='Notice', $type='MESSAGE', $custom_userid=''){
         $mdb=self::$mdb;
         
         $userid='<--SYSTEM-->';
         if( isset($_SESSION['admin']['userid']) )
             $userid=$_SESSION['admin']['userid'];
+        if( ! empty($custom_userid) )
+            $userid=$custom_userid;
         
         APP::load('vendor', 'auth.component');
         $ip=AuthComponent::getUserClientIP();
         
         $fields=array();
         $fields['id']=$mdb->quote( uniqid('LOG' ), 'text' );
-        $fields['plugin']=$mdb->quote( 'syslog' , 'text' );
         if( !empty($type) ) $fields['type']=$mdb->quote( strtoupper($type) , 'text' );
         if( !empty($prior) ) $fields['prior']=$mdb->quote( $prior , 'text' );
         if( !empty($userid) ) $fields['userid']=$mdb->quote( $userid , 'text' );
@@ -489,18 +491,8 @@ class View{
         if( isset($metas['title']) && !empty($metas['title']) ){
             $title=$metas['title'];
         }
-        if( !empty($pageTitle) ){
-            if( !empty($title) ){
-                $title_replaced=str_replace( '<%pageTitle%>', $pageTitle, $title );
-                //如果沒有設置replace tag, 則直接以設定值取代
-                if( $title_replaced==$title ){
-                    $title=$pageTitle;
-                }else{
-                    $title=$title_replaced;
-                }
-            }else{
-                $title=$pageTitle;
-            }
+        if( !empty($pageTitle) && empty($title) ){
+            $title=$pageTitle;
         }
         $docTitle =$title;
         $docTitle.=( !empty($title) && !empty($sitename) )?' - ':'';
@@ -613,14 +605,8 @@ class Form{
     /*****  Below Only For PEAR::QuickForm  *****/
     
     function create( $name='frm', $method='post' , $action='' ){
-        if( CACHE ){
-            //APP::$dataCache->setLifeTime(300);
-            //$form = APP::$dataCache->call( 'Form::createFormObject', $name, $method, $action );
-            /* 無法Cache: unserialize failed */
-            $form = Form::createFormObject( $name, $method, $action );
-        }else{
-            $form = Form::createFormObject( $name, $method, $action );
-        }
+        $form = Form::createFormObject( $name, $method, $action );
+
         return $form;
     }
     function createFormObject( $name, $method, $action ){

@@ -5,6 +5,7 @@ function redirect_message(){
     
     $redirect_messages = &$_SESSION['Redirect'];
     $ME_alias=preg_replace('/index\.html$/','', APP::$ME );
+    $RMSG='';
     if( isset($redirect_messages[ APP::$ME ]) ){ //取出
         $RMSG=$redirect_messages[ APP::$ME ];
         unset($redirect_messages[ APP::$ME ]);
@@ -13,7 +14,7 @@ function redirect_message(){
         $RMSG=$redirect_messages[ $ME_alias ];
         unset($redirect_messages[ $ME_alias ]);
     }
-    if( $RMSG['timeout'] < mktime() ){ //如果逾期就刪除
+    if( isset($RMSG['timeout']) && $RMSG['timeout'] < mktime() ){ //如果逾期就刪除
         unset($RMSG);
     }
     if( isset($RMSG) && is_array( $RMSG ) ){
@@ -94,6 +95,15 @@ function anchor( $name, $href, $options=array() ){
     $html.='<a href="'.$url.'" '.implode(' ', $attrs).'>'.$name.'</a>';
     return $html;
 }
+function get_parents_app( $app ){
+    return RoutingConfigs::$parents[ $app ];
+}
+function get_app_path( $app ){
+    if( isset( RoutingConfigs::$maps[ $app ] ) ){
+        return RoutingConfigs::$maps[ $app ];
+    }
+    return '';
+}
 function url( $href ){
     //如果傳入的參數是字串，則以字串URL方式處理
     if( is_string($href) ){
@@ -104,7 +114,7 @@ function url( $href ){
             $href = substr($href, 1);
             $base = '';
             if( APP::$prefix !== 'main' ){
-                $base .= APP::$prefixFull.'/';
+                $base = APP::$prefixFull.'/';
             }
             if( APP::$prefix === 'main' ){
                 $base = '/';
@@ -112,13 +122,35 @@ function url( $href ){
             $href = $base.$href;
             $status += 8;
         }
-        // ".." 永遠表示 prefix 的根目錄，或是 main app
+        // ".." 表示取得app 的母親app，若無則指 prefix 的根目錄，或是 main app
         if( $status==0 && substr($href, 0, 2)=='..' ){
+            $href = preg_replace('/[\.]{2,}/', '..', $href);
             $base = '';
             $href = substr($href, 2);
-            if( APP::$prefix != 'main' ){
-                $base .= APP::$prefixFull.'/';
+            if( APP::$prefix !== 'main' ){
+                $base_prefix = APP::$prefixFull.'/';
             }
+            $app = APP::$app;
+            $parents_app=get_parents_app($app);
+            if( empty($parents_app) ){
+                $base = $base_prefix;
+            }
+            while( ! empty($parents_app) ){
+                $base = $base_prefix.get_app_path($parents_app).'/';
+                
+                if( substr($href, 0, 3)==='/..' ){
+                    $parents_app=get_parents_app($parents_app);
+                    $href=substr($href, 3);
+                }else{
+                    $parents_app='';
+                }
+            }
+            //如果parents已經找完，還有/..的話，強制成為根目錄
+            if( substr($href, 0, 3)==='/..' ){
+                $base = $base_prefix;
+                $href = str_replace('/..', '', $href);
+            }
+            
             //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
             if( ! empty($base) && ! empty($href) ){
                 $base = substr($base, 0, -1);
@@ -134,7 +166,7 @@ function url( $href ){
                 $base .= APP::$prefixFull.'/';
             }
             if( APP::$app != 'main' ){
-                $base .= APP::$app.'/';
+                $base .= RoutingConfigs::$maps[ APP::$app ].'/';
             }
             //如果 $base & $href 同時非空白，此時會多一個 "/" ，因此需要移除其中一個
             if( ! empty($base) && ! empty($href) ){
@@ -155,7 +187,7 @@ function url( $href ){
                 $base .= APP::$prefixFull.'/';
             }
             if( APP::$app != 'main' ){
-                $base .= APP::$app.'/';
+                $base .= RoutingConfigs::$maps[ APP::$app ].'/';
             }
             $href = $base.$href;
         }
@@ -175,6 +207,34 @@ function layout_url( $layout, $href ){
             $href = '/'.$href;
         }
         return txturl('/layout_'.$layout.$href);
+    }
+    if( ! is_array($href) ){
+        return false;
+    }
+    
+    return false;
+}
+function repos_url( $href ){
+    //如果傳入的參數是字串，則以字串URL方式處理
+    if( is_string($href) ){
+        if( substr($href, 0, 1)!='/' ){
+            $href = '/'.$href;
+        }
+        return txturl('/cabinets'.$href);
+    }
+    if( ! is_array($href) ){
+        return false;
+    }
+    
+    return false;
+}
+function repos_path( $href ){
+    //如果傳入的參數是字串，則以字串URL方式處理
+    if( is_string($href) ){
+        if( substr($href, 0, 1)!='/' ){
+            $href = '/'.$href;
+        }
+        return './cabinets'.$href;
     }
     if( ! is_array($href) ){
         return false;

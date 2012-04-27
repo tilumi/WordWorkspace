@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $doctype=APP::$routing['doctype'];
 if( $doctype != 'html' ){
     require('error/404.php');die;

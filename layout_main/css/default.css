@@ -303,10 +303,10 @@ ul.style3 li {
     top:-52px;
     left:50px;
     cursor:pointer;
-    border-top:1px solid #0e3757;
-    background:url(../images/scrollbar.png) no-repeat 0 -1px;
-    background:url(../images/scrollbar-ie9.gif) no-repeat 0 -1px \0/IE9;
-    background:url(../images/scrollbar-ie8.gif) no-repeat 0 -1px \0/IE8+9;
+    background-color:#333;
+    background:url(../images/scrollbar-2.png) no-repeat 0 -1px;
+    /*background:url(../images/scrollbar-ie9.gif) no-repeat 0 -1px \0/IE9;
+    background:url(../images/scrollbar-ie8.gif) no-repeat 0 -1px \0/IE8+9;*/
 }
 .scroll-bar-wrap .grads{
     position:absolute;
@@ -332,15 +332,10 @@ ul.style3 li {
 }
 
 .scroll-bar .ui-handle-helper-parent { position: relative; width: 100%; height: 30px; margin: 0 auto;}
-.scroll-bar .ui-slider-handle { display:block; position:absolute; top:2px; height: 41px; border:2px solid red; alpha(opacity=70);-moz-opacity:0.7;opacity:0.7; }
+.scroll-bar .ui-slider-handle { display:block; position:absolute; top:1px; height: 32px; border:2px solid #c09; }
 .scroll-bar .ui-slider-handle .ui-icon { margin: -8px auto 0; position: relative; top: 50%; }
 
 /* Corner radius */
-.ui-corner-all, .ui-corner-top, .ui-corner-left, .ui-corner-tl { -moz-border-radius-topleft: 4px/*{cornerRadius}*/; -webkit-border-top-left-radius: 4px/*{cornerRadius}*/; -khtml-border-top-left-radius: 4px/*{cornerRadius}*/; border-top-left-radius: 4px/*{cornerRadius}*/; }
-.ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr { -moz-border-radius-topright: 4px/*{cornerRadius}*/; -webkit-border-top-right-radius: 4px/*{cornerRadius}*/; -khtml-border-top-right-radius: 4px/*{cornerRadius}*/; border-top-right-radius: 4px/*{cornerRadius}*/; }
-.ui-corner-all, .ui-corner-bottom, .ui-corner-left, .ui-corner-bl { -moz-border-radius-bottomleft: 4px/*{cornerRadius}*/; -webkit-border-bottom-left-radius: 4px/*{cornerRadius}*/; -khtml-border-bottom-left-radius: 4px/*{cornerRadius}*/; border-bottom-left-radius: 4px/*{cornerRadius}*/; }
-.ui-corner-all, .ui-corner-bottom, .ui-corner-right, .ui-corner-br { -moz-border-radius-bottomright: 4px/*{cornerRadius}*/; -webkit-border-bottom-right-radius: 4px/*{cornerRadius}*/; -khtml-border-bottom-right-radius: 4px/*{cornerRadius}*/; border-bottom-right-radius: 4px/*{cornerRadius}*/; }
-
 #menu-container {
     float:right;
 	width:715px;

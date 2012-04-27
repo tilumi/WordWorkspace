@@ -199,4 +199,200 @@ function recursiveFilter($filter, $value){
         return $filter($value);
     }
 } // end func _recursiveFilter
+
+
+function slug($str, $replacement='-', $length=50) {
+    if( mb_strlen($str) > $length ){
+        $str=mb_substr($str, 0, $length);
+    }
+    //$str=$this->Hanyu->slug($str, $replacement);
+    $str=Inflector::slug($str, $replacement);
+    
+    return $str;
+}
+
+class Inflector{
+
+/**
+ * Returns a string with all spaces converted to underscores (by default), accented
+ * characters converted to non-accented characters, and non word characters removed.
+ *
+ * @param string $string
+ * @param string $replacement
+ * @return string
+ * @access public
+ * @static
+ * @link http://book.cakephp.org/view/572/Class-methods
+ */
+	function slug($string, $replacement = '-') {
+        $a1="\x{2e80}-\x{33ff}";//中日韓符號區
+        $a2="\x{3400}-\x{4dff}";//中日韓認同表意文字擴充A區
+        $a3="\x{4e00}-\x{9fff}";//中日韓認同表意文字區
+        $a4="\x{fb00}-\x{fffd}";//中日韓相容表意文字區，總計收容302個中日韓漢字
+        $a5="\x{f900}-\x{faff}";//文字表現形式區，收容組合拉丁文字、希伯來文、阿拉伯文、中日韓直式標點、小符號、半形符號、全形符號等
+        
+        $replacement='-';
+		$map = array(
+			'/à|á|å|â/' => 'a',
+			'/è|é|ê|ẽ|ë/' => 'e',
+			'/ì|í|î/' => 'i',
+			'/ò|ó|ô|ø/' => 'o',
+			'/ù|ú|ů|û/' => 'u',
+			'/ç/' => 'c',
+			'/ñ/' => 'n',
+			'/ä|æ/' => 'ae',
+			'/ö/' => 'oe',
+			'/ü/' => 'ue',
+			'/Ä/' => 'Ae',
+			'/Ü/' => 'Ue',
+			'/Ö/' => 'Oe',
+			'/ß/' => 'ss',
+			//'/[^\w\s]/' => ' ',
+			'/\\s+/' => $replacement,
+			'/^[-]+|[-]+$/' => '',
+			// 變更 $replacement 時，請執行以下程式碼，將產生的結果改為最後的索引
+			// String::insert('/^[:replacement]+|[:replacement]+$/', array('replacement' => preg_quote($replacement, '/')))
+			// ===>   /^[-]+|[-]+$/
+		);
+		return preg_replace(array_keys($map), array_values($map), $string);
+	}
+}
+
+class String{
+/**
+ * Replaces variable placeholders inside a $str with any given $data. Each key in the $data array corresponds to a variable
+ * placeholder name in $str. Example:
+ *
+ * Sample: String::insert('My name is :name and I am :age years old.', array('name' => 'Bob', '65'));
+ * Returns: My name is Bob and I am 65 years old.
+ *
+ * Available $options are:
+ * 	before: The character or string in front of the name of the variable placeholder (Defaults to ':')
+ * 	after: The character or string after the name of the variable placeholder (Defaults to null)
+ * 	escape: The character or string used to escape the before character / string (Defaults to '\')
+ * 	format: A regex to use for matching variable placeholders. Default is: '/(?<!\\)\:%s/' (Overwrites before, after, breaks escape / clean)
+ * 	clean: A boolean or array with instructions for String::cleanInsert
+ *
+ * @param string $str A string containing variable placeholders
+ * @param string $data A key => val array where each key stands for a placeholder variable name to be replaced with val
+ * @param string $options An array of options, see description above
+ * @return string
+ * @access public
+ * @static
+ */
+	function insert($str, $data, $options = array()) {
+		$defaults = array(
+			'before' => ':', 'after' => null, 'escape' => '\\', 'format' => null, 'clean' => false
+		);
+		$options += $defaults;
+		$format = $options['format'];
+
+		if (!isset($format)) {
+			$format = sprintf(
+				'/(?<!%s)%s%%s%s/',
+				preg_quote($options['escape'], '/'),
+				str_replace('%', '%%', preg_quote($options['before'], '/')),
+				str_replace('%', '%%', preg_quote($options['after'], '/'))
+			);
+		}
+		if (!is_array($data)) {
+			$data = array($data);
+		}
+
+		if (array_keys($data) === array_keys(array_values($data))) {
+			$offset = 0;
+			while (($pos = strpos($str, '?', $offset)) !== false) {
+				$val = array_shift($data);
+				$offset = $pos + strlen($val);
+				$str = substr_replace($str, $val, $pos, 1);
+			}
+		} else {
+			asort($data);
+
+			$hashKeys = array_map('md5', array_keys($data));
+			$tempData = array_combine(array_keys($data), array_values($hashKeys));
+			foreach ($tempData as $key => $hashVal) {
+				$key = sprintf($format, preg_quote($key, '/'));
+				$str = preg_replace($key, $hashVal, $str);
+			}
+			$dataReplacements = array_combine($hashKeys, array_values($data));
+			foreach ($dataReplacements as $tmpHash => $data) {
+				$str = str_replace($tmpHash, $data, $str);
+			}
+		}
+
+		if (!isset($options['format']) && isset($options['before'])) {
+			$str = str_replace($options['escape'].$options['before'], $options['before'], $str);
+		}
+		if (!$options['clean']) {
+			return $str;
+		}
+		return String::cleanInsert($str, $options);
+	}
+/**
+ * Cleans up a Set::insert formated string with given $options depending on the 'clean' key in $options. The default method used is
+ * text but html is also available. The goal of this function is to replace all whitespace and uneeded markup around placeholders
+ * that did not get replaced by Set::insert.
+ *
+ * @param string $str
+ * @param string $options
+ * @return string
+ * @access public
+ * @static
+ */
+	function cleanInsert($str, $options) {
+		$clean = $options['clean'];
+		if (!$clean) {
+			return $str;
+		}
+		if ($clean === true) {
+			$clean = array('method' => 'text');
+		}
+		if (!is_array($clean)) {
+			$clean = array('method' => $options['clean']);
+		}
+		switch ($clean['method']) {
+			case 'html':
+				$clean = array_merge(array(
+					'word' => '[\w,.]+',
+					'andText' => true,
+					'replacement' => '',
+				), $clean);
+				$kleenex = sprintf(
+					'/[\s]*[a-z]+=(")(%s%s%s[\s]*)+\\1/i',
+					preg_quote($options['before'], '/'),
+					$clean['word'],
+					preg_quote($options['after'], '/')
+				);
+				$str = preg_replace($kleenex, $clean['replacement'], $str);
+				if ($clean['andText']) {
+					$options['clean'] = array('method' => 'text');
+					$str = String::cleanInsert($str, $options);
+				}
+				break;
+			case 'text':
+				$clean = array_merge(array(
+					'word' => '[\w,.]+',
+					'gap' => '[\s]*(?:(?:and|or)[\s]*)?',
+					'replacement' => '',
+				), $clean);
+
+				$kleenex = sprintf(
+					'/(%s%s%s%s|%s%s%s%s)/',
+					preg_quote($options['before'], '/'),
+					$clean['word'],
+					preg_quote($options['after'], '/'),
+					$clean['gap'],
+					$clean['gap'],
+					preg_quote($options['before'], '/'),
+					$clean['word'],
+					preg_quote($options['after'], '/')
+				);
+				$str = preg_replace($kleenex, $clean['replacement'], $str);
+				break;
+		}
+		return $str;
+	}
+}
+
 ?>

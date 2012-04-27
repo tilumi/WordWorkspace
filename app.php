@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
 
 //設定環境
 define('TIMEZONE', "Asia/Taipei");
@@ -58,6 +59,7 @@ APP::$routing = $routing_args;
 APP::$app     = $routing_args['app'];
 APP::$doctype = $routing_args['doctype'];
 APP::$params  = $routing_args['params'];
+APP::$parents  = $routing_args['parents'];
 APP::$handler = $routing_args['handler']; //標示總管負責的程式
 APP::$prefix  = $routing_args['prefix']; //網址前綴詞
 APP::$prefixFull = $routing_args['prefixFull']; //網址前綴全名
@@ -105,11 +107,6 @@ include( DIRCONFIG.'layouts.php' );
 $_default = array_merge( $_default , APP::$layoutsConfigs['default'] );
 $prefix=APP::$routing['prefix'];
 View::$layoutConfigs = array_merge( $_default , APP::$layoutsConfigs[ $prefix ] );
-
-$layout='main';
-if( View::$layoutConfigs['has_layout'] ){
-    $layout=View::$layoutConfigs['layout'];
-}
 
 
 marktime( 'Core' , 'Parse Layout Configs');

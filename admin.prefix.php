@@ -57,7 +57,7 @@ function userLoginCheck(){
     }
     if( ! ACL::checkAuth( pos(APP::$params) ) ){
         $logmsg = $SESSION['userid'].' 嘗試進入無通行權的區域 ';
-        $logmsg.= '@ '.ME;
+        $logmsg.= '@ '.APP::$routing['ME'];
         APP::syslog($logmsg, APP::$prior['warning'], 'login');
         
         redirect( '/', '抱歉！您沒有權限進入這個區域', 'error' );
@@ -88,8 +88,8 @@ class ACL{
     function checkAuth( $item_id='' ){
         //傳入特定項目，檢查是否有權可供操作
         //return true;
-        $privileges = &$_SESSION[ APP::$prefix ];
-        if( $privileges['is_super_user']=='1' ){
+        $admininfo = &$_SESSION[ APP::$prefix ];
+        if( $admininfo['is_super_user']=='1' ){
             return true;
         }
         
@@ -97,7 +97,8 @@ class ACL{
         
         list($prefix, $app, $action)=explode('.', $item_id);
         
-        if( isset($privileges[$prefix][$app][$action]) && $privileges[$prefix][$app][$action]=='allow' ){
+        $acl = $admininfo['privileges'];
+        if( isset($acl[$app][$action]) && $acl[$app][$action]=='allow' ){
             return true;
         }
         return false;
