@@ -126,17 +126,21 @@ $(document).ready( function(){
     //設定書卷捲軸的顯示及隱藏
     var showWrap=false;
     var overHolder, outHolder;
-    $(".midnav").mouseover(function(){
+    $(".midnav").mouseenter(function(){
         clearTimeout(outHolder);
-        if( $(".scroll-bar-wrap").css('top') > -10 ){ return; }
-        overHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'top': '0px'}, 100); }, 200);
+        //if( $(".scroll-bar-wrap").css('top') > -10 ){ return; }
+        //overHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'top': '8px'}, 100); }, 200);
+        overHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'opacity': '1'}, 100); }, 200);
         //$('#middle-area').text( $('#middle-area').text() + '1 ' );
-    }).mouseout(function(){
+    }).mouseleave(function(){
         clearTimeout(overHolder);
-        if( $(".scroll-bar-wrap").css('top') < -40 ){ return; }
-        outHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'top': '-52px'}, 200); }, 1200);
+        //if( $(".scroll-bar-wrap").css('top') < -40 ){ return; }
+        //outHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'top': '-52px'}, 200); }, 1200);
+        outHolder=setTimeout( function(){ $(".scroll-bar-wrap").stop().animate({'opacity': '0'}, 200); }, 1200);
         //$('#middle-area').text( $('#middle-area').text() + '0 ' );
     });
+    //uiSlider.get(0).onmousedown=function(){return false;};
+    //uiSlider.get(0).onclick=function(){return true};
     
     /* 設定捲軸控制鈕 */
     var scrollBtnActive=false;
@@ -233,11 +237,12 @@ $( function(){
 	//append icon to handle
 	var handleHelper = scrollbar.find( ".ui-slider-handle" )
     	.mousedown(function() {
-    		scrollbar.width( handleHelper.width() );
+            scrollbar.width( handleHelper.width() );
     	})
     	.mouseup(function() {
     		scrollbar.width( "100%" );
     	})
+        .focus(function(){ return false; })
     	.append( '<span class="ui-icon ui-icon-grip-dotted-vertical"></span>' )
     	.wrap( '<div class="ui-handle-helper-parent"></div>' ).parent();
 	 
@@ -291,4 +296,5 @@ $( function(){
 	});
 	//init scrollbar size
 	setTimeout( sizeScrollbar, 10 );//safari wants a timeout
+
 } );
