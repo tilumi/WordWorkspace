@@ -8,7 +8,7 @@
 <?php View::include_javascripts(); ?>
 <?php View::include_extra_headers(); ?>
 
-<link href="<?php echo layout_url('main', '/css/default.css'); ?>" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo layout_url('main', '/css/default.css?v='.filemtime( dirname(__FILE__).'/css/default.css') ); ?>" rel="stylesheet" type="text/css" media="all" />
 <link href="<?php echo layout_url('main', '/css/colorbox.css'); ?>" rel="stylesheet" type="text/css" media="all" />
 <style type="text/css">
 @import "<?php echo layout_url('main', '/css/layout.css'); ?>";
@@ -29,7 +29,7 @@ if( isset($selectIndex) && is_numeric($selectIndex) ){
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.ui.slider.js'); ?>"></script>
 
 <script type="text/javascript" src="<?php echo layout_url('main', '/js/jquery.colorbox-min.js'); ?>"></script>
-<script type="text/javascript" src="<?php echo url('/javascript/init/'.$jsIndex.'.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo url('/javascript/init/'.$jsIndex.'.js?v='.filemtime(dirname(dirname(__FILE__)).'/javascript=init.php') ); ?>"></script>
 
 <?php } ?>
 
