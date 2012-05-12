@@ -105,7 +105,7 @@ foreach( $rows as $r ){
     }
     if( isset( $r['highlight'] ) && ! $highlight_1st ){ //跨章顯示時，章與章之間需要間隔
         $highlight_1st = true;
-        echo '<a name="highlight"></a>'."\n";
+        echo '<a class="highlight"></a>'."\n";
     }
     switch( $r['stype_id'] ){
         case 'a':
@@ -186,10 +186,20 @@ foreach( $rows as $r ){
     $prev_chapter = $r['chapter_id'];
 }
 ?>
-<div style="height:50px;"></div>                            
+<div style="height:50px;"></div>
 
 <?php echo $chapNav; ?>
-<div style="height:50px;"></div>                            
+<div style="height:50px;"></div>
+<script>
+$(document).ready( function(e){
+    //e.preventDefault();
+    var $body = (window.opera) ? (document.compatMode == "CSS1Compat" ? $('html') : $('body')) : $('html,body');
+    $body.animate({
+        scrollTop: $('a.highlight').offset().top - 140
+    }, 500);
+});
+</script>
+<div id="tester"></div>
                     </div>
 				</div>
 			</div>
