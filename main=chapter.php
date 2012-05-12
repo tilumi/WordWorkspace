@@ -3,6 +3,7 @@ list( $rows , $nav ) = APP::$appBuffer;
 $tab_id = $nav['book_id'];
 $book_on_top = $nav;
 $fixing_topnav = true;
+View::setHeader('javascripts', 'page.scroller.js');
 include('layout_main/tpl_header-style2.php');
 
 $prev_url='';
@@ -19,48 +20,6 @@ $(document).keydown(function(e){
     if( e.keyCode == 37 <?php echo ($nav['prev']===array())?'&& false':''; ?> ){ location.href="<?php echo $prev_url;?>"; }
     /* right */
     if( e.keyCode == 39 <?php echo ($nav['next']===array())?'&& false':''; ?> ){ location.href="<?php echo $next_url;?>"; }
-    
-    var scrollActive = false;
-    var scrollToTop = 0;
-    var offset=getCurrentPageOffsets();
-    var pageTop=offset.y;
-    var browserHeight = $(window).height();
-    var scrollUnit = browserHeight - 150;
-    switch( e.keyCode ){
-        /* space */
-        case 32:
-            scrollActive = true;
-            scrollToTop = pageTop + scrollUnit;
-            break;
-        /* [Page Up] */
-        case 33:
-            scrollActive = true;
-            scrollToTop = pageTop - scrollUnit;
-            break;
-        /* [Page Down] */
-        case 34:
-            scrollActive = true;
-            scrollToTop = pageTop + scrollUnit;
-            break;
-        /* [End] */
-        case 35:
-            scrollActive = true;
-            scrollToTop = $(document).height();
-            break;
-        /* [Home] */
-        case 36:
-            scrollActive = true;
-            scrollToTop = 0;
-            break;
-    }
-    if( scrollActive ){
-        var $body = (window.opera) ? (document.compatMode == "CSS1Compat" ? $('html') : $('body')) : $('html,body');
-        $body.animate({
-            scrollTop: scrollToTop
-        }, 500);
-        return false;
-    }
-    
 });
 $(document).ready( function(){
     var highlight = $('a.highlight');
@@ -72,18 +31,6 @@ $(document).ready( function(){
         }, 500);
     }
 });
-function getCurrentPageOffsets(w) {
-    // Use the specified window or the current window if no argument 
-    w = w || window;
-    // This works for all browsers except IE versions 8 and before
-    if (w.pageXOffset != null) return {x: w.pageXOffset, y:w.pageYOffset};
-    // For IE (or any browser) in Standards mode
-    var d = w.document;
-    if (document.compatMode == "CSS1Compat")
-    return {x:d.documentElement.scrollLeft, y:d.documentElement.scrollTop};
-    // For browsers in Quirks mode
-    return { x: d.body.scrollLeft, y: d.body.scrollTop };
-}
 </script>
 
 <style>

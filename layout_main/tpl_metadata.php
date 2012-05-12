@@ -4,9 +4,6 @@
 
 <?php View::include_http_metas(); ?>
 <?php View::include_title(); ?>
-<?php View::include_stylesheets(); ?>
-<?php View::include_javascripts(); ?>
-<?php View::include_extra_headers(); ?>
 
 <link href="<?php echo layout_url('main', '/css/default.css?v='.filemtime( dirname(__FILE__).'/css/default.css') ); ?>" rel="stylesheet" type="text/css" media="all" />
 <link href="<?php echo layout_url('main', '/css/colorbox.css'); ?>" rel="stylesheet" type="text/css" media="all" />
@@ -32,6 +29,10 @@ if( isset($selectIndex) && is_numeric($selectIndex) ){
 <script type="text/javascript" src="<?php echo url('/javascript/init/'.$jsIndex.'.js?v='.filemtime(dirname(dirname(__FILE__)).'/javascript=init.php') ); ?>"></script>
 
 <?php } ?>
+
+<?php View::include_stylesheets(); ?>
+<?php View::include_javascripts(); ?>
+<?php View::include_extra_headers(); ?>
 
 <meta name="google-site-verification" content="Sl77l_lzmUMySMszkvZsOp9FD5ussf3G14LvlThAP8w" />
 <META name="y_key" content="742d689dc907a4c3" />
