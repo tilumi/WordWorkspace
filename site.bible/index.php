@@ -1,6 +1,7 @@
 <?php
-require('lib/marktime.php');
-require('lib/routing.php');
+$my_base=dirname(__FILE__);
+require('../lib/marktime.php');
+require('../lib/routing.php');
 
 marktime('Core', 'Start');
 marktime('SystemUser', 'Start');

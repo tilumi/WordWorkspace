@@ -1,5 +1,5 @@
 <?php
-include( dirname(dirname(__FILE__)).'/config/routing.php');
+include( $my_base.'/config/routing.php');
 class Routing{
     function parse( $p ){
         if( empty($p) ){

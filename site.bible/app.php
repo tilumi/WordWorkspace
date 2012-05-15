@@ -16,7 +16,10 @@ define('WEBLAYOUT', WEBROOT.'layouts/' );
 define('WEBCABINET', WEBROOT.'cabinets/' );
 
 define('DIRROOT', dirname(__FILE__).DS );
-define('DIRLIB', DIRROOT.'lib'.DS );
+define('BASEROOT', dirname(dirname(__FILE__)).DS );
+
+
+define('DIRLIB', BASEROOT.'lib'.DS );
 define('DIRCONFIG', DIRROOT.'config'.DS );
 define('DIRCACHE', DIRROOT.'cache'.DS );
 define('DIRCABINET', DIRROOT.'cabinets'.DS );
@@ -82,9 +85,9 @@ if( ! is_dir(DIRCABINET) ){ mkdirs(DIRCABINET); }
 
 //設定PEAR環境
 if( DS=='/'){
-    ini_set('include_path', ini_get('include_path').':'.DIRROOT.'pears/' ); //UNIX
+    ini_set('include_path', ini_get('include_path').':'.BASEROOT.'pears/' ); //UNIX
 }else{
-    ini_set('include_path', DIRROOT.'pears;'.ini_get('include_path') ); //Windows
+    ini_set('include_path', BASEROOT.'pears;'.ini_get('include_path') ); //Windows
 }
 
 marktime( 'Core' , 'Setting System Config');
