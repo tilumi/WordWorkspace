@@ -119,6 +119,24 @@ function index(){
     list($rows, $totalItems) = AlbumsPhotos::pagelist($submits, $pageID, $pageRows);
     
     APP::$appBuffer = array( $data, $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
+    
+/*
+    $sql="SELECT * FROM song_list WHERE 1<>2";
+    $rows=Model::fetchAll($sql);
+    foreach( $rows as $r ){
+        $id = uniqid('Song');
+        $sql="UPDATE songs SET id=".Model::quote($id, 'text')." WHERE id=".Model::quote($r['id'], 'text');
+        Model::exec($sql);
+        $lyric_id=uniqid('Lyric');
+        $sql="UPDATE songs_lyrics SET song_id=".Model::quote($id, 'text').", id=".Model::quote($lyric_id, 'text')." WHERE id=".Model::quote($r['id'], 'text');
+        Model::exec($sql);
+        $lyric_id=uniqid('Lyric');
+        $sql="UPDATE songs_lyrics_kr SET song_id=".Model::quote($id, 'text').", id=".Model::quote($lyric_id, 'text')." WHERE id=".Model::quote($r['id'], 'text');
+        Model::exec($sql);
+    }
+    $sql="INSERT IGNORE INTO songs_lyrics SELECT  *  FROM songs_lyrics_kr";
+    Model::exec($sql);
+    */
 }
 function add(){
     APP::$pageTitle='新增'.APP::$mainName;
