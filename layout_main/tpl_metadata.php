@@ -8,7 +8,7 @@
 <link href="<?php echo layout_url('main', '/css/default.css?v='.filemtime( dirname(__FILE__).'/css/default.css') ); ?>" rel="stylesheet" type="text/css" media="all" />
 <link href="<?php echo layout_url('main', '/css/colorbox.css'); ?>" rel="stylesheet" type="text/css" media="all" />
 <style type="text/css">
-@import "<?php echo layout_url('main', '/css/layout.css'); ?>";
+@import url(<?php echo layout_url('main', '/css/layout.css'); ?>);
 </style>
 <?php
 $jsIndex = $tab_id;
