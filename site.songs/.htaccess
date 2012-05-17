@@ -1,0 +1,25 @@
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteRule ^(images\/sticker\.jpg)$ layout_main/images/sticker.jpg [L]
+RewriteCond $1 !^(index\.php|favicon\.ico|layout\_|robots\.txt|cabinets|vendors)
+RewriteRule (.*) index.php?%{QUERY_STRING}&p=$1 [L]
+</IfModule>
+
+#SetEnvIfNoCase User-Agent "baiduspider" ban_bot
+#SetEnvIfNoCase User-Agent "sosospider" ban_bot
+SetEnvIfNoCase User-Agent "^HTTrack" ban_bot
+SetEnvIfNoCase User-Agent "^EmailCollector" ban_bot
+SetEnvIfNoCase User-Agent "^EmailWolf" ban_bot
+SetEnvIfNoCase User-Agent "^ExtractorPro" ban_bot
+SetEnvIfNoCase User-Agent "^Offline" ban_bot
+SetEnvIfNoCase User-Agent "^WebCopier" ban_bot
+SetEnvIfNoCase User-Agent "^Webdupe" ban_bot
+SetEnvIfNoCase User-Agent "^WebZIP" ban_bot
+SetEnvIfNoCase User-Agent "^Web Downloader" ban_bot
+SetEnvIfNoCase User-Agent "^WebAuto" ban_bot
+SetEnvIfNoCase User-Agent "^WebCapture" ban_bot
+SetEnvIfNoCase User-Agent "^WebMirror" ban_bot
+SetEnvIfNoCase User-Agent "^WebStripper" ban_bot
+Deny from env=ban_bot
+Deny from 124.115.4. 124.115.0. 64.69.34.135 216.240.136.125 218.15.197.69 155.69.160.99 58.60.13. 121.14.96. 58.60.14. 58.61.164. 202.108.7.209
+

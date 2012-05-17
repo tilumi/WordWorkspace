@@ -5,6 +5,7 @@ $(document).keydown(function(e){
     var pageTop=offset.y;
     var browserHeight = $(window).height();
     var scrollUnit = browserHeight - 150;
+    var scrollInterval = 500;
     switch( e.keyCode ){
         /* space */
         case 32:
@@ -33,7 +34,7 @@ $(document).keydown(function(e){
         var $body = (window.opera) ? (document.compatMode == "CSS1Compat" ? $('html') : $('body')) : $('html,body');
         $body.animate({
             scrollTop: scrollToTop
-        }, 300);
+        }, scrollInterval);
         return false;
     }
 });

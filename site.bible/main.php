@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $doctype=APP::$routing['doctype'];
 if( $doctype != 'html' ){
     require('error/404.php');die;
@@ -33,7 +33,7 @@ $registerAction = array(
     'chapter', //閱讀經文
 );
 
-include( APP::$routing['app'].'_model.php' );
+include( APP::$handler.'_model.php' );
 
 if( in_array( $action , $registerAction ) ){
     $action();
@@ -43,7 +43,7 @@ if( in_array( $action , $registerAction ) ){
 
 
 
-$viewTpl = APP::$routing['app'].'='.$action.'.php';
+$viewTpl = APP::$handler.'='.$action.'.php';
 if( file_exists($viewTpl) )
     include( $viewTpl );
 
