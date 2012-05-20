@@ -24,15 +24,22 @@ list( $rows ) = APP::$appBuffer;
                     Jbride&amp; 歌本
                 </h5>
             </div>
-            <div data-role="content">
-                <div style="text-align:center;" data-inset="false">
-                    <img style="width:290px;" src="http://114.32.119.171/keyboard.png" />
+            <div data-role="content" style="padding:0;background-color:#3b3a3f;">
+                <div data-inset="false">
+                    <?php include('layout_mobile/tpl_keyboard.php'); ?>
                 </div>
+            </div>
+            <div data-role="content" style="padding-top:0;">
                 <div data-role="fieldcontain">
                     <fieldset data-role="controlgroup">
                         <label for="textinput1">
                         </label>
                         <input id="textinput1" placeholder="注音速查或漢語拼音" value="" type="text" />
+                    </fieldset>
+                </div>
+                <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup">
+                        TIPS: 使用注音鍵盤「不要」點輸入框，防止跳出系統鍵盤
                     </fieldset>
                 </div>
                 <ul data-role="listview" data-divider-theme="c" data-inset="false">
