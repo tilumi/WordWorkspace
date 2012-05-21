@@ -39,7 +39,7 @@ list( $rows ) = APP::$appBuffer;
                 </div>
                 <div data-role="fieldcontain">
                     <fieldset data-role="controlgroup">
-                        TIPS: 使用注音鍵盤「不要」點輸入框，防止跳出系統鍵盤
+                        TIPS: 使用注音鍵盤「不要」點輸入框，避免跳出系統鍵盤
                     </fieldset>
                 </div>
                 <ul data-role="listview" data-divider-theme="c" data-inset="false">
