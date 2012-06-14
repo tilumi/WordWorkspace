@@ -12,20 +12,26 @@ $topmenu=array(
 
 /* 設定主工具列 */
 $mainmenu=array(
-    array('name'=>'主控面板', 'link'=>'/', 'id'=>'main.index' ), 
-    array('name'=>'新聞中心', 'link'=>'/news/', 'id'=>'news.index' ),
-    array('name'=>'相簿管理', 'link'=>'/albums/', 'id'=>'albums.index'),
+    array('name'=>'管理首頁', 'link'=>'/', 'menu_id'=>0, 'id'=>'main.index' ), 
+    array('name'=>'新聞中心', 'link'=>'/news/', 'menu_id'=>1, 'id'=>'news.index',
+        'submenu'=>array(
+            array('name'=>'關鍵字', 'link'=>'/articles/keywords/', 'id'=>'articles_keywords.index' ),
+            array('name'=>'類型', 'link'=>'/articles/categories/', 'id'=>'articles_categories.index' ),
+        )
+    ),
+    array('name'=>'書卷管理', 'link'=>'/books/', 'menu_id'=>2, 'id'=>'books.index' ),
+    array('name'=>'經文管理', 'link'=>'/verses/', 'menu_id'=>3, 'id'=>'verses.index' ),
+/*    array('name'=>'相簿管理', 'link'=>'/albums/', 'id'=>'albums.index'),
     array('name'=>'相片管理', 'link'=>'', 'id'=>'albums.index', 'hidden'=>true),
     array('name'=>'系統紀錄', 'link'=>'/syslog/', 'id'=>'syslog.index' ),
     array('name'=>'操作說明', 'link'=>'/doc/', 'id'=>'docs.index' ),
-    /*
-    array('name'=>'文章管理', 'link'=>array('plugin'=>'articles', 'controller'=>'main'),
+    */
+    array('name'=>'文章管理', 'link'=>'/articles/', 'menu_id'=>4, 'id'=>'articles.index',
         'submenu'=>array(
-            array('name'=>'關鍵字', 'link'=>array('plugin'=>'articles', 'controller'=>'keywords') ),
-            array('name'=>'類型', 'link'=>array('plugin'=>'articles', 'controller'=>'categories') ),
+            array('name'=>'關鍵字', 'link'=>'/articles/keywords/', 'id'=>'articles_keywords.index' ),
+            array('name'=>'類型', 'link'=>'/articles/categories/', 'id'=>'articles_categories.index' ),
         )
     ),
-    */
     //array('name'=>'分類管理', 'link'=>array('plugin'=>'subjects', 'controller'=>'yeartopics') ),
 );
 function parseMenuItem($item, $markup=false, $submenu_key=null){
@@ -35,28 +41,17 @@ function parseMenuItem($item, $markup=false, $submenu_key=null){
         if( isset($item['hidden']) && $item['hidden']===true ){
             $hidden=true;
         }
-        if( isset($item['id']) && !empty($item['id']) ){
-            $attrs=array();
-            if( is_numeric($submenu_key) ){
-                $attrs=array('onmouseover'=>"javascript: submenu.show($submenu_key);");
-            }
-            $current='';
-            if( $markup ){ $current=' id="current"'; }
-            
-            if( ! $hidden ){
-                $tmp .= '<li'.$current.'>';
-                $tmp .= View::anchor( $item['link'], $item['name'], $attrs );
-                $tmp .= "</li>\n";
-            }
-        }else{
-            if( $markup ){
-                $tmp.='<li id="current">';
-                $tmp.=$item['name'];
-                $tmp.="</li>\n";
-            }else{
-                $tmp.=$item['name']."\n";
-            }
+        if( $hidden ){ continue; }
+        
+        $attrs=array();
+        if( is_numeric($submenu_key) ){
+            $attrs=array('onmouseover'=>"javascript: submenu.show($submenu_key);");
         }
+        if( $markup ){ $menu_class.='current'; }
+        
+        $tmp .= '<li id="'.$menu_class.'">';
+        $tmp .= View::anchor( $item['link'], $item['name'], $attrs );
+        $tmp .= "</li>\n";
     }
     
     return $tmp;
@@ -82,45 +77,45 @@ foreach($mainmenu as $item){
         continue;
     }
     //開始產生MENU
-    $active=false;
-    $app_id = APP::$prefix.'.'.APP::$app;
-    $full_id = APP::parseFullID($item['id']);
-    $item_app_id = substr($full_id, 0, strlen(strrchr($full_id, "."))*(-1));
-    if( isset($item['submenu']) && !empty($item['submenu']) ){
+    //$app_id = APP::$prefix.'.'.APP::$app;
+    //$full_id = APP::parseFullID($item['id']);
+    //$item_app_id = substr($full_id, 0, strlen(strrchr($full_id, "."))*(-1));
+    
+    $menu_id='';
+    if( isset(APP::$appBuffer['menu_id']) ){
+        $menu_id = APP::$appBuffer['menu_id'];
+    }
+    
+    $menu_active=false;
+    if( $menu_id === $item['menu_id'] ){ $menu_active=true; }
+    
+    $mainmenu_tmp.=parseMenuItem($item, $menu_active, $i);
+    
+    $submenu_id = "submenu-".$i;
+    $subtmp='';
+    if( isset($item['submenu']) && ! empty($item['submenu']) ){
         $subtmp="";
-        $first=true; //控制分隔線的顯示
         foreach($item['submenu'] as $subitem){
             //依照權限設定顯示: 子選單部分
             if( ! ACL::checkAuth($item['id']) ){
                 continue;
             }
             //開始產生子選單
-            $subactive=false;
-            if( $app_id === $item_app_id ){
-                $active=true;$subactive=true;
-            }
-            if( !$first ){
-                //$subtmp.='<span>|</span>'."\n";
-            }
-            if( $first ){ $first=!$first; }
             $subtmp.=parseMenuItem($subitem, $subactive);
         }
-        $_.='<ul id="submenu-'.$i.'" style="float:left">'."\n";
-        $_.=$subtmp;
-        $_.="</ul>"."\n";
-        //$_.=($active)?'<script>$(document).ready(function(){ submenu.show('.$i.') });</script>':'';
-    }else{
-        $_.='<ul id="submenu-'.$i.'" style="float:left">'."\n";
-        $_.="</ul>"."\n";
     }
-    if( $app_id === $item_app_id ){
-        $active=true;
+    $submenu_class="submenu";
+    if( $menu_active ){
+        $submenu_class.=" current";
     }
-    $tmp.=parseMenuItem($item, $active, $i);
+    $submenu_tmp.='<ul id="'.$submenu_id.'" class="'.$submenu_class.'" style="float:left;left:-1000px;">'."\n";
+    $submenu_tmp.=$subtmp;
+    $submenu_tmp.="</ul>"."\n";
+    
     $i=$i+1;
 }
-$mainmenu_for_layout=$tmp;
-$submenu_for_layout=$_;
+$mainmenu_for_layout=$mainmenu_tmp;
+$submenu_for_layout=$submenu_tmp;
 
 ?>
 <!DOCTYPE HTML>
@@ -175,7 +170,7 @@ img, div, input  { behavior: url(<?php echo layout_url('admin', '/js/ie6/iepngfi
                         <a href="<?php echo url( '/managers/' );?>">系統管理員</a>
 <?php       } } ?>
                         <a href="<?php echo url( '_/' );?>" target="_blank">網站前台</a>
-                        <a href="<?php echo url( '/' );?>">主控面版</a>
+                        <a href="<?php echo url( '/' );?>">管理首頁</a>
 <?php } ?>
                     </div>
                 </div>

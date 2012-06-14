@@ -17,6 +17,11 @@ if( in_array( $action, $registedAction ) ){
 }
 APP::setAction($action);
 
+APP::$pageTitle = '主控面板';
+APP::$mainTitle = '主控面板 Dashboard';
+APP::$mainName = '';
+$menu_id = 0;
+
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
 
@@ -34,7 +39,7 @@ if( in_array( $action , $registedAction ) ){
 }
 
 
-
+APP::$appBuffer['menu_id']=$menu_id;
 $viewTpl = APP::$handler.'='.$action.'.php';
 if( file_exists($viewTpl) ){ include( $viewTpl ); }
 
