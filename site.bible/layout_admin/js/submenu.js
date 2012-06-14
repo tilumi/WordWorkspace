@@ -6,6 +6,7 @@ var submenu = new Object();
 submenu.prefix='submenu'; //ID命名的前置文字, ex: submenu-0, submenu-1, ...  此時prefix即應設置為submenu
 submenu.items=null;
 submenu.itemsWidth=null;
+submenu.current_id='0';
 submenu.show=function(no){
     submenu.hideAll();
     if( !submenu.items ) return;
@@ -38,6 +39,7 @@ submenu.show=function(no){
         var debug=false;
         //debug=true;
         if( debug ){
+            $('#test').text('');
             $('#test').text( $('#test').text()+(left)+'px (left)' );
             $('#test').text( $('#test').text()+' + '+parseInt(width/2)+'px (width/2)' );
             $('#test').text( $('#test').text()+' - '+parseInt(subwidth/2)+'px (subwidth/2)' );
@@ -52,6 +54,7 @@ submenu.hideAll=function(){
     for(var i=0;i<submenu.items.length;i++){
         submenu.items[i].style.display='none';
     }
+    //alert( $('.submenu').filter('.current').get(0).outerHTML );
 };
 $(document).ready(function(){
     var items=new Array();
@@ -69,6 +72,14 @@ $(document).ready(function(){
     submenu.items=items;
     submenu.itemsWidth=itemsWidth;
     submenu.hideAll();
+    
+    submenu.current_id=$('.submenu').filter('.current').get(0).id.replace('submenu-', '');
+    submenu.show(submenu.current_id);
+    
+    $('#nav li').mouseleave( function(){
+        setTimeout( function(){submenu.hideAll();submenu.show(submenu.current_id);} , 3000 );
+    });
+    //$('.submenu').filter('.current').css('display', 'inline');
     /*
     $('#test').html( $('#test').html()+'Width: '+Browser.getWidth()+'px<br>' );
     var id=4;

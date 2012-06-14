@@ -22,6 +22,7 @@ if( in_array( $action, $registedAction ) ){
 APP::$pageTitle = '新聞中心';
 APP::$mainTitle = '新聞中心 News';
 APP::$mainName = '公告';
+$menu_id = 1;
 
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
@@ -40,7 +41,7 @@ if( in_array( $action , $registedAction ) ){
 }
 
 
-
+APP::$appBuffer['menu_id']=$menu_id;
 $viewTpl = APP::$handler.'='.$action.'.php';
 if( file_exists($viewTpl) ){ include( $viewTpl ); }
 
