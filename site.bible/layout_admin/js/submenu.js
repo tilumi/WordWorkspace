@@ -7,13 +7,24 @@ submenu.prefix='submenu'; //ID命名的前置文字, ex: submenu-0, submenu-1, .
 submenu.items=null;
 submenu.itemsWidth=null;
 submenu.current_id='0';
+submenu.default_id='0';
+submenu.get=function(no){
+    return $(submenu.items[no]);
+}
 submenu.show=function(no){
-    submenu.hideAll();
     if( !submenu.items ) return;
     if( no==0 ) return;
+    
+    submenu.current_id=no;
     i=parseInt(no)-1;
+    //若TAB沒有副選單，就不切換
+    /*
+    if( $(submenu.items[i]).html().trim().length < 1 ){
+        return;
+    }*/
 
     if( submenu.items[i] ){
+        submenu.hideAll();
         submenu.items[i].style.display='inline';
         //動態將副選單移動到主選項下並置中
         //公式：
@@ -36,23 +47,23 @@ submenu.show=function(no){
             $(submenu.items[i]).css('left',marginLeft+'px');
         }
         
-        var debug=false;
-        //debug=true;
-        if( debug ){
-            $('#test').text('');
-            $('#test').text( $('#test').text()+(left)+'px (left)' );
-            $('#test').text( $('#test').text()+' + '+parseInt(width/2)+'px (width/2)' );
-            $('#test').text( $('#test').text()+' - '+parseInt(subwidth/2)+'px (subwidth/2)' );
-            $('#test').text( $('#test').text()+' + '+fix+'px (fix)' );
-            $('#test').text( $('#test').text()+' = '+marginLeft+'px' );
-            $('#test').text( $('#test').text()+' ::: '+submenu.prefix+'-'+no+'' );
-        }
+    }
+    var debug=false;
+    //debug=true;
+    if( debug ){
+        $('#test').text('');
+        $('#test').text( $('#test').text()+(left)+'px (left)' );
+        $('#test').text( $('#test').text()+' + '+parseInt(width/2)+'px (width/2)' );
+        $('#test').text( $('#test').text()+' - '+parseInt(subwidth/2)+'px (subwidth/2)' );
+        $('#test').text( $('#test').text()+' + '+fix+'px (fix)' );
+        $('#test').text( $('#test').text()+' = '+marginLeft+'px' );
+        $('#test').text( $('#test').text()+' ::: '+submenu.prefix+'-'+no+'' );
     }
 };
 submenu.hideAll=function(){
     if( !submenu.items ) return;
     for(var i=0;i<submenu.items.length;i++){
-        submenu.items[i].style.display='none';
+        $(submenu.items[i]).css({display:'none'});
     }
     //alert( $('.submenu').filter('.current').get(0).outerHTML );
 };
@@ -73,12 +84,25 @@ $(document).ready(function(){
     submenu.itemsWidth=itemsWidth;
     submenu.hideAll();
     
-    submenu.current_id=$('.submenu').filter('.current').get(0).id.replace('submenu-', '');
-    submenu.show(submenu.current_id);
+    submenu.default_id=$('.submenu').filter('.current').get(0).id.replace('submenu-', '');
+    submenu.show(submenu.default_id);
     
-    $('#nav li').mouseleave( function(){
-        setTimeout( function(){submenu.hideAll();submenu.show(submenu.current_id);} , 3000 );
-    });
+    //控制
+    var timeout;
+    var now_id;
+    var menu_mouseleave=function(){
+        timeout=setTimeout( function(){
+            submenu.hideAll();
+            submenu.show(submenu.default_id);
+        } , 3000 );
+    };
+    var menu_mouseenter=function(){
+        clearTimeout( timeout );
+    }
+    $('.submenu').mouseleave( menu_mouseleave );
+    $('#nav li').mouseleave( menu_mouseleave );
+    $('.submenu').mouseenter( menu_mouseenter );
+    $('#nav li').mouseenter( menu_mouseenter );
     //$('.submenu').filter('.current').css('display', 'inline');
     /*
     $('#test').html( $('#test').html()+'Width: '+Browser.getWidth()+'px<br>' );
