@@ -28,7 +28,7 @@ $(document).ready( function(){
         var $body = (window.opera) ? (document.compatMode == "CSS1Compat" ? $('html') : $('body')) : $('html,body');
         $body.animate({
             scrollTop: highlight.offset().top - 140
-        }, 500);
+        }, 300);
     }
 });
 </script>

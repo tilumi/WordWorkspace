@@ -5,7 +5,7 @@ $(document).keydown(function(e){
     var pageTop=offset.y;
     var browserHeight = $(window).height();
     var scrollUnit = browserHeight - 150;
-    var scrollInterval = 500;
+    var scrollInterval = 100;
     switch( e.keyCode ){
         /* space */
         case 32:
@@ -32,7 +32,7 @@ $(document).keydown(function(e){
     }
     if( scrollActive ){
         var $body = (window.opera) ? (document.compatMode == "CSS1Compat" ? $('html') : $('body')) : $('html,body');
-        $body.animate({
+        $body.stop().animate({
             scrollTop: scrollToTop
         }, scrollInterval);
         return false;
