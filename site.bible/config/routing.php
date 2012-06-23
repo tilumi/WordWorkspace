@@ -16,11 +16,19 @@ class RoutingConfigs{
     static $apps=array(
             'admin'=>array(
                 'news'=>array('name'=>'news'),
+                
+                'bible/books'=>array('name'=>'bible-books', 'parents'=>'bible'),
+                'bible/verses'=>array('name'=>'bible-verses', 'parents'=>'bible'),
+                'bible'=>array('name'=>'bible'),
+                
                 'albums/*/photos'=>array('name'=>'album-photos', 'parents'=>'albums'),
                 'albums'=>array('name'=>'albums'),
+                
                 'managers/groups'=>array('name'=>'groups', 'parents'=>'managers'),
                 'managers'=>array('name'=>'managers'),
+                
                 'syslog'=>array('name'=>'syslog'),
+                
                 '__default__'=>array('name'=>'main'),
             ),
             'main'=>array(

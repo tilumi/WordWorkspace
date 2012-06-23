@@ -13,23 +13,34 @@ $topmenu=array(
 /* 設定主工具列 */
 $mainmenu=array(
     array('name'=>'管理首頁', 'link'=>'/', 'menu_id'=>0, 'id'=>'main.index' ), 
-    array('name'=>'新聞中心', 'link'=>'/news/', 'menu_id'=>1, 'id'=>'news.index',
-        'submenu'=>array(
-            array('name'=>'關鍵字', 'link'=>'/articles/keywords/', 'id'=>'articles_keywords.index' ),
-            array('name'=>'類型', 'link'=>'/articles/categories/', 'id'=>'articles_categories.index' ),
-        )
-    ),
-    array('name'=>'書卷管理', 'link'=>'/books/', 'menu_id'=>2, 'id'=>'books.index' ),
-    array('name'=>'經文管理', 'link'=>'/verses/', 'menu_id'=>3, 'id'=>'verses.index' ),
+    array('name'=>'新聞中心', 'link'=>'/news/', 'menu_id'=>1, 'id'=>'news' ),
 /*    array('name'=>'相簿管理', 'link'=>'/albums/', 'id'=>'albums.index'),
     array('name'=>'相片管理', 'link'=>'', 'id'=>'albums.index', 'hidden'=>true),
     array('name'=>'系統紀錄', 'link'=>'/syslog/', 'id'=>'syslog.index' ),
     array('name'=>'操作說明', 'link'=>'/doc/', 'id'=>'docs.index' ),
     */
-    array('name'=>'文章管理', 'link'=>'/articles/', 'menu_id'=>4, 'id'=>'articles.index',
+    array('name'=>'聖經維護', 'link'=>'/bible/', 'menu_id'=>2, 'id'=>'bible',
         'submenu'=>array(
-            array('name'=>'關鍵字', 'link'=>'/articles/keywords/', 'id'=>'articles_keywords.index' ),
-            array('name'=>'類型', 'link'=>'/articles/categories/', 'id'=>'articles_categories.index' ),
+            array('name'=>'書卷管理', 'link'=>'/bible/books/', 'id'=>'bible.books' ),
+            array('name'=>'經文管理', 'link'=>'/bible/verses/', 'id'=>'bible.verses' ),
+        )
+    ),
+    array('name'=>'話語資料', 'link'=>'/words/', 'menu_id'=>3, 'id'=>'words',
+        'submenu'=>array(
+            array('name'=>'分類', 'link'=>'/words/catalogs/', 'id'=>'words.catalogs' ),
+            array('name'=>'證道者', 'link'=>'/words/speakers/', 'id'=>'words.speakers' ),
+        )
+    ),
+    array('name'=>'禮拜資料', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
+        'submenu'=>array(
+            array('name'=>'年度標語', 'link'=>'/subjects/yeartopics/', 'id'=>'subjects.yeartopics.index' ),
+        )
+    ),
+    array('name'=>'讚美歌曲', 'link'=>'/songs/', 'menu_id'=>5, 'id'=>'songs',
+        'submenu'=>array(
+            array('name'=>'分類', 'link'=>'/songs/categories/', 'id'=>'songs.categories' ),
+            array('name'=>'編號系統', 'link'=>'/songs/sns/', 'id'=>'songs.sns' ),
+            array('name'=>'歌本收錄', 'link'=>'/songs/songbooks/', 'id'=>'songs.songbooks' ),
         )
     ),
     //array('name'=>'分類管理', 'link'=>array('plugin'=>'subjects', 'controller'=>'yeartopics') ),
