@@ -9,7 +9,7 @@ $mainName = APP::$mainName;
             <div class="grid_12">
 
 <p>
-<?php echo View::anchor('/', '主控面板'); ?>
+<?php echo View::anchor('/', '管理首頁'); ?>
  »
 <?php echo View::anchor('/managers/', '系統管理員 Managers'); ?>
  »

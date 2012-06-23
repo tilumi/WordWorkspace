@@ -17,8 +17,8 @@ if( in_array( $action, $registedAction ) ){
 }
 APP::setAction($action);
 
-APP::$pageTitle = '主控面板';
-APP::$mainTitle = '主控面板 Dashboard';
+APP::$pageTitle = '管理首頁';
+APP::$mainTitle = '管理首頁 Dashboard';
 APP::$mainName = '';
 $menu_id = 0;
 

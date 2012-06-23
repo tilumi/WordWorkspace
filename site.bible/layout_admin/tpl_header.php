@@ -58,9 +58,9 @@ function parseMenuItem($item, $markup=false, $submenu_key=null){
         if( is_numeric($submenu_key) ){
             $attrs=array('onmouseover'=>"javascript: submenu.show($submenu_key);");
         }
-        if( $markup ){ $menu_class.='current'; }
+        if( $markup ){ $menu_id.='id="current"'; }
         
-        $tmp .= '<li id="'.$menu_class.'">';
+        $tmp .= '<li '.$menu_id.'>';
         $tmp .= View::anchor( $item['link'], $item['name'], $attrs );
         $tmp .= "</li>\n";
     }
