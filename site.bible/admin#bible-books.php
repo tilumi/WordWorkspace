@@ -176,6 +176,8 @@ function edit(){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
+    APP::load('vendor', 'ckeditor/ckeditor');
+    
     APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['name'];
     View::setTitle(APP::$pageTitle);
     
@@ -184,34 +186,37 @@ function edit(){
     $form->addElement('header', '', $header );
     
     $form->addElement('hidden', 'id');
-    $options = array(
-        'language'=>'tw',
-        'format'=>'Y-m-d H:i',
-        'minYear'=>date('Y')-5,
-        'maxYear'=>date('Y')+5,
-        'year'=>date('Y')
-    );
-    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
-    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
     
-    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
+    $form->addElement('text', 'name', APP::$mainName.'名稱(中)', array('class'=>'input-medium'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'名稱(韓)', array('class'=>'input-medium'));
+    $form->addElement('text', 'name_en', APP::$mainName.'名稱(英)', array('class'=>'input-medium'));
+    $form->addElement('text', 'short', APP::$mainName.'簡稱(中)', array('class'=>'input-short'));
+    $form->addElement('text', 'short_kr', APP::$mainName.'簡稱(韓)', array('class'=>'input-short'));
+    $form->addElement('text', 'short_en', APP::$mainName.'簡稱(英)', array('class'=>'input-short'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $radio=array();
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
-    $form->addGroup($radio, '', '顯示狀態', ' ');
-
-    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
+    /*$CKEditor = new CKEditor();
+    ob_start();
+    $CKEditor->editor("info", $data['info']);
+    $ckeditor=ob_get_contents();
+    ob_end_clean();
+    $form->addElement('static', '', '簡介', $ckeditor );
+    
+    ob_start();
+    $CKEditor->editor("summary", $data['summary']);
+    $ckeditor=ob_get_contents();
+    ob_end_clean();
+    $form->addElement('static', '', '摘要', $ckeditor );
+    */
+    $form->addElement('textarea', 'info', '簡介', array('cols'=>90, 'rows'=>10));
+    $form->addElement('textarea', 'summary', '摘要', array('cols'=>90, 'rows'=>10));
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
-    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
     $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
-    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){

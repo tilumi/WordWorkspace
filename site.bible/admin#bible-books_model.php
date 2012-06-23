@@ -1,5 +1,5 @@
 <?php
-class News{
+class BibleBooks{
     static $useTable='bible_books';
     
     function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
@@ -53,6 +53,29 @@ class News{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
+        
+        $data['urn']=slug($data['name_en']);
+        
+        $info=$data['info'];
+        $info_str=preg_replace("/(\r|\n)+/",'<br>',$info);
+        $info_arr=explode('<br>',$info_str);
+        $info_tmp='';
+        foreach($info_arr as $ia){
+            $info_tmp.='<p>'.$ia.'</p>'."\n";
+        }
+        $info=$info_tmp;
+        $data['info_html']=$info;
+
+        $summary=$data['summary'];
+        $summary_str=preg_replace("/(\r|\n)+/",'<br>',$summary);
+        $summary_arr=explode('<br>',$summary_str);
+        $summary_tmp='';
+        foreach($summary_arr as $ia){
+            $summary_tmp.='<li>'.$ia.'</li>'."\n";
+        }
+        $summary='<ul class="style1">'."\n".$summary_tmp.'</ul>'."\n";
+        $data['summary_html']=$summary;
+
        	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);

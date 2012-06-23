@@ -6,7 +6,7 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 
             <div class="grid_12">
 <p>
-<?php echo View::anchor('/', '主控面板'); ?>
+<?php echo View::anchor('/', '管理首頁'); ?>
  »
 <?php echo APP::$mainTitle; ?>
 </p>
@@ -82,6 +82,7 @@ var batchRoutes = {
                                     <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(韓)</th>
                                     <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(英)</th>
                                     <th class="header" style="">簡介</th>
+                                    <th class="header" style="width: 140px">最後更新</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -109,6 +110,9 @@ var batchRoutes = {
                                     </td>
                                     <td>
                                         <?php echo mb_substr($r['info'], 0, 30); ?> ...
+                                    </td>
+                                    <td>
+                                        <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>
                                     </td>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
