@@ -15,6 +15,7 @@ class Main{
         $book_id=$data['id'];
         $testament=($data['testament']=='OT')?'舊約':'新約';
         $data['ta']=$testament;
+/*
         $info=$data['info'];
         $info_str=preg_replace("/(\r|\n)+/",'<br>',$info);
         $info_arr=explode('<br>',$info_str);
@@ -34,7 +35,7 @@ class Main{
         }
         $summary='<ul class="style1">'."\n".$summary_tmp.'</ul>'."\n";
         $data['summary_html']=$summary;
-        
+*/
         $prev=(($book_id-1)>=1)?array('id'=>($book_id-1),'name'=>$bibleFull[$book_id-1]):array();
         $next=(($book_id+1)<=66)?array('id'=>($book_id+1),'name'=>$bibleFull[$book_id+1]):array();
         $data['prev']=$prev;

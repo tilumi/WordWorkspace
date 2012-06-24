@@ -105,6 +105,7 @@ function index(){
     }
     
     list($rows, $totalItems) = BibleBooks::pagelist($submits, $pageID, $pageRows);
+    //BibleBooks::updateAllHTML();
     
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
@@ -167,11 +168,11 @@ function add(){
     APP::$appBuffer = array( $form );
 }
 function edit(){
-    $id = pos(APP::$params);
-    if( empty($id) ){
+    $urn = pos(APP::$params);
+    if( empty($urn) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findById($id);
+    $data = BibleBooks::findByUrn($urn);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -238,11 +239,11 @@ function edit(){
     APP::$appBuffer = array( $form );
 }
 function delete(){
-    $id = pos(APP::$params);
-    if( empty($id) ){
+    $urn = pos(APP::$params);
+    if( empty($urn) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findById($id);
+    $data = BibleBooks::findByUrn($urn);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -285,12 +286,12 @@ function delete(){
     
     APP::$appBuffer = array( $form );
 }
-function archives( $id=null ){
-    $id = pos(APP::$params);
-    if( empty($id) ){
+function archives(){
+    $urn = pos(APP::$params);
+    if( empty($urn) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findById($id);
+    $data = BibleBooks::findByUrn($urn);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }

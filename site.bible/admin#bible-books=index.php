@@ -116,13 +116,13 @@ var batchRoutes = {
                                     </td>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
-                                        <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
+                                        <a href="<?php echo url('archives/'.$r['urn'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
 <?php } ?>
 <?php if( ACL::checkAuth( 'edit' ) ){ ?>
-                                        <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
+                                        <a href="<?php echo url('edit/'.$r['urn'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
 <?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
-                                        <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
+                                        <a href="<?php echo url('delete/'.$r['urn'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
 <?php }*/ ?>
                                     </td>
                                 </tr>

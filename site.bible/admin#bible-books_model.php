@@ -39,6 +39,20 @@ class BibleBooks{
         $data = Model::fetchRow( $sql );
         return $data;
     }
+    function findByUrn( $urn ){
+        if( is_array($urn) ){
+            $urn_list=array();
+            foreach( $urn as $r ){
+                $urn_list[]=Model::quote($r, 'text');
+            }
+            $sql = "SELECT * FROM ".self::$useTable." WHERE urn IN (".implode(',', $urn_list).") AND deleted='0'";
+            $data = Model::fetchAll( $sql );
+            return $data;
+        }
+        $sql = "SELECT * FROM ".self::$useTable." WHERE urn=".Model::quote($urn, 'text');
+        $data = Model::fetchRow( $sql );
+        return $data;
+    }
     function add( $data ){
         if( isset($data['commit']) ){
             unset($data['commit']);
@@ -79,6 +93,18 @@ class BibleBooks{
        	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);
+    }
+    function updateAllHTML(){
+        $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
+        
+        $rows = Model::fetchAll( $sql );
+        
+        foreach( $rows as $data ){
+            for($i=0;$i<19;$i++){ unset($data[$i]); }
+            self::edit($data);
+        }
+        
+        return true;
     }
 /*    function delete( $data ){
         if( isset($data['id']) ){
