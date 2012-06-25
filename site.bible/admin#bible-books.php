@@ -71,15 +71,11 @@ function index(){
     //Search
     $form=Form::create('frmSearch', 'post', APP::$ME );
     $form->addElement('header', '', '內容檢索' );
-    $form->addElement('text', 'name', '標題', array('class'=>'input-long'));
-    $form->addElement('text', 'author', '作者', array('class'=>'input-long'));
+    $form->addElement('text', 'name', APP::$mainName.'名稱 (中/英/韓)', array('class'=>'input-long'));
+    $form->addElement('text', 'short', '簡稱 (中/英/韓)', array('class'=>'input-long'));
+    $form->addElement('text', 'info', '簡介', array('class'=>'input-long'));
+    $form->addElement('text', 'summary', '摘要', array('class'=>'input-long'));
     
-    $options = array(
-        ''=>'--- 選擇狀態 ---',
-        '1'=>'顯示',
-        '0'=>'隱藏',
-    );
-    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input'));
     $buttons=Form::buttonsSearchForm( false );
     $form->addGroup($buttons, null, null, '&nbsp;');
     
@@ -99,9 +95,11 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='name' ){ $searchInfo[]='<u>標題</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='author' ){ $searchInfo[]='<u>作者</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>'.APP::$mainName.'名稱</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='short' ){ $searchInfo[]='<u>簡稱</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='info' ){ $searchInfo[]='<u>簡介</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='summary' ){ $searchInfo[]='<u>摘要</u> 含 "<span>'.$value.'</span>" '; }
+        //if( $key=='summary' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
     list($rows, $totalItems) = BibleBooks::pagelist($submits, $pageID, $pageRows);

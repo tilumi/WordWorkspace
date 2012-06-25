@@ -10,6 +10,8 @@ $mainName = APP::$mainName;
 <p>
 <?php echo View::anchor('/', '管理首頁'); ?>
  »
+<?php echo View::anchor('..', '聖經維護 Bible'); ?>
+ »
 <?php echo View::anchor('.', $mainTitle); ?>
  »
 <?php echo APP::$pageTitle; ?>

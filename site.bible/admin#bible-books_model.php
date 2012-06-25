@@ -7,15 +7,25 @@ class BibleBooks{
         
         $key="name";
         if( ! empty( $submits[$key]) ){
-            $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" AND (".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" OR ".$key."_en LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" OR ".$key."_kr LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=")";
         }
-        $key="author";
+        $key="short";
+        if( ! empty( $submits[$key]) ){
+            $sql.=" AND (".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" OR ".$key."_en LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" OR ".$key."_kr LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=")";
+        }
+        $key="info";
         if( ! empty( $submits[$key]) ){
             $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
-        $key="is_active";
-        if( in_array( $submits[$key], array('0','1') ) ){
-            $sql.=" AND ".$key." = ".Model::quote($submits[$key], 'text');
+        $key="summary";
+        if( ! empty( $submits[$key]) ){
+            $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
         //$sql.=" AND deleted='0'";
         //$sql.=" ORDER BY published DESC";

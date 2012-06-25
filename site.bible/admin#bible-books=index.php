@@ -8,6 +8,8 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 <p>
 <?php echo View::anchor('/', '管理首頁'); ?>
  »
+<?php echo View::anchor('..', '聖經維護 Bible'); ?>
+ »
 <?php echo APP::$mainTitle; ?>
 </p>
 
