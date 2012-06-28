@@ -33,7 +33,7 @@ $registerAction = array(
     'chapter', //閱讀經文
 );
 
-include( APP::$handler.'_model.php' );
+include( APP::$routing['app'].'_model.php' );
 
 if( in_array( $action , $registerAction ) ){
     $action();
@@ -43,7 +43,7 @@ if( in_array( $action , $registerAction ) ){
 
 
 
-$viewTpl = APP::$handler.'='.$action.'.php';
+$viewTpl = APP::$routing['app'].'='.$action.'.php';
 if( file_exists($viewTpl) )
     include( $viewTpl );
 
@@ -51,8 +51,9 @@ if( file_exists($viewTpl) )
 
 function index(){
     $rows=Main::getBooks();
-    View::setHeader( 'sitename', '主的愛&線上聖經 - 最美最舒適的線上讀經網' );
-    APP::$appBuffer = array($rows);
+    $sitename='JB 線上聖經';
+    View::setHeader( 'sitename', $sitename.' - 最美最舒適的線上讀經網' );
+    APP::$appBuffer = array($rows, $sitename);
 }
 function catalog(){
 

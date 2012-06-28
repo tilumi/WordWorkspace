@@ -1,7 +1,7 @@
 <?php include('cache/bible_info.php'); ?>
 
             <div class="midnav">
-                <a class="logo" href="<?php echo url('/'); ?>">The Bible 線上聖經</a>
+                <a class="logo" href="<?php echo url('/'); ?>"><?php echo APP::$layoutsConfigs['main']['sitename']; ?></a>
     			
     			<div id="menu-nav">
                     <div class="menu-nav-button scroll-restore"></div>

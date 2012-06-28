@@ -9,7 +9,7 @@ APP::$layoutsConfigs = array(
         )
     ),
     'main' => array(
-        'sitename' => '主的愛&線上聖經',
+        'sitename' => 'JB 線上聖經',
         'metas' => array(
             'author'        => '',
             'description'   => '因主的愛，我們努力提供您最佳閱讀聖經環境，願主耶穌基督的愛與真理充滿全地，哈雷路亞',

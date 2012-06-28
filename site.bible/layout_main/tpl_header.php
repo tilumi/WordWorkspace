@@ -9,7 +9,7 @@
 
 			<div id="header" class="container">
 				<div id="logo">
-					<h1><a href="<?php echo url('/');?>">主的愛&線上聖經</a></h1>
+					<h1><a href="<?php echo url('/');?>"><?php echo $sitename; ?></a></h1>
 				</div>
 			</div>
 <style>
