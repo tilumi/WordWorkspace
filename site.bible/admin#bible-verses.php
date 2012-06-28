@@ -6,17 +6,22 @@ if( APP::$doctype != 'html' ){
 $action = pos( APP::$params );
 $registedAction = array(
     'index',
+    'add',
     'edit',
+    'delete',
     'archives',
-    'chapters'
+    'm_edit',
+    'm_delete',
+    'active',
+    'inactive',
 );
 if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
-APP::$pageTitle = '書卷管理';
-APP::$mainTitle = '書卷管理 Bible Books';
-APP::$mainName = '書卷';
+APP::$pageTitle = '經文管理';
+APP::$mainTitle = '經文管理 Bible Verses';
+APP::$mainName = '經文';
 $menu_id = 2;
 
 $modelPath = APP::$handler.'_model.php';
@@ -225,67 +230,6 @@ function edit(){
             redirect( '.' , $errmsg , 'error' );
         }
     } 
-    $form->setDefaults($data);
-    
-    $form=Form::getHtml($form);
-    
-    APP::$appBuffer = array( $form );
-}
-function chapters(){
-    $urn = pos(APP::$params);
-    if( empty($urn) ){
-        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
-    }
-    $data = BibleBooks::findByUrn($urn);
-    if( !(is_array($data) && count($data)>0) ){
-        redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
-    }
-    
-    APP::load('vendor', 'ckeditor/ckeditor');
-    
-    APP::$pageTitle='卷章管理：'.$data['name'];
-    $rows=BibleBooks::getChapters($data['id']);
-    
-    View::setTitle(APP::$pageTitle);
-    
-    $form=Form::create('frmUpdate', 'post', APP::$ME );
-    
-    $form->addElement('header', '', '「'.$data['name'].'」卷章標題' );
-    $form->addElement('hidden', 'id');
-    
-    $i=0;
-    foreach( $rows as $r ){
-        if( $i%10 == 0 ){
-                $form->addElement('static', '', '', '<b style="color:red;">'.($i+1).'～'.($i+10).'</b>' );
-        }
-        $form->addElement('text', 'name['.$r['id'].']', '第'.$r['chapter_id'].'章', array('class'=>'input-medium'));
-        $form->setDefaults( array('name['.$r['id'].']'=>$r['name']) );
-        $i+=1;
-    }
-    
-    $buttons=Form::buttons();
-    $form->addGroup($buttons, null, null, '&nbsp;');
-    
-    $form->addRule('name', '標題 必填', 'required', null, 'client');
-    $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
-    
-    $submits = $form->getSubmitValues();
-    if( count($submits)>0 ){
-        if( ! isset($submits['commit']) ){
-            redirect( '.' , '使用者取消' , 'info' );
-        }
-        if( $form->validate() ){
-            $count = BibleBooks::chapters($submits); 
-            if( $count > 0 ){
-                redirect( '.' , '書卷 '.$data['name'].' 卷章已編輯成功，共有 '.$count.' 項資料被更新' , 'success' );
-            }
-            if( $count === 0 ){
-                redirect( '.' , '沒有任何資料被更新' , 'info' );
-            }
-            redirect( '.' , '很抱歉，發生了預期外的錯誤沒有更新成功，請再試一次' , 'error' );
-        }
-    }
     $form->setDefaults($data);
     
     $form=Form::getHtml($form);

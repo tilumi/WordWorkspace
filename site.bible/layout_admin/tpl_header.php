@@ -12,7 +12,7 @@ $topmenu=array(
 
 /* 設定主工具列 */
 $mainmenu=array(
-    array('name'=>'管理首頁', 'link'=>'/', 'menu_id'=>0, 'id'=>'main.index' ), 
+    array('name'=>'管理首頁', 'link'=>'/', 'menu_id'=>0, 'id'=>'main' ), 
     array('name'=>'新聞中心', 'link'=>'/news/', 'menu_id'=>1, 'id'=>'news' ),
 /*    array('name'=>'相簿管理', 'link'=>'/albums/', 'id'=>'albums.index'),
     array('name'=>'相片管理', 'link'=>'', 'id'=>'albums.index', 'hidden'=>true),
@@ -33,7 +33,7 @@ $mainmenu=array(
     ),
     array('name'=>'禮拜資料', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
         'submenu'=>array(
-            array('name'=>'年度標語', 'link'=>'/subjects/yeartopics/', 'id'=>'subjects.yeartopics.index' ),
+            array('name'=>'年度標語', 'link'=>'/subjects/yeartopics/', 'id'=>'subjects.yeartopics' ),
         )
     ),
     array('name'=>'讚美歌曲', 'link'=>'/songs/', 'menu_id'=>5, 'id'=>'songs',

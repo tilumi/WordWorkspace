@@ -1,6 +1,6 @@
 <?php
 class BibleBooks{
-    static $useTable='bible_books';
+    static $useTable='bible';
     
     function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
         $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
@@ -72,38 +72,6 @@ class BibleBooks{
        	$data['created']=date('Y-m-d H:i:s');
         
         return Model::insert($data, self::$useTable);
-    }
-    function chapters( $data ){
-        if( isset($data['commit']) ){
-            unset($data['commit']);
-        }
-        
-        $sql="SELECT * FROM bible_chapters WHERE book_id=".Model::quote($data['id'], 'text');
-        $rows=Model::fetchAll($sql);
-        
-        $chapters=array();
-        foreach( $rows as $r ){
-            $chapters[$r['id']]=$r['name'];
-        }
-        
-       	$updated=date('Y-m-d H:i:s');
-       	$i=0;
-        foreach( $data['name'] as $chapter_id=>$name ){
-            if( $chapters[ $chapter_id ]===$name ){ continue; }
-            $chapter=array();
-            $chapter['id']=$chapter_id;
-            $chapter['name']=$name;
-            $chapter['updated']=$updated;
-            Model::update($chapter, 'id', 'cuv_chapters');
-           	$i+=1;
-        }
-        return $i;
-    }
-    function getChapters( $book_id ){
-        $sql ="SELECT * FROM cuv_chapters WHERE book_id=".Model::quote($book_id, 'text');
-        $rows = Model::fetchAll( $sql );
-        
-        return $rows;
     }
     function edit( $data ){
         if( isset($data['commit']) ){

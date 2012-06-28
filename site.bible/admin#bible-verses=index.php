@@ -126,9 +126,6 @@ var batchRoutes = {
 <?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
                                         <a href="<?php echo url('delete/'.$r['urn'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
 <?php }*/ ?>
-<?php if( ACL::checkAuth( 'chapters' ) ){ ?>
-                                        <a href="<?php echo url('chapters/'.$r['urn'].'.html'); ?>" title="卷章管理"><img src="<?php echo layout_url('admin', '/images/text-list-bullets-icon.png'); ?>" alt="卷章管理" width="16" height="16"></a>
-<?php } ?>
                                     </td>
                                 </tr>
 <?php } ?>
