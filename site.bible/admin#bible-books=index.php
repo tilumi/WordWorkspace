@@ -6,7 +6,9 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 
             <div class="grid_12">
 <p>
-<?php echo View::anchor('/', '主控面板'); ?>
+<?php echo View::anchor('/', '管理首頁'); ?>
+ »
+<?php echo View::anchor('..', '聖經維護 Bible'); ?>
  »
 <?php echo APP::$mainTitle; ?>
 </p>
@@ -82,6 +84,7 @@ var batchRoutes = {
                                     <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(韓)</th>
                                     <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(英)</th>
                                     <th class="header" style="">簡介</th>
+                                    <th class="header" style="width: 140px">最後更新</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -111,15 +114,21 @@ var batchRoutes = {
                                         <?php echo mb_substr($r['info'], 0, 30); ?> ...
                                     </td>
                                     <td>
+                                        <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>
+                                    </td>
+                                    <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
-                                        <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
+                                        <a href="<?php echo url('archives/'.$r['urn'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
 <?php } ?>
 <?php if( ACL::checkAuth( 'edit' ) ){ ?>
-                                        <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
+                                        <a href="<?php echo url('edit/'.$r['urn'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
 <?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
-                                        <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
+                                        <a href="<?php echo url('delete/'.$r['urn'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
 <?php }*/ ?>
+<?php if( ACL::checkAuth( 'chapters' ) ){ ?>
+                                        <a href="<?php echo url('chapters/'.$r['urn'].'.html'); ?>" title="卷章管理"><img src="<?php echo layout_url('admin', '/images/text-list-bullets-icon.png'); ?>" alt="卷章管理" width="16" height="16"></a>
+<?php } ?>
                                     </td>
                                 </tr>
 <?php } ?>
