@@ -15,7 +15,7 @@ class Groups{
         }
         $sql.=" AND deleted='0'";
         $sql.=" ORDER BY sort";
-        $totalItems = Model::numRows($sql);
+        $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll($sql);
         

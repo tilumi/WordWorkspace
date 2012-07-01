@@ -20,12 +20,12 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                 <?php echo redirect_message(); ?>
                 
                 <div class="float-right">
-<?php if( ACL::checkAuth( 'add' ) ){ ?>
+<?php /*if( ACL::checkAuth( 'add' ) ){ ?>
                     <!-- Button -->
                     <a href="<?php echo url( 'add.html' ); ?>" class="button">
                     	<span>新增<?php echo APP::$mainName; ?> <img src="<?php echo layout_url('admin', '/images/plus-small.gif'); ?>" width="12" height="9"></span>
                     </a>
-<?php } ?>
+<?php }*/ ?>
                 </div>
                 <div class="float-left">
                     <!-- Table records filtering -->
@@ -77,13 +77,9 @@ var batchRoutes = {
                         <table class="">
                         	<thead>
                                 <tr>
-                                    <th class="header" style="width: 50px;">#</th>
-                                    <th class="header" style="width: 70px">新舊約</th>
-                                    <th class="header" style="width: 70px"><?php echo APP::$mainName; ?>型別</th>
-                                    <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(中)</th>
-                                    <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(韓)</th>
-                                    <th class="header" style="width: 140px"><?php echo APP::$mainName; ?>名稱(英)</th>
-                                    <th class="header" style="">簡介</th>
+                                    <th class="header" style="width: 70px;">#</th>
+                                    <th class="header" style="width: 150px">卷章</th>
+                                    <th class="header"><?php echo APP::$mainName; ?>標題</th>
                                     <th class="header" style="width: 140px">最後更新</th>
                                     <th style="width: 70px"></th>
                                 </tr>
@@ -96,35 +92,25 @@ var batchRoutes = {
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
                                     <td>
-                                        <?php echo ($r['testament']==='OT')?'舊約':'新約'; ?>
+                                        <?php echo $r['book_name']; ?>
+                                        <?php echo $r['chapter_id']; ?>
+                                        章
                                     </td>
                                     <td>
-                                        <?php echo $r['category_name']; ?>
-                                    </td>
-                                    <td>
-                                        <?php echo $r['name']; ?> (<?php echo $r['short']; ?>)
-                                    </td>
-                                    <td>
-                                        <?php echo $r['name_kr']; ?> (<?php echo $r['short_kr']; ?>)
-                                    </td>
-                                    <td>
-                                        <?php echo $r['name_en']; ?> (<?php echo $r['short_en']; ?>)
-                                    </td>
-                                    <td>
-                                        <?php echo mb_substr($r['info'], 0, 30); ?> ...
+                                        <?php echo $r['name']; ?>
                                     </td>
                                     <td>
                                         <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>
                                     </td>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
-                                        <a href="<?php echo url('archives/'.$r['urn'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
+                                        <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
 <?php } ?>
 <?php if( ACL::checkAuth( 'edit' ) ){ ?>
-                                        <a href="<?php echo url('edit/'.$r['urn'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
+                                        <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
 <?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
-                                        <a href="<?php echo url('delete/'.$r['urn'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
+                                        <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
 <?php }*/ ?>
                                     </td>
                                 </tr>

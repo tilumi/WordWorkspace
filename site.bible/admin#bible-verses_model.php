@@ -1,9 +1,11 @@
 <?php
-class BibleBooks{
-    static $useTable='bible';
+class BibleVerses{
+    static $useTable='cuv_chapters';
     
     function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
-        $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
+        $sql ="SELECT c.*, b.name as book_name FROM ".self::$useTable." c";
+        $sql.=" JOIN bible_books b ON b.id=c.book_id";
+        $sql.=" WHERE 1<>2";
         
         $key="name";
         if( ! empty( $submits[$key]) ){
@@ -29,7 +31,9 @@ class BibleBooks{
         }
         //$sql.=" AND deleted='0'";
         //$sql.=" ORDER BY published DESC";
-        $totalItems = Model::fetchOne( str_replace('SELECT *','SELECT COUNT(*)', $sql) );
+        
+        
+        $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
         
@@ -41,11 +45,11 @@ class BibleBooks{
             foreach( $id as $r ){
                 $id_list[]=Model::quote($r, 'text');
             }
-            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).") AND deleted='0'";
+            $sql = "SELECT c.*, b.name as book_name FROM ".self::$useTable." c JOIN bible_books b ON b.id=c.book_id WHERE c.id IN (".implode(',', $id_list).")";
             $data = Model::fetchAll( $sql );
             return $data;
         }
-        $sql = "SELECT * FROM ".self::$useTable." WHERE id=".Model::quote($id, 'text');
+        $sql = "SELECT c.*, b.name as book_name FROM ".self::$useTable." c JOIN bible_books b ON b.id=c.book_id WHERE c.id=".Model::quote($id, 'text');
         $data = Model::fetchRow( $sql );
         return $data;
     }
@@ -55,13 +59,19 @@ class BibleBooks{
             foreach( $urn as $r ){
                 $urn_list[]=Model::quote($r, 'text');
             }
-            $sql = "SELECT * FROM ".self::$useTable." WHERE urn IN (".implode(',', $urn_list).") AND deleted='0'";
+            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $urn_list).")";
             $data = Model::fetchAll( $sql );
             return $data;
         }
-        $sql = "SELECT * FROM ".self::$useTable." WHERE urn=".Model::quote($urn, 'text');
+        $sql = "SELECT * FROM ".self::$useTable." WHERE id=".Model::quote($urn, 'text');
         $data = Model::fetchRow( $sql );
         return $data;
+    }
+    function getVerses( $id ){
+        $sql ="SELECT c.*, s.name as stype_name, s.info as stype_info FROM cuv c JOIN bible_stypes s ON s.id=c.stype_id WHERE c.id LIKE ".Model::quote($id.'%', 'text');
+        $rows = Model::fetchAll( $sql );
+        
+        return $rows;
     }
     function add( $data ){
         if( isset($data['commit']) ){

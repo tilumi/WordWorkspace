@@ -22,7 +22,7 @@ $mainmenu=array(
     array('name'=>'聖經維護', 'link'=>'/bible/', 'menu_id'=>2, 'id'=>'bible',
         'submenu'=>array(
             array('name'=>'書卷管理', 'link'=>'/bible/books/', 'id'=>'bible.books' ),
-            array('name'=>'經文管理', 'link'=>'/bible/verses/', 'id'=>'bible.verses' ),
+            array('name'=>'章節經文', 'link'=>'/bible/verses/', 'id'=>'bible.verses' ),
         )
     ),
     array('name'=>'話語資料', 'link'=>'/words/', 'menu_id'=>3, 'id'=>'words',

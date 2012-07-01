@@ -29,7 +29,7 @@ class BibleBooks{
         }
         //$sql.=" AND deleted='0'";
         //$sql.=" ORDER BY published DESC";
-        $totalItems = Model::fetchOne( str_replace('SELECT *','SELECT COUNT(*)', $sql) );
+        $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
         
@@ -41,7 +41,7 @@ class BibleBooks{
             foreach( $id as $r ){
                 $id_list[]=Model::quote($r, 'text');
             }
-            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).") AND deleted='0'";
+            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).")";
             $data = Model::fetchAll( $sql );
             return $data;
         }
@@ -55,7 +55,7 @@ class BibleBooks{
             foreach( $urn as $r ){
                 $urn_list[]=Model::quote($r, 'text');
             }
-            $sql = "SELECT * FROM ".self::$useTable." WHERE urn IN (".implode(',', $urn_list).") AND deleted='0'";
+            $sql = "SELECT * FROM ".self::$useTable." WHERE urn IN (".implode(',', $urn_list).")";
             $data = Model::fetchAll( $sql );
             return $data;
         }

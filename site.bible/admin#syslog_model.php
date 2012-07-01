@@ -18,7 +18,7 @@ class Syslog{
             $sql.=" AND ".$key." = ".Model::quote($submits[$key], 'text');
         }
         $sql.=" ORDER BY created DESC";
-        $totalItems = Model::fetchOne( str_replace('SELECT *','SELECT COUNT(*)', $sql) );
+        $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
         

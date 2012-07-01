@@ -19,9 +19,9 @@ if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
-APP::$pageTitle = '經文管理';
-APP::$mainTitle = '經文管理 Bible Verses';
-APP::$mainName = '經文';
+APP::$pageTitle = '章節經文';
+APP::$mainTitle = '章節經文 Bible Verses';
+APP::$mainName = '章節';
 $menu_id = 2;
 
 $modelPath = APP::$handler.'_model.php';
@@ -102,8 +102,8 @@ function index(){
         //if( $key=='summary' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
-    list($rows, $totalItems) = BibleBooks::pagelist($submits, $pageID, $pageRows);
-    //BibleBooks::updateAllHTML();
+    list($rows, $totalItems) = BibleVerses::pagelist($submits, $pageID, $pageRows);
+    //BibleVerses::updateAllHTML();
     
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
@@ -153,7 +153,7 @@ function add(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleBooks::add($submits); 
+            $errmsg = BibleVerses::add($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已新增成功' , 'success' );
             }
@@ -166,14 +166,15 @@ function add(){
     APP::$appBuffer = array( $form );
 }
 function edit(){
-    $urn = pos(APP::$params);
-    if( empty($urn) ){
+    $id = pos(APP::$params);
+    if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findByUrn($urn);
+    $data = BibleVerses::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
+    $verses = BibleVerses::getVerses($id);
     
     APP::load('vendor', 'ckeditor/ckeditor');
     
@@ -186,29 +187,15 @@ function edit(){
     
     $form->addElement('hidden', 'id');
     
-    $form->addElement('text', 'name', APP::$mainName.'名稱(中)', array('class'=>'input-medium'));
-    $form->addElement('text', 'name_kr', APP::$mainName.'名稱(韓)', array('class'=>'input-medium'));
-    $form->addElement('text', 'name_en', APP::$mainName.'名稱(英)', array('class'=>'input-medium'));
-    $form->addElement('text', 'short', APP::$mainName.'簡稱(中)', array('class'=>'input-short'));
-    $form->addElement('text', 'short_kr', APP::$mainName.'簡稱(韓)', array('class'=>'input-short'));
-    $form->addElement('text', 'short_en', APP::$mainName.'簡稱(英)', array('class'=>'input-short'));
-    //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
+    $form->addElement('text', 'name', APP::$mainName.'標題(中)', array('class'=>'input-medium'));
+    $form->addElement('text', 'max_verse', '最大節數', array('class'=>'input-medium'));
     
-    /*$CKEditor = new CKEditor();
-    ob_start();
-    $CKEditor->editor("info", $data['info']);
-    $ckeditor=ob_get_contents();
-    ob_end_clean();
-    $form->addElement('static', '', '簡介', $ckeditor );
-    
-    ob_start();
-    $CKEditor->editor("summary", $data['summary']);
-    $ckeditor=ob_get_contents();
-    ob_end_clean();
-    $form->addElement('static', '', '摘要', $ckeditor );
-    */
-    $form->addElement('textarea', 'info', '簡介', array('cols'=>90, 'rows'=>10));
-    $form->addElement('textarea', 'summary', '摘要', array('cols'=>90, 'rows'=>10));
+    $form->addElement('static', '', '', '<b>經文</b>' );
+    foreach( $verses as $verse ){
+        $form->addElement('text', 'name['.$verse['id'].']', $verse['chapter_id'].':'.$verse['verse_id'], array('class'=>'input-long'));
+        $form->addElement('text', 'relative['.$verse['id'].']', $verse['chapter_id'].':'.$verse['verse_id'], array('class'=>'input-long'));
+        $form->setDefaults( array('name['.$verse['id'].']'=>$verse['name']) );
+    }
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
@@ -223,7 +210,7 @@ function edit(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleBooks::edit($submits); 
+            $errmsg = BibleVerses::edit($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已編輯成功' , 'success' );
             }
@@ -234,14 +221,14 @@ function edit(){
     
     $form=Form::getHtml($form);
     
-    APP::$appBuffer = array( $form );
+    APP::$appBuffer = array( $form , $data , $verses );
 }
 function delete(){
     $urn = pos(APP::$params);
     if( empty($urn) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findByUrn($urn);
+    $data = BibleVerses::findByUrn($urn);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -271,7 +258,7 @@ function delete(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleBooks::delete($submits); 
+            $errmsg = BibleVerses::delete($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已刪除' , 'success' );
             }
@@ -285,11 +272,11 @@ function delete(){
     APP::$appBuffer = array( $form );
 }
 function archives(){
-    $urn = pos(APP::$params);
-    if( empty($urn) ){
+    $id = pos(APP::$params);
+    if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findByUrn($urn);
+    $data = BibleVerses::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -318,10 +305,10 @@ function m_edit(){
     $items=$submits['items'];
     switch( $type ){
         case 'active':
-            $errmsg = BibleBooks::setActive($items);
+            $errmsg = BibleVerses::setActive($items);
             break;
         case 'inactive':
-            $errmsg = BibleBooks::setInactive($items);
+            $errmsg = BibleVerses::setInactive($items);
             break;
     }
     if( $errmsg === true ){
@@ -339,7 +326,7 @@ function m_delete(){
     if( isset($submits['commit']) ){
         $submits = $form->getSubmitValues();
         $num=count($submits['ids']);
-        $errmsg = BibleBooks::delete($submits); 
+        $errmsg = BibleVerses::delete($submits); 
         if( $errmsg === true ){
             redirect( '.' , '指定的 '.$num.' 項'.APP::$mainName.'已刪除' , 'success' );
         }
@@ -352,7 +339,7 @@ function m_delete(){
         redirect( '.', '尚未選擇執行目標，您必須先選擇項目', 'error');
     }
     $items=$submits['items'];
-    $rows=BibleBooks::findById( $items );
+    $rows=BibleVerses::findById( $items );
     
     $form=Form::create('frmMDelete', 'post', APP::$ME );
     $form->addElement('header', '', '以下'.APP::$mainName.'都將刪除，是否確認：' );
@@ -377,12 +364,12 @@ function active(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findById($id);
+    $data = BibleVerses::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    if( $errmsg = BibleBooks::setActive($id) ){
+    if( $errmsg = BibleVerses::setActive($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定顯示' , 'success' );
     }
     redirect( '.' , $errmsg , 'error' );
@@ -392,12 +379,12 @@ function inactive(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleBooks::findById($id);
+    $data = BibleVerses::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $errmsg = BibleBooks::setInactive($id);
+    $errmsg = BibleVerses::setInactive($id);
     if( $errmsg === true ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定隱藏' , 'success' );
     }

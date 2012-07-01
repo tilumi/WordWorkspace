@@ -46,7 +46,7 @@ class Blocks{
     	$_default = array(
             'mode' => 'Sliding',
             'perPage' => $perPage,
-            'delta' => 2,
+            'delta' => 3,
             'totalItems' => $totalItems,
             'httpMethod' => 'GET',
             'currentPage' => $pageID,

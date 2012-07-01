@@ -19,7 +19,7 @@ class News{
         }
         $sql.=" AND deleted='0'";
         $sql.=" ORDER BY published DESC";
-        $totalItems = Model::fetchOne( str_replace('SELECT *','SELECT COUNT(*)', $sql) );
+        $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
         
