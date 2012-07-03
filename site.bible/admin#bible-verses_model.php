@@ -7,27 +7,17 @@ class BibleVerses{
         $sql.=" JOIN bible_books b ON b.id=c.book_id";
         $sql.=" WHERE 1<>2";
         
+        $key="book_name";
+        if( ! empty( $submits[$key]) ){
+            $sql.=" AND b.name LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+        }
+        $key="chapter_id";
+        if( ! empty( $submits[$key]) ){
+            $sql.=" AND c.".$key." = ".Model::quote( $submits[$key] , 'text');
+        }
         $key="name";
         if( ! empty( $submits[$key]) ){
-            $sql.=" AND (".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-            $sql.=" OR ".$key."_en LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-            $sql.=" OR ".$key."_kr LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-            $sql.=")";
-        }
-        $key="short";
-        if( ! empty( $submits[$key]) ){
-            $sql.=" AND (".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-            $sql.=" OR ".$key."_en LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-            $sql.=" OR ".$key."_kr LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-            $sql.=")";
-        }
-        $key="info";
-        if( ! empty( $submits[$key]) ){
-            $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
-        }
-        $key="summary";
-        if( ! empty( $submits[$key]) ){
-            $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" AND c.".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
         //$sql.=" AND deleted='0'";
         //$sql.=" ORDER BY published DESC";
@@ -68,7 +58,8 @@ class BibleVerses{
         return $data;
     }
     function getVerses( $id ){
-        $sql ="SELECT c.*, s.name as stype_name, s.info as stype_info FROM cuv c JOIN bible_stypes s ON s.id=c.stype_id WHERE c.id LIKE ".Model::quote($id.'%', 'text');
+        $sql ="SELECT c.*, s.name as stype_name, s.class as stype_class, s.info as stype_info FROM cuv c";
+        $sql.=" JOIN bible_stypes s ON s.id=c.stype_id WHERE c.id LIKE ".Model::quote($id.'%', 'text');
         $rows = Model::fetchAll( $sql );
         
         return $rows;
@@ -88,29 +79,38 @@ class BibleVerses{
             unset($data['commit']);
         }
         
-        $data['urn']=slug($data['name_en']);
+        $verses=$data['verses'];
+        unset($data['verses']);
+        $relates=$data['relates'];
+        unset($data['relates']);
+        $data['updated']=date('Y-m-d H:i:s');
         
-        $info=$data['info'];
-        $info_str=preg_replace("/(\r|\n)+/",'<br>',$info);
-        $info_arr=explode('<br>',$info_str);
-        $info_tmp='';
-        foreach($info_arr as $ia){
-            $info_tmp.='<p>'.$ia.'</p>'."\n";
+        //取出比對資料，有更新才寫入
+        $rows=self::getVerses($data['id']);
+        $_verses=array();
+        $_relates=array();
+        foreach( $rows as $r ){
+            $_verses[ $r['id'] ]=$r['name'];
+            if( ! in_array($r['stype_id'], array('g', 'h')) ){
+                $_relates[ $r['id'] ]=$r['relate'];
+            }
         }
-        $info=$info_tmp;
-        $data['info_html']=$info;
-
-        $summary=$data['summary'];
-        $summary_str=preg_replace("/(\r|\n)+/",'<br>',$summary);
-        $summary_arr=explode('<br>',$summary_str);
-        $summary_tmp='';
-        foreach($summary_arr as $ia){
-            $summary_tmp.='<li>'.$ia.'</li>'."\n";
+        
+        foreach( $verses as $key=>$name ){
+            if( $name===$_verses[$key] && ( ! isset($relates[$key]) || $relates[$key]===$_relates[$key]) ){ continue; }
+            $update=array();
+            $update['id']=$key;
+            if( $name!==$_verses[$key] ){
+                $update['name']=$name;
+            }
+            if( isset($relates[$key]) ){
+                if( $relates[$key]!==$_relates[$key] ){
+                    $update['relate']=$relates[$key];
+                }
+            }
+            $update['updated']=$data['updated'];
+            Model::update( $update, 'id', 'cuv' );
         }
-        $summary='<ul class="style1">'."\n".$summary_tmp.'</ul>'."\n";
-        $data['summary_html']=$summary;
-
-       	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);
     }

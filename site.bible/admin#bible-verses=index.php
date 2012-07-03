@@ -97,7 +97,7 @@ var batchRoutes = {
                                         章
                                     </td>
                                     <td>
-                                        <?php echo $r['name']; ?>
+                                        <?php echo $r['name']; ?> <span style="color:black">(<?php echo $r['max_verse']; ?>)</span>
                                     </td>
                                     <td>
                                         <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>

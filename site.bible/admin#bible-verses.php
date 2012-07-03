@@ -71,10 +71,9 @@ function index(){
     //Search
     $form=Form::create('frmSearch', 'post', APP::$ME );
     $form->addElement('header', '', '內容檢索' );
-    $form->addElement('text', 'name', APP::$mainName.'名稱 (中/英/韓)', array('class'=>'input-long'));
-    $form->addElement('text', 'short', '簡稱 (中/英/韓)', array('class'=>'input-long'));
-    $form->addElement('text', 'info', '簡介', array('class'=>'input-long'));
-    $form->addElement('text', 'summary', '摘要', array('class'=>'input-long'));
+    $form->addElement('text', 'book_name', '書卷名稱', array('class'=>'input-long'));
+    $form->addElement('text', 'chapter_id', '章次', array('class'=>'input-long'));
+    $form->addElement('text', 'name', '章節標題', array('class'=>'input-long'));
     
     $buttons=Form::buttonsSearchForm( false );
     $form->addGroup($buttons, null, null, '&nbsp;');
@@ -95,16 +94,25 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='name' ){ $searchInfo[]='<u>'.APP::$mainName.'名稱</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='short' ){ $searchInfo[]='<u>簡稱</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='info' ){ $searchInfo[]='<u>簡介</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='summary' ){ $searchInfo[]='<u>摘要</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='book_name' ){ $searchInfo[]='<u>書卷名稱</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='chapter_id' ){ $searchInfo[]='<u>章次</u> 為 "<span>'.$value.'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>章節標題</u> 含 "<span>'.$value.'</span>" '; }
         //if( $key=='summary' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
     list($rows, $totalItems) = BibleVerses::pagelist($submits, $pageID, $pageRows);
     //BibleVerses::updateAllHTML();
-    
+/*    
+    //計算各章的最大節
+    $sql="SELECT c.id, MAX(b.verse_id) as max FROM `bible_chapters` c JOIN cuv b ON b.book_id=c.book_id AND b.chapter_id=c.chapter_id WHERE b.stype_id IN ('g','h') GROUP BY c.book_id, c.chapter_id";
+    $rrows=Model::fetchAll($sql);
+    foreach( $rrows as $r ){
+        $update=array();
+        $update['id']=$r['id'];
+        $update['max_verse']=$r['max'];
+        Model::update($update, 'id', 'bible_chapters');
+    }
+    */
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 function add(){
@@ -189,13 +197,6 @@ function edit(){
     
     $form->addElement('text', 'name', APP::$mainName.'標題(中)', array('class'=>'input-medium'));
     $form->addElement('text', 'max_verse', '最大節數', array('class'=>'input-medium'));
-    
-    $form->addElement('static', '', '', '<b>經文</b>' );
-    foreach( $verses as $verse ){
-        $form->addElement('text', 'name['.$verse['id'].']', $verse['chapter_id'].':'.$verse['verse_id'], array('class'=>'input-long'));
-        $form->addElement('text', 'relative['.$verse['id'].']', $verse['chapter_id'].':'.$verse['verse_id'], array('class'=>'input-long'));
-        $form->setDefaults( array('name['.$verse['id'].']'=>$verse['name']) );
-    }
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
