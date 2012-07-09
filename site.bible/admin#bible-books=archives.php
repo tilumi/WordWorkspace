@@ -68,28 +68,6 @@ function showColumn( $data , $type='text' ){
                     <div class="module-table-body">
                     	<form name="frmList" action="<?php echo ME; ?>" method="post">
                     	<input name="mode" type="hidden" value="">
-                        <div class="table-apply">
-                            <?php echo Blocks::itemsChecker(); //顯示列表選擇器(全選、清除...) ?>
-                            &nbsp;
-                            <span>選取操作:</span> 
-<script>
-var batchRoutes = {
-    'active':'<?php echo url("m_edit.html");?>',
-    'inactive':'<?php echo url("m_edit.html");?>',
-    'delete':'<?php echo url("m_delete.html");?>',
-};
-</script>
-                            <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
-                                <option value="" selected="selected">--- 選擇動作 ---</option>
-<?php if( ACL::checkAuth( 'm_edit' ) ){ ?>
-                                <option value="active">顯示文章</option>
-                                <option value="inactive">隱藏文章</option>
-<?php } ?>
-<?php if( ACL::checkAuth( 'm_delete' ) ){ ?>
-                                <option value="delete">刪除</option>
-<?php } ?>
-                            </select>
-                        </div>
                         <table class="">
                         	<tbody>
                                 <tr>

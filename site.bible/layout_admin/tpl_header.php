@@ -38,9 +38,9 @@ $mainmenu=array(
     ),
     array('name'=>'讚美歌曲', 'link'=>'/songs/', 'menu_id'=>5, 'id'=>'songs',
         'submenu'=>array(
-            array('name'=>'分類', 'link'=>'/songs/categories/', 'id'=>'songs.categories' ),
             array('name'=>'編號系統', 'link'=>'/songs/sns/', 'id'=>'songs.sns' ),
-            array('name'=>'歌本收錄', 'link'=>'/songs/songbooks/', 'id'=>'songs.songbooks' ),
+            array('name'=>'歌本管理', 'link'=>'/songs/books/', 'id'=>'songs.books' ),
+            array('name'=>'語系設定', 'link'=>'/songs/langs/', 'id'=>'songs.langs' ),
         )
     ),
     //array('name'=>'分類管理', 'link'=>array('plugin'=>'subjects', 'controller'=>'yeartopics') ),
