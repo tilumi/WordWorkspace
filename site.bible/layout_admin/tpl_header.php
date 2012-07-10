@@ -34,6 +34,7 @@ $mainmenu=array(
     array('name'=>'禮拜資料', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
         'submenu'=>array(
             array('name'=>'年度標語', 'link'=>'/subjects/yeartopics/', 'id'=>'subjects.yeartopics' ),
+            array('name'=>'禮拜類型', 'link'=>'/subjects/wtypes/', 'id'=>'subjects.wtypes' ),
         )
     ),
     array('name'=>'讚美歌曲', 'link'=>'/songs/', 'menu_id'=>5, 'id'=>'songs',

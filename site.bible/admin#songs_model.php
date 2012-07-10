@@ -48,9 +48,10 @@ class Songs{
         
         $data['lyrics']=array();
         $sql = "SELECT y.*, l.name as lang_name FROM songs_langs l";
-        $sql.=" LEFT JOIN songs_lyrics y ON y.lang_id=l.id";
-        $sql.=" WHERE y.song_id=".Model::quote($id, 'text');
+        $sql.=" LEFT JOIN songs_lyrics y ON y.lang_id=l.id AND y.song_id=".Model::quote($id, 'text');
+        $sql.=" WHERE l.is_active='1'";
         $sql.=" ORDER BY l.sort";
+        
         $rows = Model::fetchAll( $sql );
         foreach( $rows as $r ){
             $data['lyrics'][ $r['lang_id'] ]=$r;
