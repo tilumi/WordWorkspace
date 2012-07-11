@@ -19,10 +19,10 @@ if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
-APP::$pageTitle = '語系設定';
-APP::$mainTitle = '語系設定 Songs Languages';
-APP::$mainName = '語系';
-$menu_id = 5;
+APP::$pageTitle = '年度標語';
+APP::$mainTitle = '年度標語 YearTopics';
+APP::$mainName = '年度標語';
+$menu_id = 4;
 
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
@@ -71,8 +71,10 @@ function index(){
     //Search
     $form=Form::create('frmSearch', 'post', APP::$ME );
     $form->addElement('header', '', '內容檢索' );
-    $form->addElement('text', 'lang_id', APP::$mainName.'代碼', array('class'=>'input-short'));
-    $form->addElement('text', 'name', '顯示名稱', array('class'=>'input-long'));
+    $form->addElement('text', 'name', APP::$mainName.'(中)', array('class'=>'input-long'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'(韓)', array('class'=>'input-long'));
+    $form->addElement('text', 'year_bigger_then', '年度 大於(>=)', array('class'=>'input-long'));
+    $form->addElement('text', 'year_smaller_then', '年度 小於(<=)', array('class'=>'input-long'));
     
     $options = array(
         ''=>'--- 選擇狀態 ---',
@@ -99,14 +101,16 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='id' ){ $searchInfo[]='<u>'.APP::$mainName.'代碼</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='name' ){ $searchInfo[]='<u>顯示名稱</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>'.APP::$mainName.'(中)</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='name_kr' ){ $searchInfo[]='<u>'.APP::$mainName.'(韓)</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='year_bigger_then' ){ $searchInfo[]='<u>年度</u> 大於 "<span>'.$value.'</span>" '; }
+        if( $key=='year_smaller_then' ){ $searchInfo[]='<u>年度</u> 大於 "<span>'.$value.'</span>" '; }
         if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
-    list($rows) = SongsLangs::pagelist($submits);
+    list($rows, $totalItems) = YearTopics::pagelist($submits, $pageID, $pageRows);
     
-    APP::$appBuffer = array( $rows, $form, $searchInfo );
+    APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 function add(){
     APP::$pageTitle='新增'.APP::$mainName;
@@ -116,31 +120,23 @@ function add(){
     
     $form->addElement('header', '', $header );
     
-    $form->addElement('text', 'sort', '排序', array('class'=>'input-short'));
-    $form->setDefaults( array('sort'=>3) );
-    $form->addElement('text', 'id', APP::$mainName.'代碼', array('class'=>'input-short'));
-    $form->addElement('static', '', '', APP::$mainName.'代碼一經設定即無法修改');
-    $form->addElement('text', 'name', '顯示名稱', array('class'=>'input-medium'));
+    $form->addElement('text', 'id', '年度', array('class'=>'input-short'));
+    $form->addElement('text', 'name', APP::$mainName.'(中)', array('class'=>'input-medium'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'(韓)', array('class'=>'input-medium'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $radio=array();
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
-    $form->addGroup($radio, '', '顯示', ' ');
-    $form->setDefaults( array('is_active'=>0 ) );
-
+    $form->addElement('textarea', 'article', '附註', array('cols'=>90, 'rows'=>10, 'class'=>'wysiwyg'));
+    
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
-    $form->addRule('sort', '排序 必填', 'required', null, 'client');
-    $form->addRule('sort', '排序 必須是數字', 'numeric', null, 'client');
-    $form->addRule('id', APP::$mainName.'代碼 必填', 'required', null, 'client');
-    $form->addRule('id', APP::$mainName.'代碼至多5個字', 'maxlength', 5, 'client');
+    $form->addRule('id', '年度 必填', 'required', null, 'client');
+    $form->addRule('id', '年度 必須是數字', 'numeric', null, 'client');
+    $form->addRule('id', '年度至多4個字', 'maxlength', 4, 'client');
+    $form->addRule('name', '標題 必填', 'required', null, 'client');
+    $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
     $form->registerRule('is_allowed_id', 'callback', '_is_allowed_id' );
-    $form->addRule('id', '這個'.APP::$mainName.'代碼已被使用，請再選一個 (不可重複、不分大小寫)', 'is_allowed_id', null);
-    $form->addRule('name', '顯示名稱 必填', 'required', null, 'client');
-    $form->addRule('name', '顯示名稱至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
+    $form->addRule('id', '這個年度已有資料，請修改該筆資料，或更改年度', 'is_allowed_id', null);
     
     $form->applyFilter('name', 'trim');
     
@@ -150,7 +146,7 @@ function add(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = SongsLangs::add($submits); 
+            $errmsg = YearTopics::add($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已新增成功' , 'success' );
             }
@@ -163,26 +159,25 @@ function add(){
     APP::$appBuffer = array( $form );
 }
 function _is_allowed_id($element_value){
-    $sql ="SELECT count(id) num FROM songs_langs";
-    $sql.=" WHERE UPPER(id) = UPPER(".Model::quote($element_value, 'text').")";
+    $sql ="SELECT count(id) num FROM yeartopics";
+    $sql.=" WHERE deleted='0' AND id=".Model::quote($element_value, 'text');
     $rownum=Model::fetchRow($sql);
     if( $rownum['num'] > 0 ){
         return false;
     }
     return true;
 }
-
 function edit(){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = SongsLangs::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['name'];
+    APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['id'].' '.$data['name'];
     View::setTitle(APP::$pageTitle);
     
     $form=Form::create('frmUpdate', 'post', APP::$ME );
@@ -190,27 +185,21 @@ function edit(){
     $form->addElement('header', '', $header );
     
     $form->addElement('hidden', 'id');
-    $form->addElement('text', 'sort', '排序', array('class'=>'input-short'));
-    $form->addElement('static', '', APP::$mainName.'代碼', '<b>'.$data['id'].'</b>');
-    $form->addElement('static', '', '', APP::$mainName.'代碼不可修改');
-    $form->addElement('text', 'name', '顯示名稱', array('class'=>'input-medium'));
+    $form->addElement('static', '', '年度', $data['id']);
+    $form->addElement('text', 'name', APP::$mainName.'(中)', array('class'=>'input-medium'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'(韓)', array('class'=>'input-medium'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    if( ! in_array($data['id'], array('zh-tw', 'kr')) ){
-        $radio=array();
-        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
-        $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
-        $form->addGroup($radio, '', '顯示', ' ');
-    }else{
-        $form->addElement('static', '', '顯示', '直接顯示');
-    }
+    $form->addElement('textarea', 'article', '附註', array('cols'=>90, 'rows'=>10, 'class'=>'wysiwyg'));
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
+    $form->addRule('id', '年度 必填', 'required', null, 'client');
+    $form->addRule('id', '年度 必須是數字', 'numeric', null, 'client');
+    $form->addRule('id', '年度至多4個字', 'maxlength', 4, 'client');
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
     $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
     
     $submits = $form->getSubmitValues();
@@ -219,7 +208,7 @@ function edit(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = SongsLangs::edit($submits); 
+            $errmsg = YearTopics::edit($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已編輯成功' , 'success' );
             }
@@ -237,13 +226,9 @@ function delete(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = SongsLangs::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
-    }
-    
-    if( in_array($data['id'], array('zh-tw', 'kr')) ){
-        redirect( '.' , '不能刪除這個'.APP::$mainName.'檔: 「'.$id.'」' , 'error' );
     }
     
     APP::$pageTitle='刪除'.APP::$mainName.'確認：'.$data['name'];
@@ -271,7 +256,7 @@ function delete(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = SongsLangs::delete($submits); 
+            $errmsg = YearTopics::delete($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已刪除' , 'success' );
             }
@@ -289,11 +274,11 @@ function archives( $id=null ){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = SongsLangs::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['name'];
+    APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['id'].' '.$data['name'];
     View::setTitle(APP::$pageTitle);
     
     APP::$appBuffer = array( $data );
@@ -301,22 +286,8 @@ function archives( $id=null ){
 function m_edit(){
     $form=Form::create('frmList', 'post', ME );
     $submits = $form->getSubmitValues();
+    
     $type=$submits['mode'];
-    
-    //過濾不可執行的項目
-    $key=array_search('zh-tw', $submits['items']);
-    if( $key !== false ){
-        unset( $submits['items'][$key] );
-    }
-    $key=array_search('kr', $submits['items']);
-    if( $key !== false ){
-        unset( $submits['items'][$key] );
-    }
-    if( count($submits['items']) < 1 ){
-        redirect( '.' , '沒有允許的項目可被執行' , 'error' );
-    }
-    
-    
     
     $allowed_type=array(
         'active'=>'已設定顯示',
@@ -332,10 +303,10 @@ function m_edit(){
     $items=$submits['items'];
     switch( $type ){
         case 'active':
-            $errmsg = SongsLangs::setActive($items);
+            $errmsg = YearTopics::setActive($items);
             break;
         case 'inactive':
-            $errmsg = SongsLangs::setInactive($items);
+            $errmsg = YearTopics::setInactive($items);
             break;
     }
     if( $errmsg === true ){
@@ -353,7 +324,7 @@ function m_delete(){
     if( isset($submits['commit']) ){
         $submits = $form->getSubmitValues();
         $num=count($submits['ids']);
-        $errmsg = SongsLangs::delete($submits); 
+        $errmsg = YearTopics::delete($submits); 
         if( $errmsg === true ){
             redirect( '.' , '指定的 '.$num.' 項'.APP::$mainName.'已刪除' , 'success' );
         }
@@ -365,24 +336,8 @@ function m_delete(){
     if( !isset($submits['items']) || count($submits['items'])<1 ){
         redirect( '.', '尚未選擇執行目標，您必須先選擇項目', 'error');
     }
-
-
-    //過濾不可執行的項目
-    $key=array_search('zh-tw', $submits['items']);
-    if( $key !== false ){
-        unset( $submits['items'][$key] );
-    }
-    $key=array_search('kr', $submits['items']);
-    if( $key !== false ){
-        unset( $submits['items'][$key] );
-    }
-    if( count($submits['items']) < 1 ){
-        redirect( '.' , '沒有允許的項目可被執行' , 'error' );
-    }
-    
-
     $items=$submits['items'];
-    $rows=SongsLangs::findById( $items );
+    $rows=YearTopics::findById( $items );
     
     $form=Form::create('frmMDelete', 'post', APP::$ME );
     $form->addElement('header', '', '以下'.APP::$mainName.'都將刪除，是否確認：' );
@@ -407,12 +362,12 @@ function active(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = SongsLangs::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    if( $errmsg = SongsLangs::setActive($id) ){
+    if( $errmsg = YearTopics::setActive($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定顯示' , 'success' );
     }
     redirect( '.' , $errmsg , 'error' );
@@ -422,12 +377,12 @@ function inactive(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = SongsLangs::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $errmsg = SongsLangs::setInactive($id);
+    $errmsg = YearTopics::setInactive($id);
     if( $errmsg === true ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定隱藏' , 'success' );
     }

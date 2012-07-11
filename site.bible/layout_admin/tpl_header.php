@@ -31,7 +31,7 @@ $mainmenu=array(
             array('name'=>'證道者', 'link'=>'/words/speakers/', 'id'=>'words.speakers' ),
         )
     ),
-    array('name'=>'禮拜資料', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
+    array('name'=>'禮拜主題', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
         'submenu'=>array(
             array('name'=>'年度標語', 'link'=>'/subjects/yeartopics/', 'id'=>'subjects.yeartopics' ),
             array('name'=>'禮拜類型', 'link'=>'/subjects/wtypes/', 'id'=>'subjects.wtypes' ),

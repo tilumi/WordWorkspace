@@ -70,6 +70,7 @@ class News{
         if( isset($data['id']) ){
             $fields=array();
             $fields['id']=$data['id'];
+           	$fields['updated']=date('Y-m-d H:i:s');
             $fields['deleted']='1';
             return Model::update($fields, 'id', self::$useTable);
         }
@@ -79,13 +80,15 @@ class News{
         foreach( $id as $r ){
             $id_list[]=Model::quote($r, 'text');
         }
-        $sql="UPDATE ".self::$useTable." SET deleted='1' WHERE id IN (".implode(',', $id_list).')';
+        $sql ="UPDATE ".self::$useTable." SET deleted='1', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
+        $sql.=" WHERE id IN (".implode(',', $id_list).')';
         return Model::exec($sql);
     }
     function setActive( $id ){
         if( is_string($id) ){
             $fields=array();
             $fields['id']=$id;
+           	$fields['updated']=date('Y-m-d H:i:s');
             $fields['is_active']='1';
             
             return Model::update($fields, 'id', self::$useTable);
@@ -95,13 +98,15 @@ class News{
         foreach( $ids as $key=>$id ){
             $ids[$key]=Model::quote($id, 'text');
         }
-        $sql="UPDATE ".self::$useTable." SET is_active='1' WHERE id IN (".implode(',', $ids).')';
+        $sql ="UPDATE ".self::$useTable." SET is_active='1', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
+        $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
     }
     function setInactive( $id ){
         if( is_string($id) ){
             $fields=array();
             $fields['id']=$id;
+           	$fields['updated']=date('Y-m-d H:i:s');
             $fields['is_active']='0';
             
             return Model::update($fields, 'id', self::$useTable);
@@ -111,7 +116,8 @@ class News{
         foreach( $ids as $key=>$id ){
             $ids[$key]=Model::quote($id, 'text');
         }
-        $sql="UPDATE ".self::$useTable." SET is_active='0' WHERE id IN (".implode(',', $ids).')';
+        $sql ="UPDATE ".self::$useTable." SET is_active='0', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
+        $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
     }
 }

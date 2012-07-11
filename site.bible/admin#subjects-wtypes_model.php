@@ -1,13 +1,13 @@
 <?php
-class SongsLangs{
-    static $useTable='songs_langs';
+class SubjectsWtypes{
+    static $useTable='subjects_wtypes';
     
-    function pagelist( $submits ){
+    function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
         $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
         
-        $key="lang_id";
+        $key="key";
         if( ! empty( $submits[$key]) ){
-            $sql.=" AND id LIKE ".Model::quote( $submits[$key].'%' , 'text');
+            $sql.=" AND `".$key."` LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
         $key="name";
         if( ! empty( $submits[$key]) ){
@@ -18,9 +18,11 @@ class SongsLangs{
             $sql.=" AND ".$key." = ".Model::quote($submits[$key], 'text');
         }
         $sql.=" ORDER BY sort";
+        $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
+        $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
         
-        return array($rows);
+        return array($rows, $totalItems);
     }
     function findById( $id ){
         if( is_array($id) ){
@@ -40,7 +42,7 @@ class SongsLangs{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-       	$data['id']=strtolower($data['id']);
+       	$data['key']=$data['id'];
        	$data['created']=date('Y-m-d H:i:s');
         
         return Model::insert($data, self::$useTable);
@@ -49,15 +51,13 @@ class SongsLangs{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-       	$data['id']=strtolower($data['id']);
        	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);
     }
     function delete( $data ){
         if( isset($data['id']) ){
-            $sql="DELETE FROM ".self::$useTable." WHERE id=".Model::quote($data['id'], 'text');
-            return Model::exec($sql);
+            $data['ids']=array( $data['id'] );
         }
         //when $data is id list
         $id=$data['ids'];
@@ -65,13 +65,15 @@ class SongsLangs{
         foreach( $id as $r ){
             $id_list[]=Model::quote($r, 'text');
         }
-        $sql="DELETE FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).')';
+        $sql ="DELETE FROM ".self::$useTable;
+        $sql.=" WHERE id IN (".implode(',', $id_list).')';
         return Model::exec($sql);
     }
     function setActive( $id ){
         if( is_string($id) ){
             $fields=array();
             $fields['id']=$id;
+           	$fields['updated']=date('Y-m-d H:i:s');
             $fields['is_active']='1';
             
             return Model::update($fields, 'id', self::$useTable);
@@ -81,13 +83,15 @@ class SongsLangs{
         foreach( $ids as $key=>$id ){
             $ids[$key]=Model::quote($id, 'text');
         }
-        $sql="UPDATE ".self::$useTable." SET is_active='1' WHERE id IN (".implode(',', $ids).')';
+        $sql ="UPDATE ".self::$useTable." SET is_active='1', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
+        $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
     }
     function setInactive( $id ){
         if( is_string($id) ){
             $fields=array();
             $fields['id']=$id;
+           	$fields['updated']=date('Y-m-d H:i:s');
             $fields['is_active']='0';
             
             return Model::update($fields, 'id', self::$useTable);
@@ -97,7 +101,8 @@ class SongsLangs{
         foreach( $ids as $key=>$id ){
             $ids[$key]=Model::quote($id, 'text');
         }
-        $sql="UPDATE ".self::$useTable." SET is_active='0' WHERE id IN (".implode(',', $ids).')';
+        $sql ="UPDATE ".self::$useTable." SET is_active='0', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
+        $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
     }
 }

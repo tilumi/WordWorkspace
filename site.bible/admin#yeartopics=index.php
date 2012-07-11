@@ -8,6 +8,8 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 <p>
 <?php echo View::anchor('/', '管理首頁'); ?>
  »
+<?php echo View::anchor('..', '禮拜主題 Subjects'); ?>
+ »
 <?php echo APP::$mainTitle; ?>
 </p>
 
@@ -60,8 +62,8 @@ var batchRoutes = {
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
                                 <option value="" selected="selected">--- 選擇動作 ---</option>
 <?php if( ACL::checkAuth( 'm_edit' ) ){ ?>
-                                <option value="active">顯示文章</option>
-                                <option value="inactive">隱藏文章</option>
+                                <option value="active">顯示指定的項目</option>
+                                <option value="inactive">隱藏指定的項目</option>
 <?php } ?>
 <?php if( ACL::checkAuth( 'm_delete' ) ){ ?>
                                 <option value="delete">刪除</option>
@@ -76,10 +78,9 @@ var batchRoutes = {
                         	<thead>
                                 <tr>
                                     <th class="header" style="width: 50px;">#</th>
+                                    <th class="header" style="width: 50px">年度</th>
                                     <th class="header" style="">標題</th>
                                     <th class="header" style="width: 50px;">顯示</th>
-                                    <th class="header" style="width: 120px;">作者</th>
-                                    <th class="header" style="width: 170px">發佈日期</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -91,7 +92,11 @@ var batchRoutes = {
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
                                     <td>
+                                        <?php echo $r['id']; ?>
+                                    </td>
+                                    <td>
                                         <?php echo $r['name']; ?>
+                                        <?php if( !empty($r['name_kr']) ){ echo '（'.$r['name_kr'].'）'; } ?>
                                     </td>
 <?php if( ACL::checkAuth( 'active' ) ){ ?>
                                     <td>
@@ -111,24 +116,6 @@ var batchRoutes = {
                                     </td>
 <?php } ?>
                                     <td>
-                                        <?php echo $r['author']; ?>
-                                    </td>
-                                   <td><?php
-                                    $now=mktime();
-                                    $opened_time=strtotime($r['published']);
-                                    if( $now < $opened_time ){
-                                        echo '<a href="javascript: void(0);" title="尚未發佈"><img src="'.layout_url('admin', '/images/notification-slash.gif').'" alt="尚未發佈" width="16" height="16"></a> ';
-                                    }
-                                    if( $now >= $opened_time ){
-                                        echo '<a href="javascript: void(0);" title="已發布"><img src="'.layout_url('admin', '/images/tick-on-white.gif').'" alt="已發布" width="16" height="16"></a> ';
-                                    }
-                                    if( !empty($r['published']) && $r['published']!='0000-00-00 00:00:00' ){
-                                        echo date( 'Y-m-d H:i' , strtotime($r['published']) );
-                                    }else{
-                                        echo 'Never';
-                                    }
-                                    ?></td>
-                                    <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
                                         <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
 <?php } ?>
@@ -143,7 +130,7 @@ var batchRoutes = {
 <?php } ?>
 <?php if( count($rows)<1 ){ ?>
                                 <tr class="even">
-                                    <td colspan="6" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>
+                                    <td colspan="5" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>
                                 </tr>
 <?php } ?>
                             </tbody>
