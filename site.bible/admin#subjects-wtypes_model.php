@@ -47,6 +47,25 @@ class SubjectsWtypes{
         
         return Model::insert($data, self::$useTable);
     }
+    function quickAdd( $name ){
+        //先檢查是否有同名的類型，有則直接返回其ID
+        $sql ="SELECT id FROM ".self::useTable;
+        $sql.=" WHERE name=".Model::quote($name, 'text');
+        $result=Model::fetchRow($sql);
+        if( count($result['id'])>0 ){
+            return $result['id'];
+        }
+        
+        $data['name']=$name;
+        $data['id']=uniqid('WType');
+        $data['sort']='99';
+        $id=$data['id'];
+        
+        if( Model::insert($data) ){
+            return $id;
+        }
+        return false;
+    }
     function edit( $data ){
         if( isset($data['commit']) ){
             unset($data['commit']);
@@ -104,6 +123,18 @@ class SubjectsWtypes{
         $sql ="UPDATE ".self::$useTable." SET is_active='0', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
         $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
+    }
+    function getList(){
+        $sql ="SELECT * FROM ".self::$useTable;
+        $sql.=" WHERE is_active='1'";
+        $sql.=" ORDER BY sort";
+        $rows=Model::fetchAll($sql);
+        
+        $result=array();
+        foreach( $rows as $r ){
+            $result[$r['id']]=$r['name'];
+        }
+        return $result;
     }
 }
 ?>

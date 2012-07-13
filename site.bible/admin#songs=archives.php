@@ -123,6 +123,58 @@ function showColumn( $data , $type='text' ){
                     </div> <!-- End .module-body -->
                 </div> <!-- End .module -->
 
+            </div> <!-- End .grid_12 -->
+<?php
+    $key='zh-tw';
+    $lyrics[$key]=array();
+    if( isset($data['lyrics'][$key]) ){
+        $lyrics[$key]=$data['lyrics'][$key];
+        unset($data['lyrics'][$key]);
+    }
+    $key='kr';
+    $lyrics[$key]=array();
+    if( isset($data['lyrics'][$key]) ){
+        $lyrics[$key]=$data['lyrics'][$key];
+        unset($data['lyrics'][$key]);
+    }
+    foreach( $lyrics as $r ){
+        $articles=preg_split('/$\R?^/m', $r['article']);
+?>
+            <div class="grid_6">
+                <div class="module">
+                	<h2><span><?php echo $r['lang_name']; ?>歌詞</span></h2>
+                    <div class="module-table-body">
+                        <table style="font-size:16px;line-height:24px;">
+                        	<tbody>
+                                <tr>
+                                    <th><?php echo $r['name']; ?></th>
+                                </tr>
+<?php
+        $key=0;
+        foreach( $articles as $row ){
+            $key+=1;
+?>
+                                <tr class="<?php echo ( ($key%2)==0 )?'even':'odd'; ?>">
+                                    <td><pre style="margin:0;"><?php echo $row; ?></pre></td>
+                                </tr>
+<?php
+        }
+?>
+                            </tbody>
+                        </table>
+                        <div class="grid_12" style="text-align:center;margin-bottom:10px;">
+                            <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
+                            <input type="button" class="submit-blue" value="編輯「<?php echo $data['name']; ?>」" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
+                        </div>
+                    </div> <!-- End .module-body -->
+                </div> <!-- End .module -->
+            </div> <!-- End .grid_6 -->
+<?php
+    }
+?>
+
+            <div class="grid_12">
+
 <?php
     foreach( $data['lyrics'] as $r ){
         $articles=preg_split('/$\R?^/m', $r['article']);

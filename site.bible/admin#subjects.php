@@ -112,41 +112,11 @@ function add(){
     APP::$pageTitle='新增'.APP::$mainName;
     View::setTitle(APP::$pageTitle);
     
+    APP::load('model', 'yeartopics');
+    APP::load('model', 'subjects-wtypes');
+    APP::load('model', 'weekly');
+    
     $form=Form::create('frmInsert', 'post', APP::$ME );
-    
-    $form->addElement('header', '', $header );
-    
-    $options = array(
-        'language'=>'tw',
-        'format'=>'Y-m-d H:i',
-        'minYear'=>date('Y')-5,
-        'maxYear'=>date('Y')+5,
-        'year'=>date('Y')
-    );
-    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
-    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
-    
-    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
-    //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
-    
-    $radio=array();
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
-    $form->addGroup($radio, '', '顯示', ' ');
-    $form->setDefaults( array('is_active'=>0 ) );
-
-    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
-    
-    $buttons=Form::buttons();
-    $form->addGroup($buttons, null, null, '&nbsp;');
-    
-    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
-    $form->addRule('name', '標題 必填', 'required', null, 'client');
-    $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
-    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
-    
-    $form->applyFilter('name', 'trim');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -162,9 +132,25 @@ function add(){
         }
     }
     
-    $form=Form::getHtml($form);
+    $years = Yeartopics::getList();
+    $wtypes = SubjectsWtypes::getList();
     
-    APP::$appBuffer = array( $form );
+    $wday=(int)date('w');
+    $data['worshiped']=date('Y-m-d');
+    if( in_array( $wday, array(2,3,4)) ){
+        $data['worshiped']=date('Y-m-d', strtotime('+3 days' , Weekly::getWeekDay1('', true)) );
+        $data['wtype_id']='WedDay';
+    }
+    if( in_array( $wday, array(5,6)) ){
+        $data['worshiped']=Weekly::getWeekDay1('+7 days');
+        $data['wtype_id']='LordDay';
+    }
+    if( in_array( $wday, array(0,1)) ){
+        $data['worshiped']=Weekly::getWeekDay1();
+        $data['wtype_id']='LordDay';
+    }
+    
+    APP::$appBuffer = array( $form , $years , $wtypes , $data );
 }
 function edit(){
     $id = pos(APP::$params);

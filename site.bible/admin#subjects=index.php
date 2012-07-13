@@ -76,7 +76,10 @@ var batchRoutes = {
                         	<thead>
                                 <tr>
                                     <th class="header" style="width: 50px;">#</th>
-                                    <th class="header" style="width: 100px">禮拜日期</th>
+                                    <th class="header" style="width: 120px">禮拜日期</th>
+                                    <th class="header" style="width: 70px">禮拜類型</th>
+                                    <th class="header" style="width: 40px;">年</th>
+                                    <th class="header" style="width: 30px;">週</th>
                                     <th class="header" style="">標題</th>
                                     <th class="header" style="width: 50px;">顯示</th>
                                     <th style="width: 70px"></th>
@@ -89,9 +92,26 @@ var batchRoutes = {
                                     	<input name="items[]" value="<?php echo $r['id']; ?>" type="checkbox">
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
-                                   <td><?php
-                                    echo date( 'Y-m-d' , strtotime($r['worshiped']) );
-                                    ?></td>
+                                    <td>
+                                        <?php
+                                            $style='';
+                                            if( $r['wtype_id']==='LordDay' ){ $style='color:red;'; }
+                                            if( $r['wtype_id']==='WedDay' ){ $style='color:green;'; }
+                                        ?>
+                                        <span style="font-weight:bold;<?php echo $style; ?>">
+                                        <?php $_=array('日','一','二','三','四','五','六'); ?>
+                                        <?php echo date( 'Y-m-d' , strtotime($r['worshiped']) ); ?>(<?php echo $_[ $r['wday'] ];?>)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php echo $r['wtype_name']; ?>
+                                    </td>
+                                    <td>
+                                        <?php echo $r['year']; ?>
+                                    </td>
+                                    <td>
+                                        <?php echo $r['week']; ?>
+                                    </td>
                                     <td>
                                         <?php echo $r['name']; ?>
                                     </td>

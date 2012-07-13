@@ -118,5 +118,17 @@ class YearTopics{
         $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
     }
+    function getList(){
+        $sql ="SELECT * FROM ".self::$useTable;
+        $sql.=" WHERE is_active='1' AND deleted='0'";
+        $sql.=" ORDER BY id desc";
+        $rows=Model::fetchAll($sql);
+        
+        $result=array();
+        foreach( $rows as $r ){
+            $result[$r['id']]=$r['id'].' - '.$r['name'];
+        }
+        return $result;
+    }
 }
 ?>

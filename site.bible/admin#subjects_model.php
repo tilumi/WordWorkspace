@@ -14,7 +14,7 @@ class Subjects{
             $sql.=" AND ".$key." = ".Model::quote($submits[$key], 'text');
         }
         $sql.=" AND deleted='0'";
-        $sql.=" ORDER BY worshiped DESC";
+        $sql.=" ORDER BY CAST(year AS UNSIGNED) DESC, CAST(week AS UNSIGNED) DESC, wday";
         $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
@@ -39,14 +39,20 @@ class Subjects{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-       	$data['id']=uniqid('News');
-       	$data['urn']=$data['name'];
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
-       	
-       	$data['author']=$_SESSION['admin']['userid'];
-       	$data['author_id']=$_SESSION['admin']['id'];
+        $data['id']=uniqid('Subject');
+        $ts=mktime(0,0,0,$data['worshiped']['month'],$data['worshiped']['day'],$data['worshiped']['year']);
+        $data['year']=$data['worshiped']['year'];
+        $data['week']=Weekly::getWeek($ts);
+        $data['wday']=date('w', $ts);
+        $data['worshiped']=date('Y-m-d', $ts );
+        if( $data['wtype_id']!='other'){
+            $wtype=SubjectsWtypes::findById($data['wtype_id']);
+            $data['wtype_name']=$wtype['name'];
+        }
+        if( $data['wtype_id']=='other' && !empty($data['wtype_name']) ){
+            $data['wtype_id']=SubjectsWtypes::quickAdd($data['wtype_name']);
+        }
+        $data['name']=$data['name_zh'];
        	$data['created']=date('Y-m-d H:i:s');
         
         return Model::insert($data, self::$useTable);
@@ -55,9 +61,6 @@ class Subjects{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
        	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);

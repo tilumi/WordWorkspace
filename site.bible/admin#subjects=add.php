@@ -1,28 +1,10 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $form ) = APP::$appBuffer;
+list( $form , $years , $wtypes , $data ) = APP::$appBuffer;
 $mainTitle = APP::$mainTitle;
 $mainName = APP::$mainName;
-?>
-            <!-- Form elements -->    
-            <div class="grid_12">
-<p>
-<?php echo View::anchor('/', '管理首頁'); ?>
- »
-<?php echo View::anchor('.', $mainTitle); ?>
- »
-<?php echo APP::$pageTitle; ?>
-</p>
 
-                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
-            </div>
-
-            <div class="grid_12">
-
-<?php echo redirect_message(); ?>
-
-<?php
 $worshiped=strtotime($data['worshiped']);
 $year=date('Y', $worshiped);
 $month=date('n', $worshiped);
@@ -38,7 +20,24 @@ $wdays=array(
     '五',
     '六',
 );
+
 ?>
+            <!-- Form elements -->    
+            <div class="grid_12">
+<p>
+<?php echo View::anchor('/', '管理首頁'); ?>
+ »
+<?php echo View::anchor('.', $mainTitle); ?>
+ »
+<?php echo APP::$pageTitle; ?>
+</p>
+
+<?php echo redirect_message(); ?>
+
+                <?php echo Blocks::mainTitle( APP::$mainTitle ); ?>
+            </div>
+
+
 <script>
 var wdays=new Array('日','一','二','三','四','五','六');
 function renewWDays(){ //更新星期幾的標示
@@ -115,7 +114,7 @@ function getMonthDays(year,month){ //取得指定月份中的天數
 #worshiped_wday { display:inline-block;width:70px;font-size:12px;text-align:center; }
 </style>
 
-        <form method="post" action="<?php echo ME; ?>">
+        <form method="post" action="<?php echo APP::$ME; ?>">
 
             <div class="grid_6">
                 <div class="module">
@@ -125,7 +124,7 @@ function getMonthDays(year,month){ //取得指定月份中的天數
                             日期<br>
                             <select name="worshiped[year]" id="worshiped_year" class="input-medium" onchange="javascript: renewMDays();">
 <?php                       foreach( $years as $key=>$value ){ ?>
-                                <option value="<?php echo $key; ?>"<?php echo ( $value==$year )?' selected':'';?>><?php echo $value; ?></option>
+                                <option value="<?php echo $key; ?>"<?php echo ( $key==$year )?' selected':'';?>><?php echo $value; ?></option>
 <?php                       } ?>
                             </select>
                             <input type="button" class="submit-gray" value="日期重設" onclick="javascript: setDefault();" />
@@ -172,7 +171,7 @@ function getMonthDays(year,month){ //取得指定月份中的天數
                         </p> 
                         <p>
                             中文主題(展開)<br>
-                            <textarea class="input-medium" style="height:70px;" name="name_zh_unfold" id="name_zh_unfold"><?php echo $r['name_zh_unfold'];?></textarea>
+                            <textarea class="input-long" style="height:70px;" name="name_zh_unfold" id="name_zh_unfold"><?php echo $r['name_zh_unfold'];?></textarea>
                         </p> 
                         <p>
                             韓文主題(橫式)<br>
@@ -180,7 +179,7 @@ function getMonthDays(year,month){ //取得指定月份中的天數
                         </p> 
                         <p>
                             韓文主題(展開)<br>
-                            <textarea class="input-medium" style="height:70px;" name="name_kr_unfold" id="name_kr_unfold"><?php echo $r['name_kr_unfold'];?></textarea>
+                            <textarea class="input-long" style="height:70px;" name="name_kr_unfold" id="name_kr_unfold"><?php echo $r['name_kr_unfold'];?></textarea>
                         </p> 
                         <p>
                             <br>
@@ -228,7 +227,6 @@ function getMonthDays(year,month){ //取得指定月份中的天數
         </form>
 
         		<div style="clear: both;"></div>
-            </div> <!-- End .grid_12 -->
                 
 <?php
 include('layout_admin/tpl_footer.php');
