@@ -281,7 +281,10 @@ function archives( $id=null ){
     APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['id'].' '.$data['name'];
     View::setTitle(APP::$pageTitle);
     
-    APP::$appBuffer = array( $data );
+    APP::load('model', 'subjects');
+    $subjects = Subjects::findByYears($data['id']);
+    
+    APP::$appBuffer = array( $data , $subjects );
 }
 function m_edit(){
     $form=Form::create('frmList', 'post', ME );

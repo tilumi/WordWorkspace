@@ -102,8 +102,11 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='name' ){ $searchInfo[]='<u>標題</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='author' ){ $searchInfo[]='<u>作者</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>歌曲名稱</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='std_id' ){ $searchInfo[]='<u>標準號</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='mps_key' ){ $searchInfo[]='<u>注音索引</u> 開頭 "<span>'.$value.'</span>" '; }
+        if( $key=='hanyu_key' ){ $searchInfo[]='<u>漢語索引</u> 開頭 "<span>'.$value.'</span>" '; }
+        if( $key=='play_key' ){ $searchInfo[]='<u>標準KEY</u> 是 "<span>'.$value.'</span>" '; }
         if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     

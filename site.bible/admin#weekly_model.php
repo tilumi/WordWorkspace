@@ -65,5 +65,18 @@ class Weekly{
         }
         return array('begin'=>date('Y-m-d H:i:s', $ts_wday1), 'end'=>date('Y-m-d H:i:s', $ts_wday6) );
     }
+    function getDate( $year='', $week='', $wday=0, $timestamp=false ){
+        //取得指定週的日期
+        $year=(int)$year;
+        $week=(int)$week;
+        $wday=(int)$wday;
+        $ts_sunday1 = self::getYearSunday1($year, true);
+        $ts_wday1 = $ts_sunday1 + ($week-1)*7*24*60*60;
+        $the_day = $ts_wday1 + ($wday*24*60*60);
+        if( $timestamp ){
+            return $the_day;
+        }
+        return date('Y-m-d', $the_day);
+    }
 }
 ?>

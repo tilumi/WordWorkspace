@@ -113,7 +113,24 @@ var batchRoutes = {
                                         <?php echo $r['week']; ?>
                                     </td>
                                     <td>
-                                        <?php echo $r['name']; ?>
+                                        <b><?php echo $r['name']; ?></b>
+                                        <?php
+                                        $verses=json_decode($r['verses']);
+                                        //pr($verses);
+                                        $_=array();
+                                        foreach( $verses as $v ){
+                                            $v_data=Subjects::parseVerseKey($v->key);
+                                            
+                                            //$url ='http://bible.jbride.cc';
+                                            $url ='/'.$v_data['book_name'].'/'.$v_data['part2'].'.html';
+                                            
+                                            $_[] = '<a href="'.url('_'.$url).'" target="_blank">'.$v->name.'</a>';
+                                            //$_[] = $v->name;
+                                        }
+                                        if( count($_) > 0 ){
+                                            echo '<br>經文: '.implode(' , ', $_);
+                                        }
+                                        ?>
                                     </td>
 <?php if( ACL::checkAuth( 'active' ) ){ ?>
                                     <td>

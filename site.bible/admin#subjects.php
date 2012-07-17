@@ -14,6 +14,7 @@ $registedAction = array(
     'm_delete',
     'active',
     'inactive',
+    'sbman2flyfish',
 );
 if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
@@ -104,10 +105,58 @@ function index(){
         if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
+    //APP::load('vendor', 'Services_JSON');
     list($rows, $totalItems) = Subjects::pagelist($submits, $pageID, $pageRows);
     
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
+function getShortScript($id,$short=true,$saperate=", ",$p="-"){
+    //傳入主題id，回傳簡式經文格式(串成單一字串)
+    //參數：分隔符號、是否使用簡寫書名、節連接詞
+    
+    if($short){
+        $sql ="SELECT CONCAT(t.short,b.chapter,':',b.section,'$p',b.section+s.plus) as script, s.plus,b.book,b.chapter,b.section";
+    }else{
+        $sql ="SELECT CONCAT(t.book,b.chapter,':',b.section,'$p',b.section+s.plus) as script, s.plus,b.book,b.chapter,b.section";
+    }
+    $sql.=" FROM subject_script s";
+    $sql.=" LEFT JOIN bible b ON s.section=b.id";
+    $sql.=" LEFT JOIN bible_short t ON t.id=b.book";
+    $sql.=" WHERE s.sbj_id='$id' AND b.title='' ORDER BY s.id";
+    $qid=db_query($sql);
+    $r=db_fetch_row(&$qid);
+    
+    $link_start="";
+    $link_stop="";
+    if($link){
+        $link_start ='<a target="_blank" href="'.sprintf($url_tpl,$r["book"],$r["chapter"],$r["section"],$r["plus"]).'">';
+        $link_stop="</a>";
+
+    }
+
+    if($r["plus"]==0){
+        list($script,)=explode($p,$r["script"]);
+    }else{
+        $script=$r["script"];
+    }
+    $script=$link_start.$script.$link_stop;
+    while($r=db_fetch_row(&$qid)){
+        $link_start="";
+        $link_stop="";
+        if($link){
+            $link_start ='<a target="_blank" href="'.sprintf($url_tpl,$r["book"],$r["chapter"],$r["section"],$r["plus"]).'">';
+            $link_stop="</a>";
+        }
+        if($r["plus"]==0){
+            list($sc,)=explode($p,$r["script"]);
+        }else{
+            $sc=$r["script"];
+        }
+        $script.=$saperate.$link_start.$sc.$link_stop;
+    }
+    return $script;
+}
+
 function add(){
     APP::$pageTitle='新增'.APP::$mainName;
     View::setTitle(APP::$pageTitle);
@@ -385,6 +434,223 @@ function inactive(){
     }
     redirect( '.' , $errmsg , 'error' );
 }
+function sbman2flyfish(){
+/*
+A 聖經全書
+B 書卷-書卷（含單一書卷）
+C 書卷#章-章（含單一章）
+D 書卷#章:節-節（含單一節）
+E （特殊）書卷#章:節-章:節（同書卷）
+F （特殊）書卷#章:節-書卷#章:節（跨書卷）
+*/
+    APP::load('model', 'weekly');
+    
+    mysql_select_db('sbman');
+    $sql ="SELECT s.*,CONCAT(y.year,' ',y.topic_zh) as year_topic FROM subject s";
+    $sql.=" LEFT JOIN yeartopic y ON y.year=s.year";
+    $sql.=" WHERE 1<>2";
+    $rows=Model::fetchAll($sql);
+    
+    $data=array();
+    $a_data=array();
+    $v_data=array();
+    $a_notfound=array();
+    $i=0;
+    $v_i=0;
+    $a_i=0;
+    foreach( $rows as $key=>$r ){
+        $i+=1;
+        if( $i>50 ){ continue; }
+        mysql_select_db('sbman');
+        $id = $r['id'];
+        $sql =" SELECT *, CONCAT(t.short,b.chapter,':',b.section) as script";
+        $sql.=" , CONCAT(t.book,b.chapter,':',b.section) as script_full";
+        $sql.=" FROM subject_script s";
+        $sql.=" LEFT JOIN bible b ON s.section=b.id";
+        $sql.=" LEFT JOIN bible_short t ON t.id=b.book";
+        $sql.=" WHERE s.sbj_id='$id' AND b.title='' ORDER BY s.id";
+        $scripts=Model::fetchAll($sql);
+        $rows[$key]['scripts_count']=count($scripts);
+        $rows[$key]['scripts']=$scripts;
+        
+        
+        $sql ="SELECT n.id,i.series_name as sid,d.name_zh as name,d.name_kr as song_kr,d.name_en as song_en FROM subject_anthem a";
+        $sql.=" LEFT JOIN songs n ON n.id=a.song_id";
+        $sql.=" LEFT JOIN songs_no i ON i.songs_id=a.song_id";
+        $sql.=" LEFT JOIN songs_data d ON d.id=n.current_data";
+        $sql.=" WHERE a.sbj_id='$id' ORDER BY a.id";
+        $anthems=Model::fetchAll($sql);
+        $rows[$key]['anthems_count']=count($anthems);
+        $rows[$key]['anthems']=$anthems;
+        foreach( $anthems as $k=>$a ){
+            mysql_select_db('flyfish');
+            $sql ="SELECT * FROM songs WHERE name=".Model::quote($a['name'], 'text');
+            $_=Model::fetchRow($sql);
+            $rows[$key]['anthems'][$k]['id']=$_['id'];
+            $rows[$key]['anthems'][$k]['std_id']=pos(explode(' ',$_['std_id']));
+        }
+        //pr($rows);
+        
+        
+        $data[$key]['id']=uniqid('Subject');
+        
+        $verses=array();
+        foreach( $rows[$key]['scripts'] as $k=>$s ){
+            $v_i+=1;
+            $verses[$k]['name']=$s['script_full'];
+            $verses[$k]['short']=$s['script'];
+            $verses[$k]['key']='D:'.$s['bk'].'#'.$s['ch'].':'.$s['sc'];
+            if( $s['plus'] > 0 ){
+                $verses[$k]['key'].='-'.($s['sc']+$s['plus']);
+                $verses[$k]['name'].='-'.($s['sc']+$s['plus']);
+                $verses[$k]['short'].='-'.($s['sc']+$s['plus']);
+            }
+            $verses[$k]['type']='本文';
+            $verses[$k]['info']='';
+            
+            $v_data[$v_i]=$verses[$k];
+            $v_data[$v_i]['id']=uniqid('Verse');
+            $v_data[$v_i]['sort']=$k;
+            $v_data[$v_i]['subject_id']=$data[$key]['id'];
+            $v_data[$v_i]['verse_type']='D';
+            $v_data[$v_i]['verse_key']=$verses[$k]['key'];
+            unset($v_data[$v_i]['key']);
+            $v_data[$v_i]['verse_id']=sprintf('%02d:%03d:%03dg', $s['bk'],$s['ch'],$s['sc']);
+            $v_data[$v_i]['verse_plus']=$s['plus'];
+            //$v_data[$v_i]['created']=date('Y-m-d H:i:s');
+            //pr($v_data);die;
+            
+            //補充只在 json 中才記的內容
+            
+        }
+        //pr($verses);
+        $anthems=array();
+        foreach( $rows[$key]['anthems'] as $k=>$s ){
+            $a_i+=1;
+            
+            $anthems[$k]['name']=$s['name'];
+            $anthems[$k]['std_id']=$s['std_id'];
+            $anthems[$k]['song_id']=$s['id'];
+            
+            $a_data[$a_i]=$anthems[$k];
+            $a_data[$a_i]['id']=uniqid('Anthem');
+            $a_data[$a_i]['sort']=$k;
+            $a_data[$a_i]['subject_id']=$data[$key]['id'];
+            $a_data[$a_i]['type']='';
+            $a_data[$a_i]['info']='';
+            //$a_data[$a_i]['created']=date('Y-m-d H:i:s');
+            
+            if( empty($s['id']) ){
+                $alter='';
+                switch($s['name']){
+                    case '地球上立起攝理燈台':
+                        $alter='在各國中插上攝理燭臺';
+                        break;
+                    case '期待的心情':
+                        $alter='等待的心情';
+                        break;
+                    case '攝理的榮光':
+                        $alter='攝理的榮光 明亮之清晨';
+                        break;
+                    case '攝理史上奔跑的ＭＳ':
+                        $alter='攝理上奔跑的我們';
+                        break;
+                    case '三十階段層層話語':
+                        $alter='三十個論成約話語';
+                        break;
+                    case '無條件':
+                        $alter='無條件(1)';
+                        break;
+                    case '你腳步請對我停留':
+                        $alter='你腳步請對我停留(1)';
+                        break;
+                    case '讚美聲音':
+                        $alter='感謝聲音';
+                        break;
+                    case '我的主最寶貴':
+                        $alter='我的主最寶貴(1)';
+                        break;
+                }
+                if( ! empty($alter) ){
+                    mysql_select_db('flyfish');
+                    $sql ="SELECT * FROM songs WHERE name=".Model::quote($alter, 'text');
+                    $_=Model::fetchRow($sql);
+                    $_['id']=$_['id'];
+                    $_['std_id']=pos(explode(' ',$_['std_id']));
+                    $s=$_;
 
+                    $anthems[$k]['std_id']=$s['std_id'];
+                    $anthems[$k]['song_id']=$s['id'];
+                    
+                    $a_data[$a_i]=$anthems[$k];
+                    $a_data[$a_i]['id']=uniqid('Anthem');
+                    $a_data[$a_i]['sort']=$k;
+                    $a_data[$a_i]['subject_id']=$data[$key]['id'];
+                    $a_data[$a_i]['type']='';
+                    $a_data[$a_i]['info']='';
+                    //$a_data[$a_i]['created']=date('Y-m-d H:i:s');
+                    
+                }
+                
+                if( empty($s['id']) ){
+                    //$a_notfound[$a_i]=$a_data[$a_i];
+                }
+                
+            }
+        }
+        
+        $data[$key]['year']=$r['year'];
+        $data[$key]['week']=$r['week'];
+        $data[$key]['wday']=$r['wday'];
+        $data[$key]['worshiped']=Weekly::getDate($r['year'], $r['week'], $r['wday']);
+        if( $r['wday']==='0' ){
+            $data[$key]['wtype_id']='LordDay';
+            $data[$key]['wtype_name']='主日禮拜';
+        }
+        if( $r['wday']==='3' ){
+            $data[$key]['wtype_id']='WedDay';
+            $data[$key]['wtype_name']='週三禮拜';
+        }
+        $name_zh=str_replace(PHP_EOL, ' / ', $r['sbj_zh']);
+        $name_kr=str_replace(PHP_EOL, ' / ', $r['sbj_kr']);
+        $data[$key]['name']=$name_zh;
+        $data[$key]['name_zh']=$name_zh;
+        $data[$key]['name_zh_unfold']=$r['sbj_zh'];
+        $data[$key]['name_kr']=$name_kr;
+        $data[$key]['name_kr_unfold']=$r['sbj_kr'];
+        $data[$key]['verses_count']=count($verses);
+        $data[$key]['verses']=json_encode($verses);
+        $data[$key]['anthems_count']=count($anthems);
+        $data[$key]['anthems']=json_encode($anthems);
+        $data[$key]['extra']=$r['extra'];
+        $data[$key]['info']=$r['excerpt'];
+        $data[$key]['is_active']='1';
+        $data[$key]['created']=date('Y-m-d H:i:s');
+        
+/*        if( $i>=100 ){
+            mysql_select_db('flyfish');
+            Model::inserts($data, 'subjects');
+            Model::inserts($v_data, 'subjects_verses');
+            Model::inserts($a_data, 'subjects_anthems');
+            $data=array();
+            $a_data=array();
+            $v_data=array();
+            $i=0;
+            $v_i=0;
+            $a_i=0;
+        }*/
+    }
+    //pr($a_notfound);die;
+    pr($v_data);
+    pr($a_data);
+    pr($data);die;
+    mysql_select_db('flyfish');
+    Model::inserts($data, 'subjects');
+    Model::inserts($v_data, 'subjects_verses');
+    Model::inserts($a_data, 'subjects_anthems');
+    markquery_report();
+    echo '完成';die;
+
+}
 
 ?>

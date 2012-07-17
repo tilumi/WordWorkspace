@@ -1,7 +1,7 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $data ) = APP::$appBuffer;
+list( $data , $subjects ) = APP::$appBuffer;
 $mainTitle = APP::$mainTitle;
 $mainName = APP::$mainName;
 ?>
@@ -88,22 +88,13 @@ function showColumn( $data , $type='text' ){
                                         <?php echo ($data['updated']!=='0000-00-00 00:00:00')? substr($data['updated'],0,16) :'(從未)'; ?>
                                     </td>
                                 </tr>
-                            </tbody>
-                        </table>
-                        <div class="grid_12" style="text-align:center;margin-bottom:10px;">
-                            <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
-                            <input type="button" class="submit-blue" value="編輯「<?php echo $data['name']; ?>」" onclick="javascript: location.href='<?php echo url('./edit/'.$data['urn'].'.html'); ?>';" />
-                        </div>
-                    </div> <!-- End .module-body -->
-                </div> <!-- End .module -->
-                <div class="module">
-                	<h2><span>附註</span></h2>
-                    
-                    <div class="module-table-body">
-                        <table class="">
-                        	<tbody>
                                 <tr>
-                                    <td style="font-size:15px;">
+                                    <th colspan="4">
+                                        附註
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
                                         <?php echo $data['article']; ?>
                                         <?php if( empty($data['article']) ){ echo '（目前沒有內容）'; } ?>
                                     </td>
@@ -112,7 +103,166 @@ function showColumn( $data , $type='text' ){
                         </table>
                         <div class="grid_12" style="text-align:center;margin-bottom:10px;">
                             <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
-                            <input type="button" class="submit-blue" value="編輯「<?php echo $data['name']; ?>」" onclick="javascript: location.href='<?php echo url('./edit/'.$data['urn'].'.html'); ?>';" />
+                            <input type="button" class="submit-blue" value="編輯「<?php echo $data['name']; ?>」" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
+                        </div>
+                    </div> <!-- End .module-body -->
+                </div> <!-- End .module -->
+                <div class="module">
+                	<h2><span>各週主題經文</span></h2>
+                    
+                    <div class="module-table-body">
+                        <table class="">
+                        	<thead>
+                                <tr>
+                                    <th class="header" style="width: 170px">日期</th>
+                                    <th class="header" style="width: 40px;">年</th>
+                                    <th class="header" style="width: 30px;">週</th>
+                                    <th class="header" style=""></th>
+                                    <th style="width: 70px"></th>
+                                </tr>
+                            </thead>
+                        	<tbody>
+<?php
+    for( $i=1;$i<=55;$i++ ){
+        $key=$data['year'].'-'.$i;
+        $lordday_ts=strtotime(Weekly::getDate($data['year'], $i));
+        if( $i>50 && date('Y',$lordday_ts)!==$data['year'] ){ continue; }
+        if( isset( $subjects[$key] ) ){
+            $lordday=$subjects[$key]['LordDay'];
+            $others=$subjects[$key]['others'];
+            
+            $json_verses=json_decode($lordday['verses']);
+            //pr($verses);
+            $_=array();
+            foreach( $json_verses as $v ){
+                $v_data=Subjects::parseVerseKey($v->key);
+                
+                //$url ='http://bible.jbride.cc';
+                $url ='/'.$v_data['book_name'].'/'.$v_data['part2'].'.html';
+                
+                $_[] = '<a href="'.url('_'.$url).'" target="_blank">'.$v->name.'</a>';
+                //$_[] = $v->name;
+            }
+?>
+                                <tr>
+                                    <th>
+                                        <b><?php echo date('Y年n月j日', $lordday_ts); ?>
+                                        主日</b>
+                                    </th>
+                                    <th>
+                                        <?php echo $data['year']; ?>
+                                    </th>
+                                    <th>
+                                        <?php echo $i; ?>
+                                    </th>
+                                    <th>
+                                        
+                                    </th>
+                                    <th>
+                                        
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        <span style="font-weight:bold;font-size:24px;font-family:標楷體;">
+                                            <?php echo $lordday['name']; ?>
+                                        </span>
+                                        <?php
+                                        if( count($_) > 0 ){
+                                            echo '<br>';
+                                            echo '經文: ';
+                                            echo implode(' , ', $_);
+                                        }
+                                        ?>
+                                    </td>
+                                    <td>
+                                        
+                                    </td>
+                                </tr>
+                                <?php
+                                foreach( $others as $o ){
+                                ?>
+                                <tr class="odd">
+                                    <td colspan="4">
+                                <?php
+                                    $padding = str_repeat('&nbsp; ', 4);
+                                    echo $padding;
+                                    echo $o['wtype_name'];
+                                    $date_tpl='Y年n月j日';
+                                    echo ' - ';
+                                    echo '<b>';
+                                    echo $o['name'];
+                                    echo '</b>';
+                                    echo ' ';
+                                    echo '（'.date($date_tpl, strtotime($o['worshiped'])).'）';
+                                    
+                                    $json_verses=json_decode($o['verses']);
+                                    //pr($verses);
+                                    $_=array();
+                                    foreach( $json_verses as $v ){
+                                        $v_data=Subjects::parseVerseKey($v->key);
+                                        
+                                        //$url ='http://bible.jbride.cc';
+                                        $url ='/'.$v_data['book_name'].'/'.$v_data['part2'].'.html';
+                                        
+                                        $_[] = '<a href="'.url('_'.$url).'" target="_blank">'.$v->name.'</a>';
+                                        //$_[] = $v->name;
+                                    }
+                                    if( count($_) > 0 ){
+                                        echo '<br>';
+                                        echo $padding;
+                                        //echo '經文: ';
+                                        echo implode(' , ', $_);
+                                    }
+                                ?>
+                                    </td>
+                                    <td>
+                                        
+                                    </td>
+                                </tr>
+                                <?php
+                                }
+                                ?>
+<?php
+        }else{
+?>
+                                <tr>
+                                    <th>
+                                        <b><?php echo date('Y年n月j日', $lordday_ts); ?>
+                                        主日</b>
+                                    </th>
+                                    <th>
+                                        <?php echo $data['year']; ?>
+                                    </th>
+                                    <th>
+                                        <?php echo $i; ?>
+                                    </th>
+                                    <th>
+                                        
+                                    </th>
+                                    <th>
+                                        
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">
+                                        （沒有資料）
+                                    </td>
+                                    <td>
+                                        
+                                    </td>
+                                </tr>
+<?php
+        }
+?>
+<?php
+    }
+?>
+                            </tbody>
+                        </table>
+                        <div class="grid_12" style="text-align:center;margin-bottom:10px;">
+                            <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
+                            <input type="button" class="submit-blue" value="編輯「<?php echo $data['name']; ?>」" onclick="javascript: location.href='<?php echo url('./edit/'.$data['id'].'.html'); ?>';" />
                         </div>
                     </div> <!-- End .module-body -->
                 </div> <!-- End .module -->
