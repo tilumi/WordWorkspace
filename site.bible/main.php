@@ -51,7 +51,7 @@ if( file_exists($viewTpl) )
 
 function index(){
     $rows=Main::getBooks();
-    $sitename='JB 線上聖經';
+    $sitename='J&B 線上聖經';
     View::setHeader( 'sitename', $sitename.' - 最美最舒適的線上讀經網' );
     APP::$appBuffer = array($rows, $sitename);
 }
