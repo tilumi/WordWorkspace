@@ -94,17 +94,21 @@ var batchRoutes = {
                                         <?php echo $r['name']; ?>
                                     </td>
 <?php if( ACL::checkAuth( 'active' ) ){ ?>
-                                    <td><?php if( $r['is_active']=='1' ){ ?>
+                                    <td>
+                                    <?php if( $r['is_active']=='1' ){ ?>
                                         <a href="<?php echo url('inactive/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="直接顯示" width="16" height="16"></a>
                                     <?php }else{ ?>
                                         <a href="<?php echo url('active/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="暫時隱藏" width="16" height="16"></a>
-                                    <?php } ?></td>
+                                    <?php } ?>
+                                    </td>
 <?php }else{ ?>
-                                    <td><?php if( $r['is_active']=='1' ){ ?>
+                                    <td>
+                                    <?php if( $r['is_active']=='1' ){ ?>
                                         <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16">
                                     <?php }else{ ?>
                                         <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16">
-                                    <?php } ?></td>
+                                    <?php } ?>
+                                    </td>
 <?php } ?>
                                     <td>
                                         <?php echo $r['author']; ?>

@@ -8,7 +8,7 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 <p>
 <?php echo View::anchor('/', '管理首頁'); ?>
  »
-<?php echo View::anchor('..', '聖經維護 Bible'); ?>
+<?php echo View::anchor('..', '禮拜主題 Subjects'); ?>
  »
 <?php echo APP::$mainTitle; ?>
 </p>
@@ -20,12 +20,12 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                 <?php echo redirect_message(); ?>
                 
                 <div class="float-right">
-<?php /*if( ACL::checkAuth( 'add' ) ){ ?>
+<?php if( ACL::checkAuth( 'add' ) ){ ?>
                     <!-- Button -->
                     <a href="<?php echo url( 'add.html' ); ?>" class="button">
                     	<span>新增<?php echo APP::$mainName; ?> <img src="<?php echo layout_url('admin', '/images/plus-small.gif'); ?>" width="12" height="9"></span>
                     </a>
-<?php }*/ ?>
+<?php } ?>
                 </div>
                 <div class="float-left">
                     <!-- Table records filtering -->
@@ -62,8 +62,8 @@ var batchRoutes = {
                             <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
                                 <option value="" selected="selected">--- 選擇動作 ---</option>
 <?php if( ACL::checkAuth( 'm_edit' ) ){ ?>
-                                <option value="active">顯示文章</option>
-                                <option value="inactive">隱藏文章</option>
+                                <option value="active">顯示指定的項目</option>
+                                <option value="inactive">隱藏指定的項目</option>
 <?php } ?>
 <?php if( ACL::checkAuth( 'm_delete' ) ){ ?>
                                 <option value="delete">刪除</option>
@@ -77,10 +77,10 @@ var batchRoutes = {
                         <table class="">
                         	<thead>
                                 <tr>
-                                    <th class="header" style="width: 70px;">#</th>
-                                    <th class="header" style="width: 150px">卷章</th>
-                                    <th class="header"><?php echo APP::$mainName; ?>標題</th>
-                                    <th class="header" style="width: 140px">最後更新</th>
+                                    <th class="header" style="width: 50px;">#</th>
+                                    <th class="header" style="width: 50px">年度</th>
+                                    <th class="header" style="">標題</th>
+                                    <th class="header" style="width: 50px;">顯示</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -92,16 +92,29 @@ var batchRoutes = {
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
                                     <td>
-                                        <?php echo $r['book_name']; ?>
-                                        <?php echo $r['chapter_id']; ?>
-                                        章
+                                        <?php echo $r['id']; ?>
                                     </td>
                                     <td>
-                                        <?php echo $r['name']; ?> <span style="color:black">(<?php echo $r['max_verse']; ?>)</span>
+                                        <?php echo $r['name']; ?>
+                                        <?php if( !empty($r['name_kr']) ){ echo '（'.$r['name_kr'].'）'; } ?>
                                     </td>
+<?php if( ACL::checkAuth( 'active' ) ){ ?>
                                     <td>
-                                        <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>
+                                    <?php if( $r['is_active']=='1' ){ ?>
+                                        <a href="<?php echo url('inactive/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="直接顯示" width="16" height="16"></a>
+                                    <?php }else{ ?>
+                                        <a href="<?php echo url('active/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="暫時隱藏" width="16" height="16"></a>
+                                    <?php } ?>
                                     </td>
+<?php }else{ ?>
+                                    <td>
+                                    <?php if( $r['is_active']=='1' ){ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16">
+                                    <?php }else{ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16">
+                                    <?php } ?>
+                                    </td>
+<?php } ?>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
                                         <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
@@ -109,21 +122,21 @@ var batchRoutes = {
 <?php if( ACL::checkAuth( 'edit' ) ){ ?>
                                         <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
-<?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
+<?php if( ACL::checkAuth( 'delete' ) ){ ?>
                                         <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
-<?php }*/ ?>
+<?php } ?>
                                     </td>
                                 </tr>
 <?php } ?>
 <?php if( count($rows)<1 ){ ?>
                                 <tr class="even">
-                                    <td colspan="6" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>
+                                    <td colspan="5" style="height:100px;line-height:100px;" class="align-center"> 尚無法提供任何資料 </td>
                                 </tr>
 <?php } ?>
                             </tbody>
                         </table>
                         </form>
-                        </div> <!-- End .module-table-body -->
+                     </div> <!-- End .module-table-body -->
                 </div> <!-- End .module -->
                 
 <!--

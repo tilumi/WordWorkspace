@@ -1,6 +1,6 @@
 <?php
-class News{
-    static $useTable='news';
+class YearTopics{
+    static $useTable='yeartopics';
     
     function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
         $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
@@ -9,16 +9,24 @@ class News{
         if( ! empty( $submits[$key]) ){
             $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
-        $key="author";
+        $key="name_kr";
         if( ! empty( $submits[$key]) ){
             $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+        }
+        $key="year_bigger_then";
+        if( ! empty( $submits[$key]) ){
+            $sql.=" AND year >= ".Model::quote( $submits[$key] , 'text');
+        }
+        $key="year_smaller_then";
+        if( ! empty( $submits[$key]) ){
+            $sql.=" AND year <= ".Model::quote( $submits[$key] , 'text');
         }
         $key="is_active";
         if( in_array( $submits[$key], array('0','1') ) ){
             $sql.=" AND ".$key." = ".Model::quote($submits[$key], 'text');
         }
         $sql.=" AND deleted='0'";
-        $sql.=" ORDER BY published DESC";
+        $sql.=" ORDER BY id DESC";
         $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
@@ -43,14 +51,7 @@ class News{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-       	$data['id']=uniqid('News');
-       	$data['urn']=$data['name'];
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
-       	
-       	$data['author']=$_SESSION['admin']['userid'];
-       	$data['author_id']=$_SESSION['admin']['id'];
+       	$data['year']=$data['id'];
        	$data['created']=date('Y-m-d H:i:s');
         
         return Model::insert($data, self::$useTable);
@@ -59,9 +60,6 @@ class News{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
        	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);
@@ -119,6 +117,18 @@ class News{
         $sql ="UPDATE ".self::$useTable." SET is_active='0', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
         $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
+    }
+    function getList(){
+        $sql ="SELECT * FROM ".self::$useTable;
+        $sql.=" WHERE is_active='1' AND deleted='0'";
+        $sql.=" ORDER BY id desc";
+        $rows=Model::fetchAll($sql);
+        
+        $result=array();
+        foreach( $rows as $r ){
+            $result[$r['id']]=$r['id'].' - '.$r['name'];
+        }
+        return $result;
     }
 }
 ?>

@@ -22,7 +22,7 @@ $mainmenu=array(
     array('name'=>'聖經維護', 'link'=>'/bible/', 'menu_id'=>2, 'id'=>'bible',
         'submenu'=>array(
             array('name'=>'書卷管理', 'link'=>'/bible/books/', 'id'=>'bible.books' ),
-            array('name'=>'經文管理', 'link'=>'/bible/verses/', 'id'=>'bible.verses' ),
+            array('name'=>'章節經文', 'link'=>'/bible/verses/', 'id'=>'bible.verses' ),
         )
     ),
     array('name'=>'話語資料', 'link'=>'/words/', 'menu_id'=>3, 'id'=>'words',
@@ -31,16 +31,17 @@ $mainmenu=array(
             array('name'=>'證道者', 'link'=>'/words/speakers/', 'id'=>'words.speakers' ),
         )
     ),
-    array('name'=>'禮拜資料', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
+    array('name'=>'禮拜主題', 'link'=>'/subjects/', 'menu_id'=>4, 'id'=>'subjects',
         'submenu'=>array(
             array('name'=>'年度標語', 'link'=>'/subjects/yeartopics/', 'id'=>'subjects.yeartopics' ),
+            array('name'=>'禮拜類型', 'link'=>'/subjects/wtypes/', 'id'=>'subjects.wtypes' ),
         )
     ),
     array('name'=>'讚美歌曲', 'link'=>'/songs/', 'menu_id'=>5, 'id'=>'songs',
         'submenu'=>array(
-            array('name'=>'分類', 'link'=>'/songs/categories/', 'id'=>'songs.categories' ),
             array('name'=>'編號系統', 'link'=>'/songs/sns/', 'id'=>'songs.sns' ),
-            array('name'=>'歌本收錄', 'link'=>'/songs/songbooks/', 'id'=>'songs.songbooks' ),
+            array('name'=>'歌本管理', 'link'=>'/songs/books/', 'id'=>'songs.books' ),
+            array('name'=>'語系設定', 'link'=>'/songs/langs/', 'id'=>'songs.langs' ),
         )
     ),
     //array('name'=>'分類管理', 'link'=>array('plugin'=>'subjects', 'controller'=>'yeartopics') ),

@@ -33,6 +33,7 @@ class APP{
     static $loadedFiles=array(
         'vendors'=>array(),
         'pears'=>array(),
+        'models'=>array(),
     ); //記錄以載入的library
     
     /* Syslog */
@@ -129,6 +130,9 @@ class APP{
             case 'vendor':
                 self::_loadVendor( $name );
                 break;
+            case 'model':
+                self::_loadModel( $name );
+                break;
             default:
                 errmsg('指定的參數錯誤: TYPE: '.$type.' , NAME: '.$name.'</strong> Error.');
                 return false;
@@ -159,9 +163,21 @@ class APP{
         }
         return true;
     }
+    function _loadModel( $name ){
+        if( ! is_string($name) ){
+            errmsg('指定的參數錯誤: <strong>必須是字串</strong>');
+            return false;
+        }
+        
+        if( ! self::FileLoader('models',$name) ){
+            errmsg('指定的 Model: <strong>'.$name.'</strong> 找不到.');
+            return false;
+        }
+        return true;
+    }
     function FileLoader( $type , $name , $resource=array() ){
         
-        if( !in_array( $type , array('pears','vendors') ) ){
+        if( !in_array( $type , array('pears','vendors','models') ) ){
             die('Given Parameters: '.$type.' Not Allowed in '.__FUNCTION__);
         }
         $basepath=DIRLIB.$type.DS;
@@ -179,6 +195,17 @@ class APP{
                 $basepath=DIRROOT.$type.DS;
                 if( !in_array( $name , APP::$loadedFiles[$type] ) ){
                     require($basepath.$name.EXT);
+                    //marktime(__FUNCTION__, 'Load '.ucfirst($type).' '.$name);
+                    APP::$loadedFiles[ $type ][]=$name;
+                }
+                return true;
+                break;
+            case 'models':
+                $basepath=DIRROOT;
+                if( !in_array( $name , APP::$loadedFiles[$type] ) ){
+                    $modelPath = $name.'_model'.EXT;
+                    if( APP::$prefix!='main' ){ $modelPath = APP::$prefix.'#'.$modelPath; }
+                    require($basepath.$modelPath);
                     //marktime(__FUNCTION__, 'Load '.ucfirst($type).' '.$name);
                     APP::$loadedFiles[ $type ][]=$name;
                 }

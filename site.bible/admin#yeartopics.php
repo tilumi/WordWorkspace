@@ -19,10 +19,10 @@ if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
-APP::$pageTitle = '章節經文';
-APP::$mainTitle = '章節經文 Bible Verses';
-APP::$mainName = '章節';
-$menu_id = 2;
+APP::$pageTitle = '年度標語';
+APP::$mainTitle = '年度標語 YearTopics';
+APP::$mainName = '年度標語';
+$menu_id = 4;
 
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
@@ -71,10 +71,17 @@ function index(){
     //Search
     $form=Form::create('frmSearch', 'post', APP::$ME );
     $form->addElement('header', '', '內容檢索' );
-    $form->addElement('text', 'book_name', '書卷名稱', array('class'=>'input-long'));
-    $form->addElement('text', 'chapter_id', '章次', array('class'=>'input-long'));
-    $form->addElement('text', 'name', '章節標題', array('class'=>'input-long'));
+    $form->addElement('text', 'name', APP::$mainName.'(中)', array('class'=>'input-long'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'(韓)', array('class'=>'input-long'));
+    $form->addElement('text', 'year_bigger_then', '年度 大於(>=)', array('class'=>'input-long'));
+    $form->addElement('text', 'year_smaller_then', '年度 小於(<=)', array('class'=>'input-long'));
     
+    $options = array(
+        ''=>'--- 選擇狀態 ---',
+        '1'=>'顯示',
+        '0'=>'隱藏',
+    );
+    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input'));
     $buttons=Form::buttonsSearchForm( false );
     $form->addGroup($buttons, null, null, '&nbsp;');
     
@@ -94,25 +101,15 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='book_name' ){ $searchInfo[]='<u>書卷名稱</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='chapter_id' ){ $searchInfo[]='<u>章次</u> 為 "<span>'.$value.'</span>" '; }
-        if( $key=='name' ){ $searchInfo[]='<u>章節標題</u> 含 "<span>'.$value.'</span>" '; }
-        //if( $key=='summary' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>'.APP::$mainName.'(中)</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='name_kr' ){ $searchInfo[]='<u>'.APP::$mainName.'(韓)</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='year_bigger_then' ){ $searchInfo[]='<u>年度</u> 大於 "<span>'.$value.'</span>" '; }
+        if( $key=='year_smaller_then' ){ $searchInfo[]='<u>年度</u> 大於 "<span>'.$value.'</span>" '; }
+        if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
-    list($rows, $totalItems) = BibleVerses::pagelist($submits, $pageID, $pageRows);
-    //BibleVerses::updateAllHTML();
-/*    
-    //計算各章的最大節
-    $sql="SELECT c.id, MAX(b.verse_id) as max FROM `bible_chapters` c JOIN cuv b ON b.book_id=c.book_id AND b.chapter_id=c.chapter_id WHERE b.stype_id IN ('g','h') GROUP BY c.book_id, c.chapter_id";
-    $rrows=Model::fetchAll($sql);
-    foreach( $rrows as $r ){
-        $update=array();
-        $update['id']=$r['id'];
-        $update['max_verse']=$r['max'];
-        Model::update($update, 'id', 'bible_chapters');
-    }
-    */
+    list($rows, $totalItems) = YearTopics::pagelist($submits, $pageID, $pageRows);
+    
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 function add(){
@@ -123,35 +120,23 @@ function add(){
     
     $form->addElement('header', '', $header );
     
-    $options = array(
-        'language'=>'tw',
-        'format'=>'Y-m-d H:i',
-        'minYear'=>date('Y')-5,
-        'maxYear'=>date('Y')+5,
-        'year'=>date('Y')
-    );
-    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
-    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
-    
-    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
+    $form->addElement('text', 'id', '年度', array('class'=>'input-short'));
+    $form->addElement('text', 'name', APP::$mainName.'(中)', array('class'=>'input-medium'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'(韓)', array('class'=>'input-medium'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $radio=array();
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
-    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
-    $form->addGroup($radio, '', '顯示', ' ');
-    $form->setDefaults( array('is_active'=>0 ) );
-
-    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
+    $form->addElement('textarea', 'article', '附註', array('cols'=>90, 'rows'=>10, 'class'=>'wysiwyg'));
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
-    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
+    $form->addRule('id', '年度 必填', 'required', null, 'client');
+    $form->addRule('id', '年度 必須是數字', 'numeric', null, 'client');
+    $form->addRule('id', '年度至多4個字', 'maxlength', 4, 'client');
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
-    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
+    $form->registerRule('is_allowed_id', 'callback', '_is_allowed_id' );
+    $form->addRule('id', '這個年度已有資料，請修改該筆資料，或更改年度', 'is_allowed_id', null);
     
     $form->applyFilter('name', 'trim');
     
@@ -161,7 +146,7 @@ function add(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleVerses::add($submits); 
+            $errmsg = YearTopics::add($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已新增成功' , 'success' );
             }
@@ -173,20 +158,26 @@ function add(){
     
     APP::$appBuffer = array( $form );
 }
+function _is_allowed_id($element_value){
+    $sql ="SELECT count(id) num FROM yeartopics";
+    $sql.=" WHERE deleted='0' AND id=".Model::quote($element_value, 'text');
+    $rownum=Model::fetchRow($sql);
+    if( $rownum['num'] > 0 ){
+        return false;
+    }
+    return true;
+}
 function edit(){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $verses = BibleVerses::getVerses($id);
     
-    APP::load('vendor', 'ckeditor/ckeditor');
-    
-    APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['name'];
+    APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['id'].' '.$data['name'];
     View::setTitle(APP::$pageTitle);
     
     $form=Form::create('frmUpdate', 'post', APP::$ME );
@@ -194,16 +185,22 @@ function edit(){
     $form->addElement('header', '', $header );
     
     $form->addElement('hidden', 'id');
+    $form->addElement('static', '', '年度', $data['id']);
+    $form->addElement('text', 'name', APP::$mainName.'(中)', array('class'=>'input-medium'));
+    $form->addElement('text', 'name_kr', APP::$mainName.'(韓)', array('class'=>'input-medium'));
+    //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $form->addElement('text', 'name', APP::$mainName.'標題(中)', array('class'=>'input-medium'));
-    $form->addElement('text', 'max_verse', '最大節數', array('class'=>'input-medium'));
+    $form->addElement('textarea', 'article', '附註', array('cols'=>90, 'rows'=>10, 'class'=>'wysiwyg'));
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
+    $form->addRule('id', '年度 必填', 'required', null, 'client');
+    $form->addRule('id', '年度 必須是數字', 'numeric', null, 'client');
+    $form->addRule('id', '年度至多4個字', 'maxlength', 4, 'client');
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
+    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -211,7 +208,7 @@ function edit(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleVerses::edit($submits); 
+            $errmsg = YearTopics::edit($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已編輯成功' , 'success' );
             }
@@ -222,14 +219,14 @@ function edit(){
     
     $form=Form::getHtml($form);
     
-    APP::$appBuffer = array( $form , $data , $verses );
+    APP::$appBuffer = array( $form );
 }
 function delete(){
-    $urn = pos(APP::$params);
-    if( empty($urn) ){
+    $id = pos(APP::$params);
+    if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findByUrn($urn);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -259,7 +256,7 @@ function delete(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleVerses::delete($submits); 
+            $errmsg = YearTopics::delete($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已刪除' , 'success' );
             }
@@ -272,19 +269,22 @@ function delete(){
     
     APP::$appBuffer = array( $form );
 }
-function archives(){
+function archives( $id=null ){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['name'];
+    APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['id'].' '.$data['name'];
     View::setTitle(APP::$pageTitle);
     
-    APP::$appBuffer = array( $data );
+    APP::load('model', 'subjects');
+    $subjects = Subjects::findByYears($data['id']);
+    
+    APP::$appBuffer = array( $data , $subjects );
 }
 function m_edit(){
     $form=Form::create('frmList', 'post', ME );
@@ -306,10 +306,10 @@ function m_edit(){
     $items=$submits['items'];
     switch( $type ){
         case 'active':
-            $errmsg = BibleVerses::setActive($items);
+            $errmsg = YearTopics::setActive($items);
             break;
         case 'inactive':
-            $errmsg = BibleVerses::setInactive($items);
+            $errmsg = YearTopics::setInactive($items);
             break;
     }
     if( $errmsg === true ){
@@ -327,7 +327,7 @@ function m_delete(){
     if( isset($submits['commit']) ){
         $submits = $form->getSubmitValues();
         $num=count($submits['ids']);
-        $errmsg = BibleVerses::delete($submits); 
+        $errmsg = YearTopics::delete($submits); 
         if( $errmsg === true ){
             redirect( '.' , '指定的 '.$num.' 項'.APP::$mainName.'已刪除' , 'success' );
         }
@@ -340,7 +340,7 @@ function m_delete(){
         redirect( '.', '尚未選擇執行目標，您必須先選擇項目', 'error');
     }
     $items=$submits['items'];
-    $rows=BibleVerses::findById( $items );
+    $rows=YearTopics::findById( $items );
     
     $form=Form::create('frmMDelete', 'post', APP::$ME );
     $form->addElement('header', '', '以下'.APP::$mainName.'都將刪除，是否確認：' );
@@ -365,12 +365,12 @@ function active(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    if( $errmsg = BibleVerses::setActive($id) ){
+    if( $errmsg = YearTopics::setActive($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定顯示' , 'success' );
     }
     redirect( '.' , $errmsg , 'error' );
@@ -380,12 +380,12 @@ function inactive(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = YearTopics::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $errmsg = BibleVerses::setInactive($id);
+    $errmsg = YearTopics::setInactive($id);
     if( $errmsg === true ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定隱藏' , 'success' );
     }

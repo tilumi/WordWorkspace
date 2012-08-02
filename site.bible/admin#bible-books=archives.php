@@ -1,7 +1,7 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $data ) = APP::$appBuffer;
+list( $data , $chapters ) = APP::$appBuffer;
 $mainTitle = APP::$mainTitle;
 $mainName = APP::$mainName;
 ?>
@@ -68,28 +68,6 @@ function showColumn( $data , $type='text' ){
                     <div class="module-table-body">
                     	<form name="frmList" action="<?php echo ME; ?>" method="post">
                     	<input name="mode" type="hidden" value="">
-                        <div class="table-apply">
-                            <?php echo Blocks::itemsChecker(); //顯示列表選擇器(全選、清除...) ?>
-                            &nbsp;
-                            <span>選取操作:</span> 
-<script>
-var batchRoutes = {
-    'active':'<?php echo url("m_edit.html");?>',
-    'inactive':'<?php echo url("m_edit.html");?>',
-    'delete':'<?php echo url("m_delete.html");?>',
-};
-</script>
-                            <select class="input-medium" onchange="javascript: batch.operation(this.value, batchRoutes );">
-                                <option value="" selected="selected">--- 選擇動作 ---</option>
-<?php if( ACL::checkAuth( 'm_edit' ) ){ ?>
-                                <option value="active">顯示文章</option>
-                                <option value="inactive">隱藏文章</option>
-<?php } ?>
-<?php if( ACL::checkAuth( 'm_delete' ) ){ ?>
-                                <option value="delete">刪除</option>
-<?php } ?>
-                            </select>
-                        </div>
                         <table class="">
                         	<tbody>
                                 <tr>
@@ -152,7 +130,67 @@ var batchRoutes = {
                         </table>
                         <div class="grid_12" style="text-align:center;margin-bottom:10px;">
                             <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
-                            <input type="button" class="submit-blue" value="編輯<?php echo APP::$mainName; ?>" onclick="javascript: location.href='<?php echo url('./edit/'.$data['urn'].'.html'); ?>';" />
+                            <input type="button" class="submit-blue" value="編輯「<?php echo $data['name']; ?>」" onclick="javascript: location.href='<?php echo url('./edit/'.$data['urn'].'.html'); ?>';" />
+                        </div>
+                        <table style="font-size:16px;line-height:24px;">
+                        	<tbody>
+<?php
+    $chaps = $chapters;
+    $max=$data['max_chapter'];
+    $blockChaps=10;
+    $columsNum=3;
+    
+    $rows = ceil( $max / ($blockChaps*$columsNum) ); //將要產生的區塊數，10章1區
+    $blocks = array();
+    $chap=pos($chaps);
+    for( $i=1;$i<=$rows;$i++ ){
+        echo "<tr>";
+        for( $k=1;$k<=$columsNum;$k++ ){
+            $index = ($i-1)*$columsNum + $k;
+            $ch_start=( ($index-1)*$blockChaps + 1 );
+            $ch_end=( $index*$blockChaps < $max ) ? ($index*$blockChaps) : $max;
+            echo '<th style="width:33%;">';
+            if( $ch_start <= $max ){
+                echo $ch_start.' ~ '.$ch_end;
+            }
+            echo '</th>';
+        }
+        echo "</tr>\n";
+        echo "<tr>";
+        for( $j=1;$j<=$columsNum;$j++ ){
+            $html='';
+            $index = ($i-1)*$columsNum + $j;
+            $ch_start=( ($index-1)*$blockChaps );
+            $items = 0;
+            
+            $html.='<ul>'."\n";
+            $chap=$chaps[ $ch_start+$items ];
+            while( $chap && ($items < $blockChaps) ){
+                $name='';
+                if( ! empty($chap['name']) ){ $name = ' &nbsp; '.$chap['name']; }
+                
+                $unit='章';
+                if( $chap['book_id']==19 ){ $unit='篇'; }
+                
+                $html.='    <li style="line-height:16px;">第 '.$chap['chapter_id'].' '.$unit.$name.'</li>'."\n";
+                
+                $items += 1;
+                $chap=$chaps[ $ch_start+$items ];
+            }
+            $html.='</ul>'."\n";
+            
+            echo '<td>'."\n";
+            echo $html;
+            echo '</td>'."\n";
+        }
+        echo "</tr>";
+    }
+?>
+                            </tbody>
+                        </table>
+                        <div class="grid_12" style="text-align:center;margin-bottom:10px;">
+                            <input type="button" class="submit-green" value="回到上頁" onclick="javascript: location.href='<?php echo url('.'); ?>';" />
+                            <input type="button" class="submit-blue" value="「<?php echo $data['name']; ?>」卷章管理" onclick="javascript: location.href='<?php echo url('./chapters/'.$data['urn'].'.html'); ?>';" />
                         </div>
                     </div> <!-- End .module-body -->
                 </div> <!-- End .module -->

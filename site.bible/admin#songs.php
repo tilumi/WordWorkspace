@@ -19,10 +19,10 @@ if( in_array( $action, $registedAction ) ){
     $action = array_shift(APP::$params);
 }
 
-APP::$pageTitle = '章節經文';
-APP::$mainTitle = '章節經文 Bible Verses';
-APP::$mainName = '章節';
-$menu_id = 2;
+APP::$pageTitle = '讚美歌曲';
+APP::$mainTitle = '讚美歌曲 Songs';
+APP::$mainName = '歌曲';
+$menu_id = 5;
 
 $modelPath = APP::$handler.'_model.php';
 if( file_exists($modelPath) ){ include( $modelPath ); }
@@ -71,10 +71,18 @@ function index(){
     //Search
     $form=Form::create('frmSearch', 'post', APP::$ME );
     $form->addElement('header', '', '內容檢索' );
-    $form->addElement('text', 'book_name', '書卷名稱', array('class'=>'input-long'));
-    $form->addElement('text', 'chapter_id', '章次', array('class'=>'input-long'));
-    $form->addElement('text', 'name', '章節標題', array('class'=>'input-long'));
+    $form->addElement('text', 'name', APP::$mainName.'名稱', array('class'=>'input-long'));
+    $form->addElement('text', 'std_id', '標準號', array('class'=>'input-long'));
+    $form->addElement('text', 'mps_key', '注音索引', array('class'=>'input-long'));
+    $form->addElement('text', 'hanyu_key', '漢語索引', array('class'=>'input-long'));
+    $form->addElement('text', 'play_key', '標準KEY', array('class'=>'input-long'));
     
+    $options = array(
+        ''=>'--- 選擇狀態 ---',
+        '1'=>'顯示',
+        '0'=>'隱藏',
+    );
+    $form->addElement('select', 'is_active', '顯示狀態', $options, array('class'=>'input'));
     $buttons=Form::buttonsSearchForm( false );
     $form->addGroup($buttons, null, null, '&nbsp;');
     
@@ -94,63 +102,52 @@ function index(){
     $searchInfo=array();
     foreach($submits as $key=>$value){
         if( $value==='' ){ continue; }
-        if( $key=='book_name' ){ $searchInfo[]='<u>書卷名稱</u> 含 "<span>'.$value.'</span>" '; }
-        if( $key=='chapter_id' ){ $searchInfo[]='<u>章次</u> 為 "<span>'.$value.'</span>" '; }
-        if( $key=='name' ){ $searchInfo[]='<u>章節標題</u> 含 "<span>'.$value.'</span>" '; }
-        //if( $key=='summary' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
+        if( $key=='name' ){ $searchInfo[]='<u>歌曲名稱</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='std_id' ){ $searchInfo[]='<u>標準號</u> 含 "<span>'.$value.'</span>" '; }
+        if( $key=='mps_key' ){ $searchInfo[]='<u>注音索引</u> 開頭 "<span>'.$value.'</span>" '; }
+        if( $key=='hanyu_key' ){ $searchInfo[]='<u>漢語索引</u> 開頭 "<span>'.$value.'</span>" '; }
+        if( $key=='play_key' ){ $searchInfo[]='<u>標準KEY</u> 是 "<span>'.$value.'</span>" '; }
+        if( $key=='is_active' ){ $_=array(0=>'隱藏',1=>'直接顯示'); $searchInfo[]='<u>顯示狀態</u> 為 "<span>'.$_[$value].'</span>" '; }
     }
     
-    list($rows, $totalItems) = BibleVerses::pagelist($submits, $pageID, $pageRows);
-    //BibleVerses::updateAllHTML();
-/*    
-    //計算各章的最大節
-    $sql="SELECT c.id, MAX(b.verse_id) as max FROM `bible_chapters` c JOIN cuv b ON b.book_id=c.book_id AND b.chapter_id=c.chapter_id WHERE b.stype_id IN ('g','h') GROUP BY c.book_id, c.chapter_id";
-    $rrows=Model::fetchAll($sql);
-    foreach( $rrows as $r ){
-        $update=array();
-        $update['id']=$r['id'];
-        $update['max_verse']=$r['max'];
-        Model::update($update, 'id', 'bible_chapters');
-    }
-    */
+    list($rows, $totalItems) = Songs::pagelist($submits, $pageID, $pageRows);
+    
     APP::$appBuffer = array( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo );
 }
 function add(){
     APP::$pageTitle='新增'.APP::$mainName;
     View::setTitle(APP::$pageTitle);
     
+    $langs=Songs::getLangs();
+    
     $form=Form::create('frmInsert', 'post', APP::$ME );
     
     $form->addElement('header', '', $header );
     
-    $options = array(
-        'language'=>'tw',
-        'format'=>'Y-m-d H:i',
-        'minYear'=>date('Y')-5,
-        'maxYear'=>date('Y')+5,
-        'year'=>date('Y')
-    );
-    $form->addElement('date', 'published', '發佈日期', $options, array('class'=>'input'));
-    $form->setDefaults( array('published'=>date('Y-m-d H:i') ) );
-    
-    $form->addElement('text', 'name', '標題', array('class'=>'input-medium'));
+    $form->addElement('text', 'name', APP::$mainName.'名稱', array('class'=>'input-medium'));
+    $form->addElement('text', 'std_id', '標準號', array('class'=>'input-short'));
+    $form->addElement('text', 'mps_key', '注音索引', array('class'=>'input-short'));
+    $form->addElement('text', 'hanyu_key', '漢語索引', array('class'=>'input-short'));
+    $form->addElement('text', 'play_key', '標準KEY', array('class'=>'input-short'));
     //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
     $radio=array();
     $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
     $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
-    $form->addGroup($radio, '', '顯示', ' ');
+    $form->addGroup($radio, '', '顯示狀態', ' ');
     $form->setDefaults( array('is_active'=>0 ) );
 
-    $form->addElement('textarea', 'article', '內文', array('cols'=>90, 'rows'=>30, 'class'=>'wysiwyg'));
+    foreach( $langs as $lang_id=>$lang ){
+        $form->addElement('static', '', '<b>'.$lang['name'].'歌詞資料</b>' );
+        $form->addElement('text', 'lyrics_names['.$lang_id.']', $lang['name'].APP::$mainName.'名稱', array('class'=>'input-medium'));
+        $form->addElement('textarea', 'articles['.$lang_id.']', $lang['name'].'歌詞', array('cols'=>90, 'rows'=>15));
+    }
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
-    $form->addRule('published', '發佈日期 必填', 'required', null, 'client');
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
     $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
     
     $form->applyFilter('name', 'trim');
@@ -161,9 +158,9 @@ function add(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleVerses::add($submits); 
+            $errmsg = Songs::add($submits); 
             if( $errmsg === true ){
-                redirect( '.' , APP::$mainName.'已新增成功' , 'success' );
+                redirect( '.' , APP::$mainName.'「'.$submits['name'].'」已新增成功' , 'success' );
             }
             redirect( '.' , $errmsg , 'error' );
         }
@@ -178,13 +175,10 @@ function edit(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = Songs::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $verses = BibleVerses::getVerses($id);
-    
-    APP::load('vendor', 'ckeditor/ckeditor');
     
     APP::$pageTitle='編輯'.APP::$mainName.'：'.$data['name'];
     View::setTitle(APP::$pageTitle);
@@ -194,16 +188,32 @@ function edit(){
     $form->addElement('header', '', $header );
     
     $form->addElement('hidden', 'id');
+    $form->addElement('text', 'name', APP::$mainName.'名稱', array('class'=>'input-medium'));
+    $form->addElement('text', 'std_id', '標準號', array('class'=>'input-short'));
+    $form->addElement('text', 'mps_key', '注音索引', array('class'=>'input-short'));
+    $form->addElement('text', 'hanyu_key', '漢語索引', array('class'=>'input-short'));
+    $form->addElement('text', 'play_key', '標準KEY', array('class'=>'input-short'));
+    //$form->addElement('text', 'urn', '網址URN (Unique Resource Name): 請填入標題的英譯文句，由系統自動轉換為網址，SEO 用', array('class'=>'input-medium'));
     
-    $form->addElement('text', 'name', APP::$mainName.'標題(中)', array('class'=>'input-medium'));
-    $form->addElement('text', 'max_verse', '最大節數', array('class'=>'input-medium'));
+    $radio=array();
+    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 直接顯示', '1');
+    $radio[]=&HTML_QuickForm::createElement('radio', 'is_active', '', ' 隱藏', '0');
+    $form->addGroup($radio, '', '顯示狀態', ' ');
+    
+    foreach( $data['lyrics'] as $lang_id=>$lyrics ){
+        $form->addElement('static', '', '<b>'.$lyrics['lang_name'].'歌詞資料</b>' );
+        $form->addElement('text', 'lyrics_names['.$lang_id.']', $lyrics['lang_name'].APP::$mainName.'名稱', array('class'=>'input-medium'));
+        $form->addElement('textarea', 'articles['.$lang_id.']', $lyrics['lang_name'].'歌詞', array('cols'=>90, 'rows'=>15));
+        $data['lyrics_names'][$lang_id]=$lyrics['name'];
+        $data['articles'][$lang_id]=$lyrics['article'];
+    }
     
     $buttons=Form::buttons();
     $form->addGroup($buttons, null, null, '&nbsp;');
     
     $form->addRule('name', '標題 必填', 'required', null, 'client');
     $form->addRule('name', '標題至多255個字', 'maxlength', 255, 'client');
-    $form->addRule('urn', 'URN至多128個字', 'maxlength', 128, 'client');
+    $form->addRule('is_active', '啟用狀態 必填', 'required', null, 'client');
     
     $submits = $form->getSubmitValues();
     if( count($submits)>0 ){
@@ -211,9 +221,9 @@ function edit(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleVerses::edit($submits); 
+            $errmsg = Songs::edit($submits); 
             if( $errmsg === true ){
-                redirect( '.' , APP::$mainName.'已編輯成功' , 'success' );
+                redirect( '.' , APP::$mainName.'「'.$submits['name'].'」已編輯成功' , 'success' );
             }
             redirect( '.' , $errmsg , 'error' );
         }
@@ -222,14 +232,14 @@ function edit(){
     
     $form=Form::getHtml($form);
     
-    APP::$appBuffer = array( $form , $data , $verses );
+    APP::$appBuffer = array( $form );
 }
 function delete(){
-    $urn = pos(APP::$params);
-    if( empty($urn) ){
+    $id = pos(APP::$params);
+    if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findByUrn($urn);
+    $data = Songs::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -259,7 +269,7 @@ function delete(){
             redirect( '.' , '使用者取消' , 'info' );
         }
         if( $form->validate() ){
-            $errmsg = BibleVerses::delete($submits); 
+            $errmsg = Songs::delete($submits); 
             if( $errmsg === true ){
                 redirect( '.' , APP::$mainName.'已刪除' , 'success' );
             }
@@ -272,12 +282,12 @@ function delete(){
     
     APP::$appBuffer = array( $form );
 }
-function archives(){
+function archives( $id=null ){
     $id = pos(APP::$params);
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = Songs::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
@@ -306,10 +316,10 @@ function m_edit(){
     $items=$submits['items'];
     switch( $type ){
         case 'active':
-            $errmsg = BibleVerses::setActive($items);
+            $errmsg = Songs::setActive($items);
             break;
         case 'inactive':
-            $errmsg = BibleVerses::setInactive($items);
+            $errmsg = Songs::setInactive($items);
             break;
     }
     if( $errmsg === true ){
@@ -327,7 +337,7 @@ function m_delete(){
     if( isset($submits['commit']) ){
         $submits = $form->getSubmitValues();
         $num=count($submits['ids']);
-        $errmsg = BibleVerses::delete($submits); 
+        $errmsg = Songs::delete($submits); 
         if( $errmsg === true ){
             redirect( '.' , '指定的 '.$num.' 項'.APP::$mainName.'已刪除' , 'success' );
         }
@@ -340,7 +350,7 @@ function m_delete(){
         redirect( '.', '尚未選擇執行目標，您必須先選擇項目', 'error');
     }
     $items=$submits['items'];
-    $rows=BibleVerses::findById( $items );
+    $rows=Songs::findById( $items );
     
     $form=Form::create('frmMDelete', 'post', APP::$ME );
     $form->addElement('header', '', '以下'.APP::$mainName.'都將刪除，是否確認：' );
@@ -365,12 +375,12 @@ function active(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = Songs::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    if( $errmsg = BibleVerses::setActive($id) ){
+    if( $errmsg = Songs::setActive($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定顯示' , 'success' );
     }
     redirect( '.' , $errmsg , 'error' );
@@ -380,12 +390,12 @@ function inactive(){
     if( empty($id) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
-    $data = BibleVerses::findById($id);
+    $data = Songs::findById($id);
     if( !(is_array($data) && count($data)>0) ){
         redirect( '.' , '指定的'.APP::$mainName.'不存在' , 'attention' );
     }
     
-    $errmsg = BibleVerses::setInactive($id);
+    $errmsg = Songs::setInactive($id);
     if( $errmsg === true ){
         redirect( '.' , '指定的'.APP::$mainName.'「'.$data['name'].'」已設定隱藏' , 'success' );
     }

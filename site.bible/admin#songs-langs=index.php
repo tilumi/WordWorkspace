@@ -1,14 +1,14 @@
 <?php
 include('layout_admin/tpl_header.php');
 include('layout_admin/helper.blocks.php');
-list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBuffer;
+list( $rows, $form, $searchInfo ) = APP::$appBuffer;
 ?>
 
             <div class="grid_12">
 <p>
 <?php echo View::anchor('/', '管理首頁'); ?>
  »
-<?php echo View::anchor('..', '聖經維護 Bible'); ?>
+<?php echo View::anchor('..', '讚美歌曲 Songs'); ?>
  »
 <?php echo APP::$mainTitle; ?>
 </p>
@@ -20,12 +20,12 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                 <?php echo redirect_message(); ?>
                 
                 <div class="float-right">
-<?php /*if( ACL::checkAuth( 'add' ) ){ ?>
+<?php if( ACL::checkAuth( 'add' ) ){ ?>
                     <!-- Button -->
                     <a href="<?php echo url( 'add.html' ); ?>" class="button">
                     	<span>新增<?php echo APP::$mainName; ?> <img src="<?php echo layout_url('admin', '/images/plus-small.gif'); ?>" width="12" height="9"></span>
                     </a>
-<?php }*/ ?>
+<?php } ?>
                 </div>
                 <div class="float-left">
                     <!-- Table records filtering -->
@@ -70,17 +70,14 @@ var batchRoutes = {
 <?php } ?>
                             </select>
                         </div>
-                        <div class="pager" id="pager">
-                            <div class="info"><?php echo Blocks::pageInfo($pageID, $pageRows, count($rows), $totalItems); ?></div>
-                        </div>
                         <div style="clear: both;"></div>
                         <table class="">
                         	<thead>
                                 <tr>
-                                    <th class="header" style="width: 70px;">#</th>
-                                    <th class="header" style="width: 150px">卷章</th>
-                                    <th class="header"><?php echo APP::$mainName; ?>標題</th>
-                                    <th class="header" style="width: 140px">最後更新</th>
+                                    <th class="header" style="width: 50px;">#</th>
+                                    <th class="header" style="">語系</th>
+                                    <th class="header" style="width: 50px;">排序</th>
+                                    <th class="header" style="width: 80px;">顯示</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -92,26 +89,39 @@ var batchRoutes = {
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
                                     <td>
-                                        <?php echo $r['book_name']; ?>
-                                        <?php echo $r['chapter_id']; ?>
-                                        章
+                                        <?php echo $r['name']; ?> (<?php echo $r['id']; ?>)
                                     </td>
                                     <td>
-                                        <?php echo $r['name']; ?> <span style="color:black">(<?php echo $r['max_verse']; ?>)</span>
+                                        <?php echo $r['sort']; ?>
                                     </td>
+<?php if( ACL::checkAuth( 'active' ) && !in_array( $r['id'], array('zh-tw', 'kr') ) ){ ?>
                                     <td>
-                                        <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>
+                                    <?php if( $r['is_active']=='1' ){ ?>
+                                        <a href="<?php echo url('inactive/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="直接顯示" width="16" height="16"></a>
+                                    <?php }else{ ?>
+                                        <a href="<?php echo url('active/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="暫時隱藏" width="16" height="16"></a>
+                                    <?php } ?>
                                     </td>
+<?php }else{ ?>
                                     <td>
-<?php if( ACL::checkAuth( 'archives' ) ){ ?>
-                                        <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
+                                    <?php if( $r['is_active']=='1' ){ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16">
+                                    <?php }else{ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16">
+                                    <?php } ?>
+                                    <?php if( in_array( $r['id'], array('zh-tw', 'kr') ) ){ ?>
+                                        不可隱藏
+                                    <?php } ?>
+                                    
+                                    </td>
 <?php } ?>
+                                    <td>
 <?php if( ACL::checkAuth( 'edit' ) ){ ?>
                                         <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
-<?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
+<?php if( ACL::checkAuth( 'delete' ) && !in_array( $r['id'], array('zh-tw', 'kr') ) ){ ?>
                                         <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
-<?php }*/ ?>
+<?php } ?>
                                     </td>
                                 </tr>
 <?php } ?>
@@ -123,45 +133,9 @@ var batchRoutes = {
                             </tbody>
                         </table>
                         </form>
-                        </div> <!-- End .module-table-body -->
+                     </div> <!-- End .module-table-body -->
                 </div> <!-- End .module -->
                 
-<!--
-                     <div class="pagination">           
-                		<a href="" class="button"><span><img src="<?php echo layout_url('admin', '/images/arrow-stop-180-small.gif'); ?>" alt="First" width="12" height="9"> First</span></a> 
-                        <a href="" class="button"><span><img src="<?php echo layout_url('admin', '/images/arrow-180-small.gif'); ?>" alt="Previous" width="12" height="9"> Prev</span></a>
-                        <div class="numbers">
-                            <span>Page:</span> 
-                            <a href="">1</a> 
-                            <span>|</span> 
-                            <a href="">2</a> 
-                            <span>|</span> 
-                            <span class="current">3</span> 
-                            <span>|</span> 
-                            <a href="">4</a> 
-                            <span>|</span> 
-                            <a href="">5</a> 
-                            <span>|</span> 
-                            <a href="">6</a> 
-                            <span>|</span> 
-                            <a href="">7</a> 
-                            <span>|</span> 
-                            <span>...</span> 
-                            <span>|</span> 
-                            <a href="">99</a>
-                        </div> 
-                        <a href="" class="button"><span>Next <img src="<?php echo layout_url('admin', '/images/arrow-000-small.gif'); ?>" alt="Next" width="12" height="9"></span></a> 
-                        <a href="" class="button last"><span>Last <img src="<?php echo layout_url('admin', '/images/arrow-stop-000-small.gif'); ?>" alt="Last" width="12" height="9"></span></a>
-                        <div style="clear: both;"></div> 
-                     </div>
--->                
-                     <div class="pagination">
-                        <?php
-                            echo Blocks::render( $pageID, $totalItems );
-                        ?>
-                        
-                        <div style="clear: both;"></div> 
-                     </div>
                 
 
                 

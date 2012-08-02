@@ -1,15 +1,15 @@
 <?php
-class News{
-    static $useTable='news';
+class SubjectsWtypes{
+    static $useTable='subjects_wtypes';
     
     function pagelist( $submits, $pageID, $pageRows=PAGEROWS ){
         $sql ="SELECT * FROM ".self::$useTable." WHERE 1<>2";
         
-        $key="name";
+        $key="key";
         if( ! empty( $submits[$key]) ){
-            $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
+            $sql.=" AND `".$key."` LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
-        $key="author";
+        $key="name";
         if( ! empty( $submits[$key]) ){
             $sql.=" AND ".$key." LIKE ".Model::quote( '%'.$submits[$key].'%' , 'text');
         }
@@ -17,8 +17,7 @@ class News{
         if( in_array( $submits[$key], array('0','1') ) ){
             $sql.=" AND ".$key." = ".Model::quote($submits[$key], 'text');
         }
-        $sql.=" AND deleted='0'";
-        $sql.=" ORDER BY published DESC";
+        $sql.=" ORDER BY sort";
         $totalItems = Model::fetchOne( preg_replace('/^SELECT .* FROM/','SELECT COUNT(*) FROM', $sql) );
         $sql.=" LIMIT ".Model::getOffsetStart( $pageID, $pageRows ).", ".$pageRows;
         $rows = Model::fetchAll( $sql );
@@ -31,11 +30,11 @@ class News{
             foreach( $id as $r ){
                 $id_list[]=Model::quote($r, 'text');
             }
-            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).") AND deleted='0'";
+            $sql = "SELECT * FROM ".self::$useTable." WHERE id IN (".implode(',', $id_list).")";
             $data = Model::fetchAll( $sql );
             return $data;
         }
-        $sql = "SELECT * FROM ".self::$useTable." WHERE id=".Model::quote($id, 'text')." AND deleted='0'";
+        $sql = "SELECT * FROM ".self::$useTable." WHERE id=".Model::quote($id, 'text');
         $data = Model::fetchRow( $sql );
         return $data;
     }
@@ -43,36 +42,41 @@ class News{
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-       	$data['id']=uniqid('News');
-       	$data['urn']=$data['name'];
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
-       	
-       	$data['author']=$_SESSION['admin']['userid'];
-       	$data['author_id']=$_SESSION['admin']['id'];
+       	$data['key']=$data['id'];
        	$data['created']=date('Y-m-d H:i:s');
         
         return Model::insert($data, self::$useTable);
+    }
+    function quickAdd( $name ){
+        //先檢查是否有同名的類型，有則直接返回其ID
+        $sql ="SELECT id FROM ".self::useTable;
+        $sql.=" WHERE name=".Model::quote($name, 'text');
+        $result=Model::fetchRow($sql);
+        if( count($result['id'])>0 ){
+            return $result['id'];
+        }
+        
+        $data['name']=$name;
+        $data['id']=uniqid('WType');
+        $data['sort']='99';
+        $id=$data['id'];
+        
+        if( Model::insert($data) ){
+            return $id;
+        }
+        return false;
     }
     function edit( $data ){
         if( isset($data['commit']) ){
             unset($data['commit']);
         }
-        $date=$data['published'];
-        $timestamp=mktime( $date['H'],$date['i'],0,$date['m'],$date['d'],$date['Y'] );
-    	$data['published']=date('Y-m-d H:i:s', $timestamp);
        	$data['updated']=date('Y-m-d H:i:s');
         
         return Model::update($data, 'id', self::$useTable);
     }
     function delete( $data ){
         if( isset($data['id']) ){
-            $fields=array();
-            $fields['id']=$data['id'];
-           	$fields['updated']=date('Y-m-d H:i:s');
-            $fields['deleted']='1';
-            return Model::update($fields, 'id', self::$useTable);
+            $data['ids']=array( $data['id'] );
         }
         //when $data is id list
         $id=$data['ids'];
@@ -80,7 +84,7 @@ class News{
         foreach( $id as $r ){
             $id_list[]=Model::quote($r, 'text');
         }
-        $sql ="UPDATE ".self::$useTable." SET deleted='1', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
+        $sql ="DELETE FROM ".self::$useTable;
         $sql.=" WHERE id IN (".implode(',', $id_list).')';
         return Model::exec($sql);
     }
@@ -119,6 +123,18 @@ class News{
         $sql ="UPDATE ".self::$useTable." SET is_active='0', updated=".Model::quote(date('Y-m-d H:i:s'), 'text');
         $sql.=" WHERE id IN (".implode(',', $ids).')';
         return Model::exec($sql);
+    }
+    function getList(){
+        $sql ="SELECT * FROM ".self::$useTable;
+        $sql.=" WHERE is_active='1'";
+        $sql.=" ORDER BY sort";
+        $rows=Model::fetchAll($sql);
+        
+        $result=array();
+        foreach( $rows as $r ){
+            $result[$r['id']]=$r['name'];
+        }
+        return $result;
     }
 }
 ?>

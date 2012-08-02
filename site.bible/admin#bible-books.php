@@ -352,7 +352,9 @@ function archives(){
     APP::$pageTitle='檢視'.APP::$mainName.'：'.$data['name'];
     View::setTitle(APP::$pageTitle);
     
-    APP::$appBuffer = array( $data );
+    $chapters = BibleBooks::getChapters($data['id']);
+    
+    APP::$appBuffer = array( $data , $chapters );
 }
 function m_edit(){
     $form=Form::create('frmList', 'post', ME );

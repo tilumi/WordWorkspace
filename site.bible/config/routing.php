@@ -17,6 +17,15 @@ class RoutingConfigs{
             'admin'=>array(
                 'news'=>array('name'=>'news'),
                 
+                'subjects/yeartopics'=>array('name'=>'yeartopics', 'parents'=>'subjects'),
+                'subjects/wtypes'=>array('name'=>'subjects-wtypes', 'parents'=>'subjects'),
+                'subjects'=>array('name'=>'subjects'),
+                
+                'songs/sns'=>array('name'=>'songs-sns', 'parents'=>'songs'),
+                'songs/langs'=>array('name'=>'songs-langs', 'parents'=>'songs'),
+                'songs/books'=>array('name'=>'songs-books', 'parents'=>'songs'),
+                'songs'=>array('name'=>'songs'),
+                
                 'bible/books'=>array('name'=>'bible-books', 'parents'=>'bible'),
                 'bible/verses'=>array('name'=>'bible-verses', 'parents'=>'bible'),
                 'bible'=>array('name'=>'bible'),

@@ -8,8 +8,6 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
 <p>
 <?php echo View::anchor('/', '管理首頁'); ?>
  »
-<?php echo View::anchor('..', '聖經維護 Bible'); ?>
- »
 <?php echo APP::$mainTitle; ?>
 </p>
 
@@ -20,12 +18,12 @@ list( $rows, $totalItems, $pageID, $pageRows, $form, $searchInfo ) = APP::$appBu
                 <?php echo redirect_message(); ?>
                 
                 <div class="float-right">
-<?php /*if( ACL::checkAuth( 'add' ) ){ ?>
+<?php if( ACL::checkAuth( 'add' ) ){ ?>
                     <!-- Button -->
                     <a href="<?php echo url( 'add.html' ); ?>" class="button">
                     	<span>新增<?php echo APP::$mainName; ?> <img src="<?php echo layout_url('admin', '/images/plus-small.gif'); ?>" width="12" height="9"></span>
                     </a>
-<?php }*/ ?>
+<?php } ?>
                 </div>
                 <div class="float-left">
                     <!-- Table records filtering -->
@@ -77,10 +75,13 @@ var batchRoutes = {
                         <table class="">
                         	<thead>
                                 <tr>
-                                    <th class="header" style="width: 70px;">#</th>
-                                    <th class="header" style="width: 150px">卷章</th>
-                                    <th class="header"><?php echo APP::$mainName; ?>標題</th>
-                                    <th class="header" style="width: 140px">最後更新</th>
+                                    <th class="header" style="width: 50px;">#</th>
+                                    <th class="header" style="width: 120px">禮拜日期</th>
+                                    <th class="header" style="width: 70px">禮拜類型</th>
+                                    <th class="header" style="width: 40px;">年</th>
+                                    <th class="header" style="width: 30px;">週</th>
+                                    <th class="header" style="">標題</th>
+                                    <th class="header" style="width: 50px;">顯示</th>
                                     <th style="width: 70px"></th>
                                 </tr>
                             </thead>
@@ -92,16 +93,62 @@ var batchRoutes = {
                                         <?php echo ($pageID-1)*$pageRows + ($key+1); ?>.
                                     </td>
                                     <td>
-                                        <?php echo $r['book_name']; ?>
-                                        <?php echo $r['chapter_id']; ?>
-                                        章
+                                        <?php
+                                            $style='';
+                                            if( $r['wtype_id']==='LordDay' ){ $style='color:red;'; }
+                                            if( $r['wtype_id']==='WedDay' ){ $style='color:green;'; }
+                                        ?>
+                                        <span style="font-weight:bold;<?php echo $style; ?>">
+                                        <?php $_=array('日','一','二','三','四','五','六'); ?>
+                                        <?php echo date( 'Y-m-d' , strtotime($r['worshiped']) ); ?>(<?php echo $_[ $r['wday'] ];?>)
+                                        </span>
                                     </td>
                                     <td>
-                                        <?php echo $r['name']; ?> <span style="color:black">(<?php echo $r['max_verse']; ?>)</span>
+                                        <?php echo $r['wtype_name']; ?>
                                     </td>
                                     <td>
-                                        <?php echo ($r['updated']!=='0000-00-00 00:00:00')? substr($r['updated'],0,16) :'(從未)'; ?>
+                                        <?php echo $r['year']; ?>
                                     </td>
+                                    <td>
+                                        <?php echo $r['week']; ?>
+                                    </td>
+                                    <td>
+                                        <b><?php echo $r['name']; ?></b>
+                                        <?php
+                                        $verses=json_decode($r['verses']);
+                                        //pr($verses);
+                                        $_=array();
+                                        foreach( $verses as $v ){
+                                            $v_data=Subjects::parseVerseKey($v->key);
+                                            
+                                            //$url ='http://bible.jbride.cc';
+                                            $url ='/'.$v_data['book_name'].'/'.$v_data['part2'].'.html';
+                                            
+                                            $_[] = '<a href="'.url('_'.$url).'" target="_blank">'.$v->name.'</a>';
+                                            //$_[] = $v->name;
+                                        }
+                                        if( count($_) > 0 ){
+                                            echo '<br>經文: '.implode(' , ', $_);
+                                        }
+                                        ?>
+                                    </td>
+<?php if( ACL::checkAuth( 'active' ) ){ ?>
+                                    <td>
+                                    <?php if( $r['is_active']=='1' ){ ?>
+                                        <a href="<?php echo url('inactive/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="直接顯示" width="16" height="16"></a>
+                                    <?php }else{ ?>
+                                        <a href="<?php echo url('active/'.$r['id'].'.html'); ?>"><img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="暫時隱藏" width="16" height="16"></a>
+                                    <?php } ?>
+                                    </td>
+<?php }else{ ?>
+                                    <td>
+                                    <?php if( $r['is_active']=='1' ){ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/tick-circle.gif'); ?>" alt="已啟用" width="16" height="16">
+                                    <?php }else{ ?>
+                                        <img src="<?php echo layout_url('admin', '/images/minus-circle.gif'); ?>" alt="已停用" width="16" height="16">
+                                    <?php } ?>
+                                    </td>
+<?php } ?>
                                     <td>
 <?php if( ACL::checkAuth( 'archives' ) ){ ?>
                                         <a href="<?php echo url('archives/'.$r['id'].'.html'); ?>" title="檢視資訊"><img src="<?php echo layout_url('admin', '/images/icons/mail-find.png'); ?>" alt="檢視資訊" width="16" height="16"></a>
@@ -109,9 +156,9 @@ var batchRoutes = {
 <?php if( ACL::checkAuth( 'edit' ) ){ ?>
                                         <a href="<?php echo url('edit/'.$r['id'].'.html'); ?>" title="編輯"><img src="<?php echo layout_url('admin', '/images/icons/edit.png'); ?>" alt="編輯" width="16" height="16"></a>
 <?php } ?>
-<?php /*if( ACL::checkAuth( 'delete' ) ){ ?>
+<?php if( ACL::checkAuth( 'delete' ) ){ ?>
                                         <a href="<?php echo url('delete/'.$r['id'].'.html'); ?>" title="刪除"><img src="<?php echo layout_url('admin', '/images/bin.gif'); ?>" alt="刪除" width="16" height="16"></a>
-<?php }*/ ?>
+<?php } ?>
                                     </td>
                                 </tr>
 <?php } ?>
@@ -123,7 +170,7 @@ var batchRoutes = {
                             </tbody>
                         </table>
                         </form>
-                        </div> <!-- End .module-table-body -->
+                     </div> <!-- End .module-table-body -->
                 </div> <!-- End .module -->
                 
 <!--
