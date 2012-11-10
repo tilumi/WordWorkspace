@@ -1,0 +1,6 @@
+<h1>File Upload</h1>
+<%= form_for(@document, :html => {:multipart => true} , :url => documents_path(@document) ) do |f| %>
+<%= f.text_field :title %>
+<%= f.file_field :uploaded_file%>
+<%= f.submit%>
+<% end %>

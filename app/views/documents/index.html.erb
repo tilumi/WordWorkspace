@@ -1,0 +1,10 @@
+<ul>
+	<% @documents.each do |document| %>
+	<li>
+		<%= document.title %>
+		<%= link_to 'Show', document_path(document) %>
+		<%= link_to 'Delete', document_path(document), :method => :delete %>
+	</li>
+	<% end %>
+</ul>
+<%= link_to 'New event', new_document_path %>
