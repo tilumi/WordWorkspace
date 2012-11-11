@@ -40,8 +40,7 @@ class Document < ActiveRecord::Base
 
   def delete_associate_files
     Dir.entries(DOCUMENT_DIRECTORY).each do |filename|
-      my_logger.debug filename =~ /^#{filepath[0..filepath.rindex(".")-1]}/
-      File.delete(filename) if filename =~ /^#{filepath[0..filepath.rindex(".")-1]}/
+      File.delete(File.join(DOCUMENT_DIRECTORY,filename)) if filename =~ /^#{filepath[filepath.rindex("/")+1..filepath.rindex(".")-1]}/
      end
   end
   
