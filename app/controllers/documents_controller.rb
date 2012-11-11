@@ -15,7 +15,8 @@ class DocumentsController < ApplicationController
   end
   
   def show
-    
+    content = File.read(Document.find(params[:id]).filepath, :mode => "r", :encoding => "Big5")
+    render :text => content
   end
   
   def destroy

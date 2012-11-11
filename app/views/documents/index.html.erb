@@ -2,6 +2,7 @@
 	<% @documents.each do |document| %>
 	<li>
 		<%= document.title %>
+		<%= document.original_filename %>
 		<%= link_to 'Show', document_path(document) %>
 		<%= link_to 'Delete', document_path(document), :method => :delete %>
 	</li>

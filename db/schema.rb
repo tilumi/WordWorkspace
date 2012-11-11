@@ -11,13 +11,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121110051218) do
+ActiveRecord::Schema.define(:version => 20121111101130) do
 
   create_table "documents", :force => true do |t|
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",        :null => false
+    t.datetime "updated_at",        :null => false
     t.string   "filepath"
     t.string   "title"
+    t.string   "original_filename"
   end
 
   create_table "users", :force => true do |t|

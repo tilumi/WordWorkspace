@@ -1,15 +1,24 @@
 class Document < ActiveRecord::Base
-  attr_accessible :filepath, :title, :uploaded_file
+  DOCUMENT_DIRECTORY = "public/documents"
+  attr_accessible :filepath, :title, :uploaded_file, :original_filename
   attr_writer :uploaded_file
 
   before_create :store_doc
-  after_destroy :delete_html
+  after_destroy :delete_associate_files
 
   protected
+  
+  def my_logger
+    @@my_logger ||= Logger.new("#{Rails.root}/log/my.log")
+  end
+  
+  def new_filename(original_filename)
+    "#{DateTime.now.strftime("%Y%m%d%H%M%S")}#{original_filename[original_filename.rindex(".")..-1]}"
+  end
+  
   def store_doc
-    name = @uploaded_file.original_filename
-    directory = "public/documents"
-    path = File.join(directory, name)
+    self.original_filename = @uploaded_file.original_filename
+    path = File.join(DOCUMENT_DIRECTORY, new_filename(self.original_filename))
     File.open(path,"wb") { |f| f.write(@uploaded_file.read)}
     doc_to_html(path)
   end
@@ -25,13 +34,15 @@ class Document < ActiveRecord::Base
         word.quit
       end
     t.join
-    File.delete(path)
     self.filepath = path.gsub(/\.doc$|\.docx$/,".html")
     end
   end
 
-  def delete_html
-    File.delete(filepath) if filepath and File.exist?(filepath)
+  def delete_associate_files
+    Dir.entries(DOCUMENT_DIRECTORY).each do |filename|
+      my_logger.debug filename =~ /^#{filepath[0..filepath.rindex(".")-1]}/
+      File.delete(filename) if filename =~ /^#{filepath[0..filepath.rindex(".")-1]}/
+     end
   end
   
 end
