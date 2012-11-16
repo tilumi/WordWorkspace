@@ -1,3 +1,5 @@
+require 'nokogiri'
+
 class DocumentsController < ApplicationController
   
   def index
@@ -16,7 +18,20 @@ class DocumentsController < ApplicationController
   
   def show
     content = File.read(Document.find(params[:id]).filepath, :mode => "r", :encoding => "Big5")
-    render :text => content
+    parsed_content=Nokogiri::HTML(content)
+    js_elem = Nokogiri::XML::Node.new "script", parsed_content
+    js_elem["src"] = "/assets/document.js?body=1"
+    js_elem["type"] = "text/javascript"
+    parsed_content.css("head").first << js_elem
+    
+    css_elem = Nokogiri::XML::Node.new "link", parsed_content
+    css_elem["href"] = "/assets/document.css?body=1"
+    css_elem["media"] = "all"
+    css_elem["rel"] = "stylesheet"
+    css_elem["type"] = "text/css"
+    parsed_content.css("head").first << css_elem
+    
+    render :text => parsed_content.to_html
   end
   
   def destroy

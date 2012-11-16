@@ -146,6 +146,7 @@ DEPENDENCIES
   capybara
   coffee-rails (~> 3.2.1)
   jquery-rails
+  nokogiri
   rack-openid
   rails (= 3.2.8)
   rspec-rails
