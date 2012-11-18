@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WordWorkspace</title>
+  <title><%=h yield :title %></title>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
+  <%= yield :javascript_includes %>
+  <%= yield :css_includes %>
   <%= csrf_meta_tags %>
 </head>
 <body>

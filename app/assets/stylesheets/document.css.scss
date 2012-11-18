@@ -1,3 +1,85 @@
 .markup {
   background-color : #81F7F3
 }
+
+#nav{
+    height:35px;
+    border-bottom:1px solid #ddd;
+    position:fixed;
+    top:0px;
+    left:0px;
+    right:0px;
+    background:#fff url(../assets/nav.png) repeat-x center left;
+    z-index:999999;
+    ul{
+      height:25px;
+      list-style:none;
+      margin:6px auto 0px auto;
+      width:600px;
+      li{
+        display:inline;
+        float:left;
+        margin:0px 2px;
+        &.search{
+          float:right;
+        }             
+        input[type="text"]{
+          float:left;
+          border:1px solid #ccc;
+          margin:0px 1px 0px 50px;
+          padding:2px 2px 2px 2px;
+        }  
+      }
+    }
+    
+    a{
+      font-size:11px;
+      font-weight:bold;
+      float:left;
+      padding: 2px 4px;
+      color:#999;
+      text-decoration: none;
+      border:1px solid #ccc;
+      cursor: pointer;
+      background:transparent url(../assets/overlay.png) repeat-x center left;
+      height:16px;
+      line-height:16px;
+      &:hover{
+        background:#D9D9DA none;
+        color: #fff;
+      }
+      &.top, &.bottom{
+        span{
+          float:left;
+          width:16px;
+          height:16px;
+        }
+      }
+      &.top{ 
+        span{
+          background:transparent url(../assets/top.png) no-repeat center center;
+        }     
+      }
+      &.bottom{
+        span{
+          background:transparent url(../assets/bottom.png) no-repeat center center;
+        }
+      }
+    }
+    
+    input{
+    &.searchbutton{
+    border:1px solid #ccc;
+    padding:1px;
+    cursor:pointer;
+    width:30px;
+    height:22px;
+    background:#E8E9EA url(../assets/search.png) no-repeat center center;
+    }
+    &.searchbutton:hover{
+    background-color:#D9D9DA;
+    }
+}
+}
+
+
