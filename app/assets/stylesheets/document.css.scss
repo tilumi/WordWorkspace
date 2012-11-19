@@ -1,5 +1,11 @@
+$markup-color : #F8E0F1;
+
 .markup {
-  background-color : #81F7F3
+  background-color : $markup-color;
+}
+
+.markup-selected{
+  background-color : darken($markup-color, 30%);
 }
 
 #nav{

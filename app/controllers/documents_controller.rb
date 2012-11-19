@@ -19,7 +19,7 @@ class DocumentsController < ApplicationController
     content = File.read(Document.find(params[:id]).filepath, :mode => "r", :encoding => "Big5")
     parsed_content=Nokogiri::HTML(content)
     @body = parsed_content.css("body").children.to_html.html_safe
-    @title = parsed_content.css("head title").children[0].to_str
+    @title = parsed_content.css("title").children[0]
   end
 
   def destroy
