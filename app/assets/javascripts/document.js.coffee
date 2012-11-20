@@ -6,18 +6,11 @@ $ ->
   
   $("body").bind 'mouseup', (e) ->       
     selection = rangy.getSelection()
-    unless selection.getRangeAt(0).collapsed
-      markups.push rangy.serializeSelection(selection,true,docElem)
-      selectedText = getTextInRange(selection.getRangeAt(0))
-      try
-        markCssApplier.applyToRange(selection.getRangeAt(0))
-      catch error
-        console.log error
-      console.log rangy.deserializeRange(markups[markups.length - 1],docElem).getNodes(
-        [1]
-        (node) ->
-          /\bmarkup\b/.test $(node).attr("class")
-      )
+    range = selection.getRangeAt(0)
+    unless range.collapsed
+      selectedText = getTextInRange(range)
+      markCssApplier.applyToRange(range)
+      markups.push range.getNodes([3])
       selection.removeAllRanges()
       console.log(markups)
       
