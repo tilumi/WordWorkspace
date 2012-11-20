@@ -301,7 +301,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 
 
 	Merge.prototype = {
-		doMerge : function() {
+		doMerge : function(rangeID) {
 			var textBits = [], textNode, parent, text;
 			for (var i = 0, len = this.textNodes.length; i < len; ++i) {
 				textNode = this.textNodes[i];
@@ -314,6 +314,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 					}
 				}
 			}
+			this.setRangeID(this.firstTextNode.parentNode,rangeID);
 			this.firstTextNode.data = text = textBits.join("");
 			return text;
 		},
@@ -332,7 +333,12 @@ rangy.createModule("CssClassApplier", function(api, module) {
 				textBits[i] = "'" + this.textNodes[i].data + "'";
 			}
 			return "[Merge(" + textBits.join(",") + ")]";
+		},
+		
+		setRangeID : function(el,rangeID){
+			el.setAttribute("data-range-id",rangeID);
 		}
+		
 	};
 
 	var optionProperties = ["elementTagName", "ignoreWhiteSpace", "applyToEditableOnly"];
@@ -442,7 +448,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 		},
 
 		// Normalizes nodes after applying a CSS class to a Range.
-		postApply : function(textNodes, range, isUndo) {
+		postApply : function(textNodes, range, isUndo, rangeID) {
 
 			var firstNode = textNodes[0], lastNode = textNodes[textNodes.length - 1];
 
@@ -475,7 +481,8 @@ rangy.createModule("CssClassApplier", function(api, module) {
 					currentMerge = null;
 				}
 			}
-
+			
+			
 			// Test whether the first node after the range needs merging
 			var nextTextNode = getNextMergeableTextNode(lastNode, !isUndo);
 
@@ -491,7 +498,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			if (merges.length) {
 
 				for ( i = 0, len = merges.length; i < len; ++i) {
-					merges[i].doMerge();
+					merges[i].doMerge(rangeID);
 				}
 
 				// Set the range boundaries
@@ -573,7 +580,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 				textNode = textNodes[textNodes.length - 1];
 				range.setEnd(textNode, textNode.length);
 				if (this.normalize) {
-					this.postApply(textNodes, range, false);
+					this.postApply(textNodes, range, false, rangeID);
 				}
 			}
 		},
