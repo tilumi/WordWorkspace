@@ -4,13 +4,14 @@
 <%= javascript_include_tag "rangy-serializer.js" %>
 <%= javascript_include_tag "document.js" %>
 <%= javascript_include_tag "jquery.layout-latest.js"%>
+<%= javascript_include_tag "jquery.contextMenu.js"%>
 <% end %>
 <% content_for :title do -%>
 <%= @title %>
 <% end -%>
 <% content_for :css_includes do -%>
 <%= stylesheet_link_tag    "document.css", :media => "all" %>
-
+<%= stylesheet_link_tag    "jquery.contextMenu.css", :media => "all" %>
 <% end -%>
 <div class="ui-layout-center">
 	<div id="doc">
@@ -27,7 +28,7 @@
 				<a class="bottom" href="#bottom"><span></span></a>
 			</li>
 			<li>
-				<a>Link 1</a>
+				<a id="undo-btn">Undo</a>
 			</li>
 			<li>
 				<a>Link 2</a>

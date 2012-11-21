@@ -314,7 +314,6 @@ rangy.createModule("CssClassApplier", function(api, module) {
 					}
 				}
 			}
-			this.setRangeID(this.firstTextNode.parentNode, rangeID);
 			this.firstTextNode.data = text = textBits.join("");
 			return text;
 		},
@@ -333,10 +332,6 @@ rangy.createModule("CssClassApplier", function(api, module) {
 				textBits[i] = "'" + this.textNodes[i].data + "'";
 			}
 			return "[Merge(" + textBits.join(",") + ")]";
-		},
-
-		setRangeID : function(el, rangeID) {
-			el.setAttribute("data-range-id", rangeID);
 		}
 	};
 
@@ -513,10 +508,6 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			return el;
 		},
 
-		setRangeID : function(el, rangeID) {
-			el.setAttribute("data-range-id", rangeID);
-		},
-
 		applyToTextNode : function(textNode) {
 
 			var parent = textNode.parentNode;
@@ -528,20 +519,6 @@ rangy.createModule("CssClassApplier", function(api, module) {
 				el.appendChild(textNode);
 			}
 
-		},
-
-		setRangeIDToTextNode : function(textNode, rangeID) {
-			var parent = textNode.parentNode;
-			console.log(parent.childNodes);
-			if (parent.childNodes.length == 1 && dom.arrayContains(this.tagNames, parent.tagName.toLowerCase())) {
-				this.setRangeID(parent, rangeID);
-			} else {
-				var el = dom.getDocument(textNode).createElement(this.elementTagName);
-				api.util.extend(el, this.elementProperties);
-				this.setRangeID(el, rangeID);
-				textNode.parentNode.insertBefore(el, textNode);
-				el.appendChild(textNode);
-			}
 		},
 
 		isRemovable : function(el) {
