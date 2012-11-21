@@ -314,7 +314,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 					}
 				}
 			}
-			this.setRangeID(this.firstTextNode.parentNode,rangeID);
+			this.setRangeID(this.firstTextNode.parentNode, rangeID);
 			this.firstTextNode.data = text = textBits.join("");
 			return text;
 		},
@@ -334,11 +334,10 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			}
 			return "[Merge(" + textBits.join(",") + ")]";
 		},
-		
-		setRangeID : function(el,rangeID){
-			el.setAttribute("data-range-id",rangeID);
+
+		setRangeID : function(el, rangeID) {
+			el.setAttribute("data-range-id", rangeID);
 		}
-		
 	};
 
 	var optionProperties = ["elementTagName", "ignoreWhiteSpace", "applyToEditableOnly"];
@@ -481,8 +480,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 					currentMerge = null;
 				}
 			}
-			
-			
+
 			// Test whether the first node after the range needs merging
 			var nextTextNode = getNextMergeableTextNode(lastNode, !isUndo);
 
@@ -514,25 +512,37 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			addClass(el, this.cssClass);
 			return el;
 		},
-		
-		setRangeID : function(el,rangeID){
-			el.setAttribute("data-range-id",rangeID);
+
+		setRangeID : function(el, rangeID) {
+			el.setAttribute("data-range-id", rangeID);
 		},
 
-		applyToTextNode : function(textNode,rangeID) {
+		applyToTextNode : function(textNode) {
 
 			var parent = textNode.parentNode;
 			if (parent.childNodes.length == 1 && dom.arrayContains(this.tagNames, parent.tagName.toLowerCase())) {
 				addClass(parent, this.cssClass);
-				this.setRangeID(parent,rangeID);
 			} else {
 				var el = this.createContainer(dom.getDocument(textNode));
 				textNode.parentNode.insertBefore(el, textNode);
-				this.setRangeID(el,rangeID);
 				el.appendChild(textNode);
 			}
 
-		},		
+		},
+
+		setRangeIDToTextNode : function(textNode, rangeID) {
+			var parent = textNode.parentNode;
+			console.log(parent.childNodes);
+			if (parent.childNodes.length == 1 && dom.arrayContains(this.tagNames, parent.tagName.toLowerCase())) {
+				this.setRangeID(parent, rangeID);
+			} else {
+				var el = dom.getDocument(textNode).createElement(this.elementTagName);
+				api.util.extend(el, this.elementProperties);
+				this.setRangeID(el, rangeID);
+				textNode.parentNode.insertBefore(el, textNode);
+				el.appendChild(textNode);
+			}
+		},
 
 		isRemovable : function(el) {
 			return el.tagName.toLowerCase() == this.elementTagName && getSortedClassName(el) == this.elementSortedClassName && elementHasProps(el, this.elementProperties) && !elementHasNonClassAttributes(el, this.attrExceptions) && this.isModifiable(el);
@@ -562,19 +572,49 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			}
 		},
 
-		applyToRange : function(range,rangeID) {
+		insertAfter : function(newElement, targetElement) {
+			var parent = targetElement.parentNode;
+			if (parent.lastChild == targetElement) {
+				parent.appendChild(newElement);
+			} else {
+				parent.insertBefore(newElement, targetElement.nextSibling);
+			}
+		},
+
+		applyToRange : function(range, rangeID) {
 			range.splitBoundaries();
 			var textNodes = getEffectiveTextNodes(range);
 
 			if (textNodes.length) {
-				var textNode;
+				var textNode, parent;
 
 				for (var i = 0, len = textNodes.length; i < len; ++i) {
 					textNode = textNodes[i];
-
 					if (!this.isIgnorableWhiteSpaceNode(textNode) && !this.getSelfOrAncestorWithClass(textNode) && this.isModifiable(textNode)) {
-						this.applyToTextNode(textNode,rangeID);
+						this.applyToTextNode(textNode);
 					}
+					if (!this.isIgnorableWhiteSpaceNode(textNode) && this.isModifiable(textNode)) {
+						parent = textNode.parentNode;
+						if (parent.childNodes.length == 1) {
+							parent.setAttribute("data-range-id", rangeID);
+						} else {
+							var leftToRight = textNodes.indexOf(parent.childNodes[0])>-1?true:false;
+							for (var j = 0, childNodeslen = parent.childNodes.length; j < childNodeslen; ++j) {
+								if (parent.childNodes[j] == textNode) {
+									parent.removeChild(textNode);
+									var el = parent.cloneNode(false);
+									el.setAttribute("data-range-id", rangeID);
+									el.appendChild(textNode);
+									if(leftToRight){
+										parent.parentNode.insertBefore(el, parent);
+									}else{
+										this.insertAfter(el, parent);
+									}
+								}
+							}
+						}
+					}
+
 				}
 				range.setStart(textNodes[0], 0);
 				textNode = textNodes[textNodes.length - 1];
