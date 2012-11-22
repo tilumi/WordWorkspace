@@ -60,13 +60,33 @@ $ ->
   
   deleteMarkup = (markup) ->
     @markup_id = $(markup).attr("data-range-id")
-    $("span[data-range-id = '#{@markup_id}']").removeClass("markup").removeAttr("data-range-id")
+    markupsToDelete = $("span[data-range-id = '#{@markup_id}']")
+    commonAncestor = getCommonAncestor(markupsToDelete[0],markupsToDelete[markupsToDelete.length - 1])
+    History.do(new AddMarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
+    markupsToDelete.removeClass("markup").removeAttr("data-range-id")
+
+  getCommonAncestor = (a, b) ->
+  
+    $parentsa = $(a).parents()
+    $parentsb = $(b).parents()
+    found = null
+    $parentsa.each(->
+      thisa = this
+
+      $parentsb.each(->
+          if (thisa == this)     
+            found = this
+            return false
+      )
+      return false if found
+    )
+    found
 
   $("#undo-btn").click ->
-    History.undo()
+      History.undo()
   
-  $("#redo-btn").click ->
-    History.redo()
+    $("#redo-btn").click ->
+      History.redo()
     
   class AddMarkupMemento
     
