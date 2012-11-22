@@ -1,6 +1,8 @@
 $ ->
   rangy.init();
-  markups = []
+  undoStates = []
+  redoStates = []
+  
   docElem = $("#doc")[0]
   markup_id = 1
   markCssApplier = rangy.createCssClassApplier("markup", {normalize: false}, ["p","b","span","strong","a"]);
@@ -33,10 +35,7 @@ $ ->
     unless range.collapsed
       selection.removeAllRanges()
       commonAncestor = if range.commonAncestorContainer.nodeType == 3 then range.commonAncestorContainer.parentNode else range.commonAncestorContainer
-      markups.push {
-        node : rangy.serializePosition(commonAncestor,0,$("#doc")[0]) 
-        xml : (new XMLSerializer()).serializeToString(commonAncestor)
-        }
+      History.do(new AddMarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
       markCssApplier.applyToRange(range,markup_id)
       markup_id++
       
@@ -64,6 +63,38 @@ $ ->
     $("span[data-range-id = '#{@markup_id}']").removeClass("markup").removeAttr("data-range-id")
 
   $("#undo-btn").click ->
-    lastStep = markups.pop()
-    console.log(rangy.deserializePosition(lastStep.node,$("#doc")[0]).node)
-    $(rangy.deserializePosition(lastStep.node,$("#doc")[0]).node).replaceWith(lastStep.xml)
+    History.undo()
+  
+  $("#redo-btn").click ->
+    History.redo()
+    
+  class AddMarkupMemento
+    
+    constructor: (@node , @xml) ->
+    
+    restore: ->
+      state = new AddMarkupMemento(@node, (new XMLSerializer()).serializeToString(rangy.deserializePosition(@node,$("#doc")[0]).node) )
+      $(rangy.deserializePosition(@node,$("#doc")[0]).node).replaceWith(@xml)
+      state
+
+  class History
+    
+    @_isUndoRedo = false
+    @_undoStack = []
+    @_redoStack = []
+    
+    @undo: ->
+      @_isUndoRedo = true
+      @_redoStack.push(@_undoStack.pop().restore())
+      @_isUndoRedo = false
+      
+    @redo: ->
+      @_isUndoRedo = true
+      @_undoStack.push(@_redoStack.pop().restore())
+      @_isUndoRedo = false
+      
+     @do: (m) ->
+       if(@_isUndoRedo)
+          console.log("Involking do within an undo/redo action.!")
+       @_redoStack.length = 0           
+       @_undoStack.push m
