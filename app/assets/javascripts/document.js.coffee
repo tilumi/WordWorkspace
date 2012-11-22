@@ -29,18 +29,22 @@ $ ->
     }
   )
   
+  
   $("#doc").bind 'mouseup', (e) ->       
     selection = rangy.getSelection()
     range = selection.getRangeAt(0)
     unless range.collapsed
       selection.removeAllRanges()
       commonAncestor = if range.commonAncestorContainer.nodeType == 3 then range.commonAncestorContainer.parentNode else range.commonAncestorContainer
-      History.do(new AddMarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
+      History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
       markCssApplier.applyToRange(range,markup_id)
       markup_id++
-      
-      
-  $("body").layout({applyDefaultStyles: true})
+  
+  $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
+        false
+  )
+          
+  $("body").layout({ applyDefaultStyles: true })
   
   getTextInRange = (range) ->
     range.getNodes([3]).map( (e) -> e.data ).reduce( (n1,n2) -> n1 + n2 ).replace(/(\r\n|\n|\r)/gm,""); 
@@ -62,7 +66,7 @@ $ ->
     @markup_id = $(markup).attr("data-range-id")
     markupsToDelete = $("span[data-range-id = '#{@markup_id}']")
     commonAncestor = getCommonAncestor(markupsToDelete[0],markupsToDelete[markupsToDelete.length - 1])
-    History.do(new AddMarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
+    History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
     markupsToDelete.removeClass("markup").removeAttr("data-range-id")
 
   getCommonAncestor = (a, b) ->
@@ -88,12 +92,12 @@ $ ->
     $("#redo-btn").click ->
       History.redo()
     
-  class AddMarkupMemento
+  class MarkupMemento
     
     constructor: (@node , @xml) ->
     
     restore: ->
-      state = new AddMarkupMemento(@node, (new XMLSerializer()).serializeToString(rangy.deserializePosition(@node,$("#doc")[0]).node) )
+      state = new MarkupMemento(@node, (new XMLSerializer()).serializeToString(rangy.deserializePosition(@node,$("#doc")[0]).node) )
       $(rangy.deserializePosition(@node,$("#doc")[0]).node).replaceWith(@xml)
       state
 
