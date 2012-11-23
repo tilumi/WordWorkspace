@@ -15,10 +15,11 @@ $ ->
         selector: 'span.markup', 
         callback: (key, options) ->
           switch key
-            when "delete" then deleteMarkup(this) 
+            when "delete" then deleteMarkup(this)
+            when "edit" then addComment(this)
         ,
         items: {
-          "edit": {name: "Edit", icon: "edit"},
+          "edit": {name: "Add Comment", icon: "edit"},
           "cut": {name: "Cut", icon: "cut"},
           "copy": {name: "Copy", icon: "copy"},
           "paste": {name: "Paste", icon: "paste"},
@@ -29,8 +30,28 @@ $ ->
     }
   )
   
-  
-  $("#doc").bind 'mouseup', (e) ->       
+  addComment = (elem) ->
+    @markup_id = $(elem).attr("data-range-id")
+    $comment = $('<textarea>',{id : "comment_#{@markup_id}"})
+    $("#comments").append($comment)
+    $comment.autosize({append: "\n"});
+    $comment.align({top:"*[data-range-id = '#{@markup_id}']"})
+    $comment.qtip({
+      content: '<a href="#" >Delete</a> <a href="#">Reply<a/>',
+      position: {
+        corner: {
+          target: 'bottomRight',
+          tooltip: 'topRight'
+        }
+      }
+      hide: { when: 'mouseout', fixed: true }
+    })
+    $comment.focus()
+    History.do(new AddCommentMemento($comment))
+  deleteComment = ($comment) ->
+    History.do(new DeleteCommentMemento($comment))
+    $comment.remove()  
+  $("#doc").bind 'mouseup', (e) ->
     selection = rangy.getSelection()
     range = selection.getRangeAt(0)
     unless range.collapsed
@@ -53,11 +74,13 @@ $ ->
     {
       mouseenter: ->
         @markup_id = $(this).attr("data-range-id")
-        $("span[data-range-id = '#{@markup_id}']").addClass("markup-selected")
+        $("*[data-range-id = '#{@markup_id}']").addClass("markup-selected")
+        $("#comment_#{@markup_id}").addClass("markup-selected")
              
       mouseleave: ->
         @markup_id = $(this).attr("data-range-id")
-        $("span[data-range-id = '#{@markup_id}']").removeClass("markup-selected")  
+        $("*[data-range-id = '#{@markup_id}']").removeClass("markup-selected")
+        $("#comment_#{@markup_id}").removeClass("markup-selected")  
     }
     ".markup"
   )
@@ -92,6 +115,23 @@ $ ->
     $("#redo-btn").click ->
       History.redo()
     
+  class AddCommentMemento
+    
+    constructor: (@comment) -> 
+    
+    restore: ->
+      @comment.remove()
+      new DeleteCommentMemento(@comment)
+            
+      
+  class DeleteCommentMemento
+    
+    constructor: (@comment) ->
+      
+    restore: ->
+      $("#comments").append(@comment)
+      new AddCommentMemento(@comment)
+      
   class MarkupMemento
     
     constructor: (@node , @xml) ->

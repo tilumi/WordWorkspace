@@ -5,6 +5,9 @@
 <%= javascript_include_tag "document.js" %>
 <%= javascript_include_tag "jquery.layout-latest.js"%>
 <%= javascript_include_tag "jquery.contextMenu.js"%>
+<%= javascript_include_tag "magic.js"%>
+<%= javascript_include_tag "jquery.autosize.js"%>
+<%= javascript_include_tag "jquery.qtip.js"%>
 <% end %>
 <% content_for :title do -%>
 <%= @title %>
@@ -12,11 +15,13 @@
 <% content_for :css_includes do -%>
 <%= stylesheet_link_tag    "document.css", :media => "all" %>
 <%= stylesheet_link_tag    "jquery.contextMenu.css", :media => "all" %>
+<%= stylesheet_link_tag    "http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css", :media => "all" %>
 <% end -%>
-<div class="ui-layout-center">
+<div id="center" class="ui-layout-center">
 	<div id="doc">
 		<%= @body%>
 	</div>
+	<div id="comments"></div>
 </div>
 <div class="ui-layout-north">
 	<div id="nav">
@@ -52,6 +57,4 @@
 		</ul>
 	</div>
 </div>
-<div class="ui-layout-east"></div>
-
 

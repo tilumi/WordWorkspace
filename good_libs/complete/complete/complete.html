@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head>
+<title>Extanded Template example</title>
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1"/>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+<link type="text/css" rel="stylesheet" rev="stylesheet" media="screen" href="./css/default.css" />
+<!--[if IE]>
+<link href="./css/ie.css" rel="stylesheet" type="text/css" media="screen" />
+<![endif]-->
+<!--[if IE 6]>
+<link href="./css/ie6.css" rel="stylesheet" type="text/css" media="screen" />
+<![endif]-->
+</head>
+<body>
+<div id="header" class="bkgDark whiteLink">
+	<div class="bkgLighter tCenter">
+		<div class="center siteWidth tLeft clearfix pushUp pushDown">
+		 	<div class="h1 left w35 tWhite">
+		 		<a href="/">logo</a>
+		 	</div>
+	 		<form id="mainSearchForm" method="get" action="search" name="search" class="w25 right">
+	 			<input type="submit" class="darkButton right marginLeft height30 button" value="Go">
+				<input type="text" accesskey="f" id="searchinput" name="q" size="20" maxlength="255" class="right curved borderL w56 height20">
+			</form>
+		</div>
+	</div>
+	
+	<div class="bkgMedium tCenter">
+		<div class="center tLeft siteWidth clearfix whiteLink">
+			<ul id="mainMenu" class="height30 horizontalList menu  ">
+				<li class="selected bkgWhite" ><a href="/">Home</a></li><li id="menuItem2" >
+				<a href="./css.php">menu Item 2</a></li><li id="menuItem3" >
+				<a href="./advanced-templates.php">menu Item 3</a></li><li  id="menuItem4" >
+				<a href="./ui.php">menu Item 4</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div id="content" class="center siteWidth clearfix relative tLeft bkgWhite">
+	<div class="relative">
+		<div class="block">
+			<div id="carrousel" class="bkgWhite curved clearfix center w100 paddingTop">
+				<div id="carrouselContent" class="editText bkgBlack noPadding relative height300 ">
+					<a id="content1" class="whiteLink bkgBlack absolute  noOverflow hidden w100" href="carrouselLink1"><span class="relative w100">
+						<span style="background: pink" class="w1 height300 "></span>
+					    <span class="absolute h2 height40 tWhite siteWidth subMenu paddingLeft">This is an example of a carrousel</span>
+					</span></a>
+					<a id="content2" class="whiteLink bkgBlack absolute  noOverflow hidden w100" href="carrouselLink2"><span class="relative w100">
+						<span style="background: red" class="w1 height300 "></span>
+					    <span class="absolute h2 height40 tWhite siteWidth subMenu paddingLeft">We limited to the top of the screen for fun</span>
+					</span></a>
+					<a id="content3" class="whiteLink bkgBlack absolute  noOverflow hidden w100" href="carrouselLink3"><span class="relative w100">
+						<span style="background: orange" class="w1 height300 "></span>
+					    <span class="absolute h2 height40 tWhite siteWidth subMenu paddingLeft">Third element</span>
+					</span></a>
+					<a id="content4" class="whiteLink bkgBlack absolute  noOverflow hidden w100" href="carrouselLink4"><span class="relative w100">
+						<span style="background: yellow" class="w1 height300 "></span>
+					    <span class="absolute h2 height40 tWhite siteWidth subMenu paddingLeft">Fourth element</span>
+					</span></a>
+				</div>
+				<div class="pushUp">
+					<ul class="pushHalfUp pushDown horizontalList  tLeft " id="items" >
+						<li id="item1"><a class="button" href="carrouselLink1">First link</a></li>
+						<li class="pushHalfLeft" id="item2" ><a class="button" href="carrouselLink2">Second link</a></li>
+						<li class="pushHalfLeft" id="item3"><a class="button" href="carrouselLink3">Third link</a></li>
+						<li class="pushHalfLeft" id="item4"><a class="button" href="carrouselLink4">Fourth link</a></li>	
+					</ul>
+				</div>
+			</div>
+			<div class="clearfix pushUp">
+				<h1>Here is some content ;)</h1>
+				<div class="clearfix">
+					<div class="w23 left">
+						left col
+					</div>
+					<div class="w13 right">
+						right col
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<div id="footer" class="bkgDark height500">
+footer we set 500px height
+</div>
+<!-- Sub menus wherever you want in the page code (cool for SEO) -->
+<div id="subItem2" class="clearfix subMenu bkgMedium hidden">
+	<div class="padding">This is the sub menu for menu item2</div>
+</div>
+<div id="subItem3" class="clearfix subMenu bkgMedium hidden">
+	<div class="padding">This is the sub menu for menu item3</div>
+</div>
+<div id="subItem4" class="clearfix subMenu bkgMedium hidden">
+	<div class="padding">This is the sub menu for menu item4</div>
+</div>
+<!-- /Sub menus -->
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script type="text/javascript" src="./js/jquery.hoverIntent.minified.js"></script>
+<script type="text/javascript" src="./js/jquery.ba-resize.min.js"></script>
+<script type="text/javascript" src="http://www.jquery-css.com/js/magic.js" ></script>
+<script type="text/javascript">
+$(document).ready(function () {
+	//Align the sub meu to their menu items
+	$("#subItem2").align({top:{at:1, selector:'#mainMenu'}, right:"#content", left:"#menuItem2"});
+	$("#subItem3").align({top:{at:1, selector:'#mainMenu'}, right:"#content", left:"#menuItem3"});
+	$("#subItem4").align({top:{at:1, selector:'#mainMenu'}, right:"#content", left:"#menuItem4"});
+	
+	//Associate menu item and submenus
+	$("#menuItem2").setSubMenu('subItem2');
+	$("#menuItem3").setSubMenu('subItem3');
+	$("#menuItem4").setSubMenu('subItem4');
+	
+	//for fun
+	$("#carrousel").limit({top:window});
+	
+	//Build the carrousel	
+	var itemsCount = $("#items li").length;
+	for(var i=1; i<=itemsCount;i++) {
+		$('#item'+i).setSubMenu({
+			id:'content'+i, 
+			action:'click', 
+			hover:'bkgDark curved', 
+			out :'tLight',
+			openFunction: function(me) {
+				if(me.hasClass("hidden")) {	
+					me.removeClass("hidden");
+					me.css({'height': me.height(), maxHeight: me.height(), width:'0%'});
+				}
+				$('#carrouselContent').append(me); 
+				me.animate({ width:"100%"}, { queue:false, duration:400 } );
+			}, 
+			closeFunction : function(me){
+				setTimeout(function(){me.animate({ width:"0%"}, { queue:false, duration:400 } ).addClass("hidden");}, 500);
+			}, 
+		});
+	}
+	//start the carrousel
+	$("#items").playMenu(6000);
+	
+	//carrousel : on hover stops it, on out resume it
+	$("#carrousel").hoverIntent({    
+    	over:function(){$("#items").pauseMenu();},
+    	out:function(){$("#items").playMenu();}
+    });
+}); 
+</script>
+</body>
+</html>
