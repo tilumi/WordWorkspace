@@ -111,19 +111,10 @@ $markup-color : #F8E0F1;
    user-select: none;
 }
 
-.comment {
-  width: auto; 
-  height: 120px;
-  padding: 0.5em;
-  background-color:$markup-color;
-  -moz-border-radius: 15px;
-  border-radius: 15px;
-}
-
 textarea{
    background:$markup-color;
    -moz-border-radius: 10px;
-  border-radius: 10px;
+   border-radius: 10px;
    border-style:none;
    width: 100%;
    height:100%;
