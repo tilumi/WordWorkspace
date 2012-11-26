@@ -573,18 +573,26 @@ rangy.createModule("CssClassApplier", function(api, module) {
 					if (!this.isIgnorableWhiteSpaceNode(textNode) && this.isModifiable(textNode)) {
 						parent = textNode.parentNode;
 						if (parent.childNodes.length == 1) {
-							parent.setAttribute("data-range-id", rangeID);
+							if (parent.getAttribute("data-range-id") == null) {
+								parent.setAttribute("data-range-id", rangeID);
+							} else {
+								parent.setAttribute("data-range-id", parent.getAttribute("data-range-id") + " " + rangeID);
+							}
 						} else {
-							var leftToRight = textNodes.indexOf(parent.childNodes[0])>-1?true:false;
+							var leftToRight = textNodes.indexOf(parent.childNodes[0]) > -1 ? true : false;
 							for (var j = 0, childNodeslen = parent.childNodes.length; j < childNodeslen; ++j) {
 								if (parent.childNodes[j] == textNode) {
 									parent.removeChild(textNode);
 									var el = parent.cloneNode(false);
-									el.setAttribute("data-range-id", rangeID);
+									if (el.getAttribute("data-range-id") == null) {
+										el.setAttribute("data-range-id", rangeID);
+									} else {
+										el.setAttribute("data-range-id", el.getAttribute("data-range-id") + " " + rangeID);
+									}
 									el.appendChild(textNode);
-									if(leftToRight){
+									if (leftToRight) {
 										parent.parentNode.insertBefore(el, parent);
-									}else{
+									} else {
 										this.insertAfter(el, parent);
 									}
 								}

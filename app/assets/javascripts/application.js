@@ -13,4 +13,4 @@
 //= require jquery
 //= require jquery_ujs
 //= require jquery-ui
-
+//= require_directory ../../../vendor/assets/javascripts/.

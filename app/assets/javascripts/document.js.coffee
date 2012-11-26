@@ -1,4 +1,5 @@
 $ ->
+  
   rangy.init();
   undoStates = []
   redoStates = []
@@ -7,6 +8,14 @@ $ ->
   markup_id = 1
   markCssApplier = rangy.createCssClassApplier("markup", {normalize: false}, ["p","b","span","strong","a"]);
   
+  jsPlumb.Defaults.Container = $("body");
+  jsPlumb.importDefaults({
+        Connector:"Flowchart",
+        PaintStyle:{ lineWidth:3, strokeStyle:"#ffa500", "dashstyle":"2 4" },
+        Endpoint:[ "Dot", { radius:5 } ],
+        EndpointStyle:{ fillStyle:"#ffa500"
+         }
+      });
   isRangeStartAndEndInMarkup = (range) ->
     $(range.startContainer).parents().hasClass("markup") && $(range.endContainer).parents().hasClass("markup")
   
@@ -31,13 +40,16 @@ $ ->
   )
   
   addComment = (elem) ->
-    @markup_id = $(elem).attr("data-range-id")
-    $comment = $('<textarea>',{id : "comment_#{@markup_id}"})
+    markup_ids = $(elem).attr("data-range-id").split(" ")
+    last_markup_id = markup_ids[markup_ids.length - 1]
+    $comment = $('<textarea>',{id : "comment_#{last_markup_id}"})
     $("#comments").append($comment)
     $comment.autosize({append: "\n"});
-    $comment.align({top:"*[data-range-id = '#{@markup_id}']"})
+    $comment.align({top:":regex(data-range-id, ( )*#{last_markup_id}( )* )"})
     $comment.qtip({
-      content: '<a href="#" >Delete</a> <a href="#">Reply<a/>',
+      content: $('<a>Delete</a>',{href : "#"}).click ->
+          History.do(new DeleteCommentMemento($comment)) 
+          $comment.remove()        
       position: {
         corner: {
           target: 'bottomRight',
@@ -47,6 +59,11 @@ $ ->
       hide: { when: 'mouseout', fixed: true }
     })
     $comment.focus()
+    jsPlumb.connect({
+      source: $(":regex(data-range-id, ( )*#{last_markup_id}( )* )")[0]
+      target: $comment
+      anchors: ["TopCenter","TopCenter"]
+    })
     History.do(new AddCommentMemento($comment))
   deleteComment = ($comment) ->
     History.do(new DeleteCommentMemento($comment))
@@ -65,32 +82,50 @@ $ ->
         false
   )
           
-  $("body").layout({ applyDefaultStyles: true })
-  
+  # $("body").layout({ applyDefaultStyles: true })  
   getTextInRange = (range) ->
     range.getNodes([3]).map( (e) -> e.data ).reduce( (n1,n2) -> n1 + n2 ).replace(/(\r\n|\n|\r)/gm,""); 
       
   $("body").on(
     {
       mouseenter: ->
-        @markup_id = $(this).attr("data-range-id")
-        $("*[data-range-id = '#{@markup_id}']").addClass("markup-selected")
-        $("#comment_#{@markup_id}").addClass("markup-selected")
+        markup_ids = $(this).attr("data-range-id").split(" ")
+        if markup_ids.length > 0
+          last_markup_id = markup_ids[markup_ids.length - 1]
+        $(":regex(data-range-id, ( )*#{last_markup_id}( )* )").addClass("markup-selected")
+        $("#comment_#{last_markup_id}").addClass("markup-selected")
              
       mouseleave: ->
-        @markup_id = $(this).attr("data-range-id")
-        $("*[data-range-id = '#{@markup_id}']").removeClass("markup-selected")
-        $("#comment_#{@markup_id}").removeClass("markup-selected")  
+        markup_ids = $(this).attr("data-range-id").split(" ")
+        if markup_ids.length > 0
+          last_markup_id = markup_ids[markup_ids.length - 1]
+        $(":regex(data-range-id, ( )*#{last_markup_id}( )* )").removeClass("markup-selected")
+        $("#comment_#{last_markup_id}").removeClass("markup-selected")  
     }
     ".markup"
   )
   
   deleteMarkup = (markup) ->
-    @markup_id = $(markup).attr("data-range-id")
-    markupsToDelete = $("span[data-range-id = '#{@markup_id}']")
+    markup_ids = $(markup).attr("data-range-id").split " "
+    last_markup_id = markup_ids[markup_ids.length - 1]
+    markupsToDelete = $(":regex(data-range-id, ( )*#{last_markup_id}( )* )")
     commonAncestor = getCommonAncestor(markupsToDelete[0],markupsToDelete[markupsToDelete.length - 1])
+    History.beginCompoundDo()
     History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
-    markupsToDelete.removeClass("markup").removeAttr("data-range-id")
+    markupsToDelete.each((index) ->
+        markup_ids = $(this).attr("data-range-id").split(" ")
+        if markup_ids.length <= 1   
+          $(this).removeClass("markup").removeAttr("data-range-id")
+        else
+          last_markup_id_index = markup_ids.indexOf("#{last_markup_id}")
+          if last_markup_id_index > -1
+            markup_ids.splice(last_markup_id_index,1)
+          $(this).attr("data-range-id",markup_ids.join(" "))
+    )
+    $comment = $("#comment_#{last_markup_id}")
+    History.do(new DeleteCommentMemento($comment)) 
+    $comment.remove() 
+    History.endCompoundDo()
 
   getCommonAncestor = (a, b) ->
   
@@ -127,9 +162,22 @@ $ ->
   class DeleteCommentMemento
     
     constructor: (@comment) ->
-      
+    
     restore: ->
+      comment = @comment
       $("#comments").append(@comment)
+      @comment.qtip({
+        content: $('<a>Delete</a>',{href : "#"}).click ->
+          History.do(new DeleteCommentMemento(comment)) 
+          comment.remove()        
+        position: {
+          corner: {
+            target: 'bottomRight'
+            tooltip: 'topRight'
+          }
+        }
+      hide: { when: 'mouseout', fixed: true }
+      })
       new AddCommentMemento(@comment)
       
   class MarkupMemento
@@ -141,24 +189,58 @@ $ ->
       $(rangy.deserializePosition(@node,$("#doc")[0]).node).replaceWith(@xml)
       state
 
+  class CompoundMemento
+    
+    _mementos : []
+    
+    push: (m) ->
+      @_mementos.push(m)
+      
+    restore: ->
+      inverse = new CompoundMemento()
+      inverse.push(m.restore()) for m in @_mementos
+      inverse
+  
   class History
     
     @_isUndoRedo = false
     @_undoStack = []
     @_redoStack = []
+    @_tempMemento = null
     
     @undo: ->
+      if (@_tempMemento != null)
+        throw "The complex memento wasn't commited."
       @_isUndoRedo = true
       @_redoStack.push(@_undoStack.pop().restore())
       @_isUndoRedo = false
       
     @redo: ->
+      if (@_tempMemento != null)
+        throw "The complex memento wasn't commited."
       @_isUndoRedo = true
       @_undoStack.push(@_redoStack.pop().restore())
       @_isUndoRedo = false
       
-     @do: (m) ->
-       if(@_isUndoRedo)
-          console.log("Involking do within an undo/redo action.!")
-       @_redoStack.length = 0           
-       @_undoStack.push m
+    @do: (m) ->
+      if(@_isUndoRedo)
+        throw "Involking do within an undo/redo action.!"
+      if(@_tempMemento)
+        @_tempMemento.push(m)
+      else
+        @_do(m)
+    
+    @_do: (m) ->
+      @_redoStack.length = 0           
+      @_undoStack.push m
+    
+    @beginCompoundDo: ->
+      if (@_tempMemento != null)
+        throw "Previous complex memento wasn't commited."
+      @_tempMemento = new CompoundMemento();
+      
+    @endCompoundDo: ->
+      if (@_tempMemento == null)
+        throw "Ending a non-existing complex memento"
+      @_do(@_tempMemento);
+      @_tempMemento = null;

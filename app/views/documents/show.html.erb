@@ -1,60 +1,47 @@
-<% content_for :javascript_includes do %>
-<%= javascript_include_tag "rangy-core.js" %>
-<%= javascript_include_tag "rangy-cssclassapplier.js" %>
-<%= javascript_include_tag "rangy-serializer.js" %>
+<% content_for :javascript_includes do -%>
 <%= javascript_include_tag "document.js" %>
-<%= javascript_include_tag "jquery.layout-latest.js"%>
-<%= javascript_include_tag "jquery.contextMenu.js"%>
-<%= javascript_include_tag "magic.js"%>
-<%= javascript_include_tag "jquery.autosize.js"%>
-<%= javascript_include_tag "jquery.qtip.js"%>
-<% end %>
+<% end -%>
 <% content_for :title do -%>
 <%= @title %>
 <% end -%>
 <% content_for :css_includes do -%>
 <%= stylesheet_link_tag    "document.css", :media => "all" %>
-<%= stylesheet_link_tag    "jquery.contextMenu.css", :media => "all" %>
-<%= stylesheet_link_tag    "http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css", :media => "all" %>
 <% end -%>
-<div id="center" class="ui-layout-center">
+<div id="content">
 	<div id="doc">
 		<%= @body%>
 	</div>
 	<div id="comments"></div>
 </div>
-<div class="ui-layout-north">
-	<div id="nav">
-		<ul>
-			<li>
-				<a class="top" href="#top"><span></span></a>
-			</li>
-			<li>
-				<a class="bottom" href="#bottom"><span></span></a>
-			</li>
-			<li>
-				<a id="undo-btn">Undo</a>
-			</li>
-			<li>
-				<a id="redo-btn">Redo</a>
-			</li>
-			<li>
-				<a>Link 3</a>
-			</li>
-			<li>
-				<a>Link 4</a>
-			</li>
-			<li>
-				<a>Link 5</a>
-			</li>
-			<li>
-				<a>Link 6</a>
-			</li>
-			<li class="search">
-				<input type="text"/>
-				<input class="searchbutton" type="submit" value=""/>
-			</li>
-		</ul>
-	</div>
+<div id="nav">
+	<ul>
+		<li>
+			<a class="top" href="#top"><span></span></a>
+		</li>
+		<li>
+			<a class="bottom" href="#bottom"><span></span></a>
+		</li>
+		<li>
+			<a id="undo-btn">Undo</a>
+		</li>
+		<li>
+			<a id="redo-btn">Redo</a>
+		</li>
+		<li>
+			<a>Link 3</a>
+		</li>
+		<li>
+			<a>Link 4</a>
+		</li>
+		<li>
+			<a>Link 5</a>
+		</li>
+		<li>
+			<a>Link 6</a>
+		</li>
+		<li class="search">
+			<input type="text"/>
+			<input class="searchbutton" type="submit" value=""/>
+		</li>
+	</ul>
 </div>
-
