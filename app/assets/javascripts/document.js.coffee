@@ -7,7 +7,7 @@ $ ->
   
   jsPlumb.Defaults.Container = $("body");
   jsPlumb.importDefaults({
-        Connector:"Flowchart",
+        Connector:[ "Flowchart", { stub:10 } ]
         PaintStyle:{ lineWidth:3, strokeStyle:"#ffa500", "dashstyle":"2 4" },
         Endpoint:[ "Dot", { radius:5 } ],
         EndpointStyle:{ fillStyle:"#ffa500"
@@ -40,9 +40,12 @@ $ ->
   addComment = (elem) ->
     markup_ids = $(elem).attr("data-range-id").split(" ")
     last_markup_id = markup_ids[markup_ids.length - 1]
-    $comment = $('<textarea>',{id : "comment_#{last_markup_id}"})
+    
+    $comment = $("<div>", {id : "comment_#{last_markup_id}"}).addClass("comment")
+    $textarea = $('<textarea>')
+    $comment.append($textarea)
     $("#comments").append($comment)
-    $comment.autosize({append: "\n"});
+    $textarea.autosize({append: "\n"});
     $markups = $(":regex(data-range-id, ( )*#{last_markup_id}( )* )")
     $comment.align({top:":regex(data-range-id, ( )*#{last_markup_id}( )* )"})
     $connect = jsPlumb.connect({
@@ -51,9 +54,11 @@ $ ->
       anchors: ["TopCenter","TopCenter"]
     })
     $connect.setVisible(false)
+    $connect.endpoints[0].setVisible(false)
+    $connect.endpoints[1].setVisible(false)
     $comment.qtip({
       content: $('<a>Delete</a>',{href : "#"}).click ->
-          History.do(new DeleteCommentMemento($markups,$comment,$connect)) 
+          History.do(new DeleteCommentMemento(rangy.serializePosition($markups[0],0,$("#doc")[0]),$comment,$connect)) 
           jsPlumb.deleteEndpoint($connect.endpoints[0])
           $comment.remove()        
       position: {
@@ -64,8 +69,8 @@ $ ->
       }
       hide: { when: 'mouseout', fixed: true }
     })
-    $comment.focus()
-    History.do(new AddCommentMemento($markups,$comment,$connect))
+    $textarea.focus()
+    History.do(new AddCommentMemento(rangy.serializePosition($markups[0],0,$("#doc")[0]),$comment,$connect))
   $("#doc").bind 'mouseup', (e) ->
     selection = rangy.getSelection()
     range = selection.getRangeAt(0)
@@ -89,7 +94,10 @@ $ ->
         $(":regex(data-range-id, ( )*#{last_markup_id}( )* )").addClass("markup-selected")
         $("#comment_#{last_markup_id}").addClass("markup-selected")
         if jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
-          jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0).setVisible(true)
+          $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
+          $connect.setVisible(true)
+          $connect.endpoints[0].setVisible(true)
+          $connect.endpoints[1].setVisible(true)
              
       mouseleave: ->
         markup_ids = $(this).attr("data-range-id").split(" ")
@@ -98,7 +106,10 @@ $ ->
         $(":regex(data-range-id, ( )*#{last_markup_id}( )* )").removeClass("markup-selected")
         $("#comment_#{last_markup_id}").removeClass("markup-selected")
         if jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)  
-          jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0).setVisible(false)
+          $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
+          $connect.setVisible(false)
+          $connect.endpoints[0].setVisible(false)
+          $connect.endpoints[1].setVisible(false)
     }
     ".markup"
   )
@@ -110,16 +121,27 @@ $ ->
         markups_id = comment_id.split("_")[1]
         $(":regex(data-range-id, ( )*#{markups_id}( )* )").addClass("markup-selected")
         $(this).addClass("markup-selected")
-        jsPlumb.select({target : "#{comment_id}"}).get(0).setVisible(true)
+        $connect = jsPlumb.select({target : "#{comment_id}"}).get(0)
+        $connect.setVisible(true)
+        $connect.endpoints[0].setVisible(true)
+        $connect.endpoints[1].setVisible(true)
         
       mouseleave: ->
         comment_id = $(this).attr("id")
         markups_id = comment_id.split("_")[1]
         $(":regex(data-range-id, ( )*#{markups_id}( )* )").removeClass("markup-selected")
         $(this).removeClass("markup-selected")
-        jsPlumb.select({target : "#{comment_id}"}).get(0).setVisible(false)
+        $connect = jsPlumb.select({target : "#{comment_id}"}).get(0)
+        $connect.setVisible(false)
+        $connect.endpoints[0].setVisible(false)
+        $connect.endpoints[1].setVisible(false)
+        
     }
-    "textarea"
+    ".comment"
+  )
+  
+  $("body").resize( ->
+      jsPlumb.repaintEverything()
   )
   
   deleteMarkup = (markup) ->
@@ -129,6 +151,9 @@ $ ->
     commonAncestor = getCommonAncestor($markupsToDelete[0],$markupsToDelete[$markupsToDelete.length - 1])
     History.beginCompoundDo()
     History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
+    $comment = $("#comment_#{last_markup_id}")
+    $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
+    History.do(new DeleteCommentMemento(rangy.serializePosition($markupsToDelete[0],0,$("#doc")[0]),$comment,$connect)) 
     $markupsToDelete.each((index) ->
         markup_ids = $(this).attr("data-range-id").split(" ")
         if markup_ids.length <= 1   
@@ -139,10 +164,7 @@ $ ->
             markup_ids.splice(last_markup_id_index,1)
           $(this).attr("data-range-id",markup_ids.join(" "))
     )
-    $comment = $("#comment_#{last_markup_id}")
-    $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
     jsPlumb.deleteEndpoint($connect.endpoints[0])
-    History.do(new DeleteCommentMemento($markupsToDelete,$comment,$connect)) 
     $comment.remove() 
     History.endCompoundDo()
 
@@ -171,31 +193,31 @@ $ ->
     
   class AddCommentMemento
     
-    constructor: (@markups,@comment,@connect) -> 
+    constructor: (@markup,@comment,@connect) -> 
     
     restore: ->
       jsPlumb.deleteEndpoint(@connect.endpoints[0])
       @comment.remove()
-      new DeleteCommentMemento(@markups,@comment,@connect)
+      new DeleteCommentMemento(@markup,@comment,@connect)
             
       
   class DeleteCommentMemento
     
-    constructor: (@markups,@comment,@connect) ->
+    constructor: (@markup,@comment,@connect) ->
     
     restore: ->
       $comment = @comment
       $connect = @connect
-      $markups = @markups
+      $markup = @markup
       $("#comments").append($comment)
       $connect = jsPlumb.connect({
-        source: $markups[0]
+        source: $(rangy.deserializePosition($markup,$("#doc")[0]).node)
         target: $comment
         anchors: ["TopCenter","TopCenter"]
       })
       $comment.qtip({
         content: $('<a>Delete</a>',{href : "#"}).click ->
-          History.do(new DeleteCommentMemento($markups,$comment,$connect)) 
+          History.do(new DeleteCommentMemento($markup,$comment,$connect)) 
           jsPlumb.deleteEndpoint($connect.endpoints[0])
           $comment.remove()
         position: {
@@ -206,7 +228,7 @@ $ ->
         }
       hide: { when: 'mouseout', fixed: true }
       })
-      new AddCommentMemento($markups,$comment,$connect)
+      new AddCommentMemento($markup,$comment,$connect)
       
   class MarkupMemento
     
