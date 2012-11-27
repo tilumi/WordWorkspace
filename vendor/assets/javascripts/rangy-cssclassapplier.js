@@ -337,6 +337,56 @@ rangy.createModule("CssClassApplier", function(api, module) {
 
 	var optionProperties = ["elementTagName", "ignoreWhiteSpace", "applyToEditableOnly"];
 
+	var ApplyMarkupToTextMemento, RemoveMarkupFromTextMemento;
+
+	ApplyMarkupToTextMemento = (function() {
+
+		function ApplyMarkupToTextMemento(parent, text, textContainer, _class) {
+			this.parent = parent;
+			this.text = text;
+			this.textContainer = textContainer;
+			this["class"] = _class;
+		}
+
+
+		ApplyMarkupToTextMemento.prototype.restore = function() {
+			if (this.parent.childNodes.length === 1) {
+				$(this.parent).removeClass(this["class"]);
+			} else {
+				dom.insertAfter(this.text, this.textContainer);
+				this.parent.removeChild(this.textContainer);
+			}
+			return new RemoveMarkupFromTextMemento(this.parent, this.text, this["class"]);
+		};
+
+		return ApplyMarkupToTextMemento;
+
+	})();
+
+	RemoveMarkupFromTextMemento = (function() {
+
+		function RemoveMarkupFromTextMemento(parent, text, textContainer, _class) {
+			this.parent = parent;
+			this.text = text;
+			this.textContainer = textContainer;
+			this["class"] = _class;
+		}
+
+
+		RemoveMarkupFromTextMemento.prototype.restore = function() {
+			if (this.parent.childNodes.length === 1) {
+				$(this.parent).addClass(this["class"]);
+			} else {
+				this.parent.insertBefore(this.textContainer, this.text);
+				this.textContainer.appendChild(this.text);
+			}
+			return new ApplyMarkupToTextMemento(this.parent, this.text, this.textContainer, this["class"]);
+		};
+
+		return RemoveMarkupFromTextMemento;
+
+	})();
+
 	// Allow "class" as a property name in object properties
 	var mappedPropertyNames = {
 		"class" : "className"
@@ -512,9 +562,11 @@ rangy.createModule("CssClassApplier", function(api, module) {
 
 			var parent = textNode.parentNode;
 			if (parent.childNodes.length == 1 && dom.arrayContains(this.tagNames, parent.tagName.toLowerCase())) {
+				History["do"](new ApplyMarkupToTextMemento(parent, textNode, '', this.cssClass));
 				addClass(parent, this.cssClass);
 			} else {
 				var el = this.createContainer(dom.getDocument(textNode));
+				History["do"](new ApplyMarkupToTextMemento(parent, textNode, el, this.cssClass));
 				textNode.parentNode.insertBefore(el, textNode);
 				el.appendChild(textNode);
 			}
@@ -546,15 +598,6 @@ rangy.createModule("CssClassApplier", function(api, module) {
 				replaceWithOwnChildren(ancestorWithClass);
 			} else {
 				removeClass(ancestorWithClass, this.cssClass);
-			}
-		},
-
-		insertAfter : function(newElement, targetElement) {
-			var parent = targetElement.parentNode;
-			if (parent.lastChild == targetElement) {
-				parent.appendChild(newElement);
-			} else {
-				parent.insertBefore(newElement, targetElement.nextSibling);
 			}
 		},
 
@@ -593,7 +636,7 @@ rangy.createModule("CssClassApplier", function(api, module) {
 									if (leftToRight) {
 										parent.parentNode.insertBefore(el, parent);
 									} else {
-										this.insertAfter(el, parent);
+										dom.insertAfter(el, parent);
 									}
 								}
 							}

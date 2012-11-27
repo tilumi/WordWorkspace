@@ -40,7 +40,6 @@ $ ->
   addComment = (elem) ->
     markup_ids = $(elem).attr("data-range-id").split(" ")
     last_markup_id = markup_ids[markup_ids.length - 1]
-    
     $comment = $("<div>", {id : "comment_#{last_markup_id}"}).addClass("comment")
     $textarea = $('<textarea>')
     $comment.append($textarea)
@@ -77,8 +76,10 @@ $ ->
     unless range.collapsed
       selection.removeAllRanges()
       commonAncestor = if range.commonAncestorContainer.nodeType == 3 then range.commonAncestorContainer.parentNode else range.commonAncestorContainer
-      History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
+      # History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))      
+      History.beginCompoundDo()
       markCssApplier.applyToRange(range,markup_id)
+      History.endCompoundDo()
       markup_id++
   
   $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
@@ -150,10 +151,10 @@ $ ->
     $markupsToDelete = $(":regex(data-range-id, ( )*#{last_markup_id}( )* )")
     commonAncestor = getCommonAncestor($markupsToDelete[0],$markupsToDelete[$markupsToDelete.length - 1])
     History.beginCompoundDo()
-    History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
     $comment = $("#comment_#{last_markup_id}")
     $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
     History.do(new DeleteCommentMemento(rangy.serializePosition($markupsToDelete[0],0,$("#doc")[0]),$comment,$connect)) 
+    History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
     $markupsToDelete.each((index) ->
         markup_ids = $(this).attr("data-range-id").split(" ")
         if markup_ids.length <= 1   
@@ -196,6 +197,7 @@ $ ->
     constructor: (@markup,@comment,@connect) -> 
     
     restore: ->
+      console.log(@connect.endpoints)
       jsPlumb.deleteEndpoint(@connect.endpoints[0])
       @comment.remove()
       new DeleteCommentMemento(@markup,@comment,@connect)
@@ -206,10 +208,12 @@ $ ->
     constructor: (@markup,@comment,@connect) ->
     
     restore: ->
+      console.log("undo delete comment")
       $comment = @comment
-      $connect = @connect
       $markup = @markup
       $("#comments").append($comment)
+      last_markup_id = $comment.attr("id").split("_")[1]
+      $comment.align({top:":regex(data-range-id, ( )*#{last_markup_id}( )* )"})
       $connect = jsPlumb.connect({
         source: $(rangy.deserializePosition($markup,$("#doc")[0]).node)
         target: $comment
@@ -226,7 +230,7 @@ $ ->
             tooltip: 'topRight'
           }
         }
-      hide: { when: 'mouseout', fixed: true }
+        hide: { when: 'mouseout', fixed: true }
       })
       new AddCommentMemento($markup,$comment,$connect)
       
@@ -238,59 +242,3 @@ $ ->
       state = new MarkupMemento(@node, (new XMLSerializer()).serializeToString(rangy.deserializePosition(@node,$("#doc")[0]).node) )
       $(rangy.deserializePosition(@node,$("#doc")[0]).node).replaceWith(@xml)
       state
-
-  class CompoundMemento
-    
-    _mementos : []
-    
-    push: (m) ->
-      @_mementos.push(m)
-      
-    restore: ->
-      inverse = new CompoundMemento()
-      inverse.push(m.restore()) for m in @_mementos
-      inverse
-  
-  class History
-    
-    @_isUndoRedo = false
-    @_undoStack = []
-    @_redoStack = []
-    @_tempMemento = null
-    
-    @undo: ->
-      if (@_tempMemento != null)
-        throw "The complex memento wasn't commited."
-      @_isUndoRedo = true
-      @_redoStack.push(@_undoStack.pop().restore())
-      @_isUndoRedo = false
-      
-    @redo: ->
-      if (@_tempMemento != null)
-        throw "The complex memento wasn't commited."
-      @_isUndoRedo = true
-      @_undoStack.push(@_redoStack.pop().restore())
-      @_isUndoRedo = false
-      
-    @do: (m) ->
-      if(@_isUndoRedo)
-        throw "Involking do within an undo/redo action.!"
-      if(@_tempMemento)
-        @_tempMemento.push(m)
-      else
-        @_do(m)
-    
-    @_do: (m) ->
-      @_redoStack.length = 0           
-      @_undoStack.push m
-    
-    @beginCompoundDo: ->
-      if (@_tempMemento != null)
-        throw "Previous complex memento wasn't commited."
-      @_tempMemento = new CompoundMemento();
-      
-    @endCompoundDo: ->
-      if (@_tempMemento == null)
-        throw "Ending a non-existing complex memento"
-      @_do(@_tempMemento);
-      @_tempMemento = null;
