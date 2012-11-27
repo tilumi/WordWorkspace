@@ -5,7 +5,7 @@ $markup-color : #F8E0F1;
 }
 
 .markup-selected{
-  background-color : darken($markup-color, 15%);
+  background-color : darken($markup-color, 15%) !important;
 }
 
 #nav{
