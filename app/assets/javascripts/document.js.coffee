@@ -15,7 +15,7 @@ $ ->
         ConnectionsDetachable:false
       });
   isRangeStartAndEndInMarkup = (range) ->
-    $(range.startContainer).parents().hasClass("markup") && $(range.endContainer).parents().hasClass("markup")
+    $(range.startContainer).parents().attr("data-range-id") && $(range.endContainer).parents().attr("data-range-id")
   selectedMarkup = null
 
   $.contextMenu(
@@ -45,7 +45,7 @@ $ ->
     $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
       ->
         History.do(new DeleteCommentMemento($markups,$comment))
-        jsPlumb.detach($connect)
+        jsPlumb.removeAllEndpoints($comment)
         $comment.detach()
     )
     $comment.append($closeButton)
@@ -56,6 +56,7 @@ $ ->
 
     $markups = $("[data-range-id='#{comment_id}']")
     $comment.css({top: "#{$($markups[0]).position().top - $($markups[0]).closest('#doc').position().top}px", left:"0px"}).addClass("absolute")
+    jsPlumb.draggable($comment)
     $("#comments").append($comment)
 
     $connect = jsPlumb.connect({
@@ -187,8 +188,7 @@ $ ->
     History.beginCompoundDo()
     $comment = $("#comment_#{comment_id}")
     History.do(new DeleteCommentMemento($markupsToDelete,$comment))
-    $connect = jsPlumb.select({target : $comment}).get(0) if $comment
-    jsPlumb.deleteEndpoint($connect.endpoints[0]) if $connect
+    $connect = jsPlumb.removeAllEndpoints($comment) if $comment
     $markupsToDelete.each((index) ->
         markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this)
     )
