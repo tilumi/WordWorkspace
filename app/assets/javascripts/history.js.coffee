@@ -15,7 +15,7 @@ class History
 
         restore: ->
           inverse = new CompoundMemento()
-          inverse.push(m.restore()) for m in @_mementos
+          inverse.push(m.restore()) for m in @_mementos.reverse()
           inverse
     @init: ->
       @_isUndoRedo = false

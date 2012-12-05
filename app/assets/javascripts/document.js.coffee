@@ -187,13 +187,11 @@ $ ->
     History.beginCompoundDo()
     $comment = $("#comment_#{comment_id}")
     History.do(new DeleteCommentMemento($markupsToDelete,$comment))
-    $markupsToDelete.each((index) ->
-        console.log (this.childNodes[0])
-        this.parentNode.insertBefore(this.childNodes[0],this)
-        $(this).remove()
-    )
     $connect = jsPlumb.select({target : $comment}).get(0) if $comment
     jsPlumb.deleteEndpoint($connect.endpoints[0]) if $connect
+    $markupsToDelete.each((index) ->
+        markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this)
+    )
     $comment.detach()
     History.endCompoundDo()
 
@@ -246,12 +244,3 @@ $ ->
       if selectedMarkup.$markups.is(@markups)
         selectedMarkup.$connect = $connect
       new AddCommentMemento(@markups,@comment,$connect)
-
-  class MarkupMemento
-
-    constructor: (@node , @xml) ->
-
-    restore: ->
-      state = new MarkupMemento(@node, (new XMLSerializer()).serializeToString(rangy.deserializePosition(@node,$("#doc")[0]).node) )
-      $(rangy.deserializePosition(@node,$("#doc")[0]).node).replaceWith(@xml)
-      state

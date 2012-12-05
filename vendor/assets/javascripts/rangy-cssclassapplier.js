@@ -817,6 +817,14 @@ RemoveRangeIDOnMultiChildTextNodeMemento = (function() {
 			}
 		},
 
+    removeMarkup : function(parent,text,textContainer){
+      var mergeTextNodesResult;
+      dom.insertAfter(text, textContainer);
+      parent.removeChild(textContainer);
+      mergeTextNodesResult = mergeTextNodes(text);
+      History.do(new RemoveMarkupFromTextMemento(parent,text,textContainer,mergeTextNodesResult));
+    },
+
 		applyToSelection : function(win) {
 
 			win = win || window;
