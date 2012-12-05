@@ -30,9 +30,15 @@ gem 'rack-openid'
 group :test, :development do
   gem "rspec-rails"
   gem 'capybara'
+  gem 'guard-jasmine'
+  gem 'jasminerice'
+  gem 'guard-livereload'
 end
 
 gem 'nokogiri'
+gem 'therubyracer'
+gem 'open4'
+
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 

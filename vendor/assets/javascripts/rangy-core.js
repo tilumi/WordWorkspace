@@ -634,6 +634,11 @@ rangy.createModule("DomUtil", function(api, module) {
         return this.message;
     };
 
+    function mergeSiblingTextNodes(textNode){
+
+    }
+
+
     api.dom = {
         arrayContains: arrayContains,
         isHtmlNamespace: isHtmlNamespace,
@@ -667,7 +672,7 @@ rangy.createModule("DomUtil", function(api, module) {
     var dom = api.dom;
     var DomPosition = dom.DomPosition;
     var DOMException = api.DOMException;
-    
+
     /*----------------------------------------------------------------------------------------------------------------*/
 
     // Utility functions

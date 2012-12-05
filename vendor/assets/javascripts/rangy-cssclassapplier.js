@@ -12,168 +12,168 @@
  * Version: 1.2.3
  * Build date: 26 February 2012
  */
-rangy.createModule("CssClassApplier", function(api, module) {
-	api.requireModules(["WrappedSelection", "WrappedRange"]);
+ rangy.createModule("CssClassApplier", function(api, module) {
+   api.requireModules(["WrappedSelection", "WrappedRange"]);
 
-	var dom = api.dom;
+   var dom = api.dom;
 
-	var defaultTagName = "span";
+   var defaultTagName = "span";
 
-	function trim(str) {
-		return str.replace(/^\s\s*/, "").replace(/\s\s*$/, "");
-	}
+   function trim(str) {
+    return str.replace(/^\s\s*/, "").replace(/\s\s*$/, "");
+  }
 
-	function hasClass(el, cssClass) {
-		return el.className && new RegExp("(?:^|\\s)" + cssClass + "(?:\\s|$)").test(el.className);
-	}
+  function hasClass(el, cssClass) {
+    return el.className && new RegExp("(?:^|\\s)" + cssClass + "(?:\\s|$)").test(el.className);
+  }
 
-	function addClass(el, cssClass) {
-		if (el.className) {
-			if (!hasClass(el, cssClass)) {
-				el.className += " " + cssClass;
-			}
-		} else {
-			el.className = cssClass;
-		}
-	}
+  function addClass(el, cssClass) {
+    if (el.className) {
+     if (!hasClass(el, cssClass)) {
+      el.className += " " + cssClass;
+    }
+  } else {
+   el.className = cssClass;
+ }
+}
 
-	var removeClass = (function() {
-		function replacer(matched, whiteSpaceBefore, whiteSpaceAfter) {
-			return (whiteSpaceBefore && whiteSpaceAfter) ? " " : "";
-		}
+var removeClass = (function() {
+  function replacer(matched, whiteSpaceBefore, whiteSpaceAfter) {
+   return (whiteSpaceBefore && whiteSpaceAfter) ? " " : "";
+ }
 
-		return function(el, cssClass) {
-			if (el.className) {
-				el.className = el.className.replace(new RegExp("(?:^|\\s)" + cssClass + "(?:\\s|$)"), replacer);
-			}
-		};
-	})();
+ return function(el, cssClass) {
+   if (el.className) {
+    el.className = el.className.replace(new RegExp("(?:^|\\s)" + cssClass + "(?:\\s|$)"), replacer);
+  }
+};
+})();
 
-	function sortClassName(className) {
-		return className.split(/\s+/).sort().join(" ");
-	}
+function sortClassName(className) {
+  return className.split(/\s+/).sort().join(" ");
+}
 
-	function getSortedClassName(el) {
-		return sortClassName(el.className);
-	}
+function getSortedClassName(el) {
+  return sortClassName(el.className);
+}
 
-	function haveSameClasses(el1, el2) {
-		return getSortedClassName(el1) == getSortedClassName(el2);
-	}
+function haveSameClasses(el1, el2) {
+  return getSortedClassName(el1) == getSortedClassName(el2);
+}
 
-	function replaceWithOwnChildren(el) {
+function replaceWithOwnChildren(el) {
 
-		var parent = el.parentNode;
-		while (el.hasChildNodes()) {
-			parent.insertBefore(el.firstChild, el);
-		}
-		parent.removeChild(el);
-	}
+  var parent = el.parentNode;
+  while (el.hasChildNodes()) {
+   parent.insertBefore(el.firstChild, el);
+ }
+ parent.removeChild(el);
+}
 
-	function rangeSelectsAnyText(range, textNode) {
-		var textRange = range.cloneRange();
-		textRange.selectNodeContents(textNode);
+function rangeSelectsAnyText(range, textNode) {
+  var textRange = range.cloneRange();
+  textRange.selectNodeContents(textNode);
 
-		var intersectionRange = textRange.intersection(range);
-		var text = intersectionRange ? intersectionRange.toString() : "";
-		textRange.detach();
+  var intersectionRange = textRange.intersection(range);
+  var text = intersectionRange ? intersectionRange.toString() : "";
+  textRange.detach();
 
-		return text != "";
-	}
+  return text != "";
+}
 
-	function getEffectiveTextNodes(range) {
-		return range.getNodes([3], function(textNode) {
-			return rangeSelectsAnyText(range, textNode);
-		});
-	}
+function getEffectiveTextNodes(range) {
+  return range.getNodes([3], function(textNode) {
+   return rangeSelectsAnyText(range, textNode);
+ });
+}
 
-	function elementsHaveSameNonClassAttributes(el1, el2) {
-		if (el1.attributes.length != el2.attributes.length)
-			return false;
-		for (var i = 0, len = el1.attributes.length, attr1, attr2, name; i < len; ++i) {
-			attr1 = el1.attributes[i];
-			name = attr1.name;
-			if (!/^data-.*/.test(name)) {
-				if (name != "class") {
-					attr2 = el2.attributes.getNamedItem(name);
-					if (!attr2)
-						return false;
-					if (attr1.specified != attr2.specified)
-						return false;
-					if (attr1.specified && attr1.nodeValue !== attr2.nodeValue)
-						return false;
+function elementsHaveSameNonClassAttributes(el1, el2) {
+  if (el1.attributes.length != el2.attributes.length)
+   return false;
+ for (var i = 0, len = el1.attributes.length, attr1, attr2, name; i < len; ++i) {
+   attr1 = el1.attributes[i];
+   name = attr1.name;
+   if (!/^data-.*/.test(name)) {
+    if (name != "class") {
+     attr2 = el2.attributes.getNamedItem(name);
+     if (!attr2)
+      return false;
+    if (attr1.specified != attr2.specified)
+      return false;
+    if (attr1.specified && attr1.nodeValue !== attr2.nodeValue)
+      return false;
 
-				}
-			}
-		}
-		return true;
-	}
+  }
+}
+}
+return true;
+}
 
-	function elementHasNonClassAttributes(el, exceptions) {
-		for (var i = 0, len = el.attributes.length, attrName; i < len; ++i) {
-			attrName = el.attributes[i].name;
-			if (!(exceptions && dom.arrayContains(exceptions, attrName)) && el.attributes[i].specified && attrName != "class") {
-				return true;
-			}
-		}
-		return false;
-	}
+function elementHasNonClassAttributes(el, exceptions) {
+  for (var i = 0, len = el.attributes.length, attrName; i < len; ++i) {
+   attrName = el.attributes[i].name;
+   if (!(exceptions && dom.arrayContains(exceptions, attrName)) && el.attributes[i].specified && attrName != "class") {
+    return true;
+  }
+}
+return false;
+}
 
-	function elementHasProps(el, props) {
-		for (var p in props) {
-			if (props.hasOwnProperty(p) && el[p] !== props[p]) {
-				return false;
-			}
-		}
-		return true;
-	}
+function elementHasProps(el, props) {
+  for (var p in props) {
+   if (props.hasOwnProperty(p) && el[p] !== props[p]) {
+    return false;
+  }
+}
+return true;
+}
 
-	var getComputedStyleProperty;
+var getComputedStyleProperty;
 
-	if ( typeof window.getComputedStyle != "undefined") {
-		getComputedStyleProperty = function(el, propName) {
-			return dom.getWindow(el).getComputedStyle(el, null)[propName];
-		};
-	} else if ( typeof document.documentElement.currentStyle != "undefined") {
-		getComputedStyleProperty = function(el, propName) {
-			return el.currentStyle[propName];
-		};
-	} else {
-		module.fail("No means of obtaining computed style properties found");
-	}
+if ( typeof window.getComputedStyle != "undefined") {
+  getComputedStyleProperty = function(el, propName) {
+   return dom.getWindow(el).getComputedStyle(el, null)[propName];
+ };
+} else if ( typeof document.documentElement.currentStyle != "undefined") {
+  getComputedStyleProperty = function(el, propName) {
+   return el.currentStyle[propName];
+ };
+} else {
+  module.fail("No means of obtaining computed style properties found");
+}
 
-	var isEditableElement;
+var isEditableElement;
 
-	(function() {
-		var testEl = document.createElement("div");
-		if ( typeof testEl.isContentEditable == "boolean") {
-			isEditableElement = function(node) {
-				return node && node.nodeType == 1 && node.isContentEditable;
-			};
-		} else {
-			isEditableElement = function(node) {
-				if (!node || node.nodeType != 1 || node.contentEditable == "false") {
-					return false;
-				}
-				return node.contentEditable == "true" || isEditableElement(node.parentNode);
-			};
-		}
-	})();
+(function() {
+  var testEl = document.createElement("div");
+  if ( typeof testEl.isContentEditable == "boolean") {
+   isEditableElement = function(node) {
+    return node && node.nodeType == 1 && node.isContentEditable;
+  };
+} else {
+ isEditableElement = function(node) {
+  if (!node || node.nodeType != 1 || node.contentEditable == "false") {
+   return false;
+ }
+ return node.contentEditable == "true" || isEditableElement(node.parentNode);
+};
+}
+})();
 
-	function isEditingHost(node) {
-		var parent;
-		return node && node.nodeType == 1 && ((( parent = node.parentNode) && parent.nodeType == 9 && parent.designMode == "on") || (isEditableElement(node) && !isEditableElement(node.parentNode)));
-	}
+function isEditingHost(node) {
+  var parent;
+  return node && node.nodeType == 1 && ((( parent = node.parentNode) && parent.nodeType == 9 && parent.designMode == "on") || (isEditableElement(node) && !isEditableElement(node.parentNode)));
+}
 
-	function isEditable(node) {
-		return (isEditableElement(node) || (node.nodeType != 1 && isEditableElement(node.parentNode))) && !isEditingHost(node);
-	}
+function isEditable(node) {
+  return (isEditableElement(node) || (node.nodeType != 1 && isEditableElement(node.parentNode))) && !isEditingHost(node);
+}
 
-	var inlineDisplayRegex = /^inline(-block|-table)?$/i;
+var inlineDisplayRegex = /^inline(-block|-table)?$/i;
 
-	function isNonInlineElement(node) {
-		return node && node.nodeType == 1 && !inlineDisplayRegex.test(getComputedStyleProperty(node, "display"));
-	}
+function isNonInlineElement(node) {
+  return node && node.nodeType == 1 && !inlineDisplayRegex.test(getComputedStyleProperty(node, "display"));
+}
 
 	// White space characters as defined by HTML 4 (http://www.w3.org/TR/html401/struct/text.html)
 	var htmlNonWhiteSpaceRegex = /[^\r\n\t\f \u200B]/;
@@ -190,12 +190,12 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			case "pre":
 			case "pre-wrap":
 			case "-moz-pre-wrap":
-				return false;
-			case "pre-line":
-				if (/[\r\n]/.test(node.data)) {
-					return false;
-				}
-		}
+      return false;
+      case "pre-line":
+      if (/[\r\n]/.test(node.data)) {
+       return false;
+     }
+   }
 
 		// We now have a whitespace-only text node that may be rendered depending on its context. If it is adjacent to a
 		// non-inline element, it will not be rendered. This seems to be a good enough definition.
@@ -339,53 +339,210 @@ rangy.createModule("CssClassApplier", function(api, module) {
 
 	var ApplyMarkupToTextMemento, RemoveMarkupFromTextMemento;
 
-	ApplyMarkupToTextMemento = (function() {
+  function mergeTextNodes(textNode){
+    var previousSibling = textNode.previousSibling;
+    var originalNodeValue;
+    var nextSibling = textNode.nextSibling;
+    if(previousSibling != null && previousSibling.nodeType == 3 && nextSibling != null && nextSibling.nodeType == 3){
+      originalNodeValue = previousSibling.nodeValue;
+      previousSibling.nodeValue = previousSibling.nodeValue + textNode.nodeValue + nextSibling.nodeValue;
+      $(textNode).detach();
+      $(nextSibling).detach();
+      return {originalNodeValue:originalNodeValue,
+        leftedNode:previousSibling,
+        previousSibling:previousSibling,
+        textNode:textNode,
+        nextSibling:nextSibling
+      };
+    }
+    else if(nextSibling != null && nextSibling.nodeType == 3){
+      originalNodeValue = textNode.nodeValue;
+      textNode.nodeValue = textNode.nodeValue + nextSibling.nodeValue;
+      $(nextSibling).detach();
+      return {originalNodeValue:originalNodeValue,
+        leftedNode:textNode,
+        previousSibling:previousSibling,
+        textNode:textNode,
+        nextSibling:nextSibling
+      };
+    }else if(previousSibling != null && previousSibling.nodeType ==3){
+      originalNodeValue = previousSibling.nodeValue;
+      previousSibling.nodeValue = previousSibling.nodeValue + textNode.nodeValue;
+      $(textNode).detach();
+      return {originalNodeValue:originalNodeValue,
+        leftedNode:previousSibling,
+        previousSibling:previousSibling,
+        textNode:textNode,
+        nextSibling:nextSibling
+      };
+    }
 
-		function ApplyMarkupToTextMemento(parent, text, textContainer, _class) {
-			this.parent = parent;
-			this.text = text;
-			this.textContainer = textContainer;
-			this["class"] = _class;
-		}
+    return null;
+  }
+
+  function splitTextNodes(mergeTextNodesResult){
+    if(mergeTextNodesResult != null && mergeTextNodesResult !== undefined){
+      mergeTextNodesResult.leftedNode.nodeValue = mergeTextNodesResult.originalNodeValue;
+      if(mergeTextNodesResult.leftedNode == mergeTextNodesResult.textNode){
+        dom.insertAfter(mergeTextNodesResult.nextSibling,mergeTextNodesResult.textNode);
+      }else if(mergeTextNodesResult.leftedNode == mergeTextNodesResult.previousSibling){
+        dom.insertAfter(mergeTextNodesResult.textNode,mergeTextNodesResult.previousSibling);
+        if(mergeTextNodesResult.nextSibling != null){
+          dom.insertAfter(mergeTextNodesResult.nextSibling,mergeTextNodesResult.textNode)
+        }
+      }
+    }
+  }
+
+  ApplyMarkupToTextMemento = (function() {
+
+    function ApplyMarkupToTextMemento(parent, text, textContainer) {
+     this.parent = parent;
+     this.text = text;
+     this.textContainer = textContainer;
+   }
 
 
-		ApplyMarkupToTextMemento.prototype.restore = function() {
-			if (this.parent.childNodes.length === 1) {
-				$(this.parent).removeClass(this["class"]);
-			} else {
-				dom.insertAfter(this.text, this.textContainer);
-				this.parent.removeChild(this.textContainer);
-			}
-			return new RemoveMarkupFromTextMemento(this.parent, this.text, this["class"]);
-		};
+   ApplyMarkupToTextMemento.prototype.restore = function() {
+    var mergeTextNodesResult;
+    dom.insertAfter(this.text, this.textContainer);
+    this.parent.removeChild(this.textContainer);
+    mergeTextNodesResult = mergeTextNodes(this.text);
+    return new RemoveMarkupFromTextMemento(this.parent, this.text,this.textContainer,mergeTextNodesResult);
+  };
 
-		return ApplyMarkupToTextMemento;
+  return ApplyMarkupToTextMemento;
 
-	})();
+})();
 
-	RemoveMarkupFromTextMemento = (function() {
+RemoveMarkupFromTextMemento = (function() {
 
-		function RemoveMarkupFromTextMemento(parent, text, textContainer, _class) {
-			this.parent = parent;
-			this.text = text;
-			this.textContainer = textContainer;
-			this["class"] = _class;
-		}
+  function RemoveMarkupFromTextMemento(parent, text, textContainer,mergeTextNodesResult) {
+   this.parent = parent;
+   this.text = text;
+   this.textContainer = textContainer;
+   this.mergeTextNodesResult = mergeTextNodesResult
+ }
 
 
-		RemoveMarkupFromTextMemento.prototype.restore = function() {
-			if (this.parent.childNodes.length === 1) {
-				$(this.parent).addClass(this["class"]);
-			} else {
-				this.parent.insertBefore(this.textContainer, this.text);
-				this.textContainer.appendChild(this.text);
-			}
-			return new ApplyMarkupToTextMemento(this.parent, this.text, this.textContainer, this["class"]);
-		};
+ RemoveMarkupFromTextMemento.prototype.restore = function() {
+  splitTextNodes(this.mergeTextNodesResult)
+  this.parent.insertBefore(this.textContainer, this.text);
+  this.textContainer.appendChild(this.text);
+  return new ApplyMarkupToTextMemento(this.parent, this.text, this.textContainer);
+};
 
-		return RemoveMarkupFromTextMemento;
+return RemoveMarkupFromTextMemento;
 
-	})();
+})();
+
+var AddRangeIDOnSingleChildTextNodeMemento, RemoveRangeIDOnSingleChildTextNodeMemento;
+
+AddRangeIDOnSingleChildTextNodeMemento = (function() {
+
+  function AddRangeIDOnSingleChildTextNodeMemento(parent, id) {
+    this.parent = parent;
+    this.id = id;
+  }
+
+  AddRangeIDOnSingleChildTextNodeMemento.prototype.restore = function() {
+    var dataRangeIds;
+    dataRangeIds = $(this.parent).attr("data-range-id").split(" ");
+    if (dataRangeIds.length === 0) {
+      throw "The node dosen't have data-range-id attribute.";
+    }
+    if (dataRangeIds.length === 1) {
+      $(this.parent).removeAttr("data-range-id");
+    } else {
+     dataRangeIds.splice(-1, 1);
+     $(this.parent).attr("data-range-id",dataRangeIds.join(" "))
+   }
+   return new RemoveRangeIDOnSingleChildTextNodeMemento(this.parent, this.id);
+ };
+
+ return AddRangeIDOnSingleChildTextNodeMemento;
+
+})();
+
+RemoveRangeIDOnSingleChildTextNodeMemento = (function() {
+
+  function RemoveRangeIDOnSingleChildTextNodeMemento(parent,id) {
+    this.parent = parent;
+    this.id = id;
+  }
+
+  RemoveRangeIDOnSingleChildTextNodeMemento.prototype.restore = function() {
+    if ($(this.parent).attr("data-range-id") === undefined) {
+      $(this.parent).attr("data-range-id", this.id);
+    } else {
+      var newRangeIDs = $(this.parent).attr("data-range-id").split(" ")
+      newRangeIDs.push(this.id)
+      $(this.parent).attr("data-range-id",newRangeIDs.join(" "));
+    }
+    return new AddRangeIDOnSingleChildTextNodeMemento(this.parent, this.id);
+  };
+
+  return RemoveRangeIDOnSingleChildTextNodeMemento;
+
+})();
+
+var AddRangeIDOnMultiChildTextNodeMemento, RemoveRangeIDOnMultiChildTextNodeMemento;
+
+AddRangeIDOnMultiChildTextNodeMemento = (function() {
+
+  function AddRangeIDOnMultiChildTextNodeMemento(originalParent, textNode, originalNextSibling, rangeID, leftToRight) {
+    this.originalParent = originalParent;
+    this.textNode = textNode;
+    this.originalNextSibling = originalNextSibling;
+    this.rangeID = rangeID;
+    this.leftToRight = leftToRight;
+  }
+
+  AddRangeIDOnMultiChildTextNodeMemento.prototype.restore = function() {
+    var parent;
+    parent = this.textNode.parentNode;
+    if (this.originalNextSibling.length === 0) {
+      $(this.originalParent).append($(this.textNode));
+      mergeTextNodesResult = mergeTextNodes(this.textNode);
+    } else {
+      this.originalParent.insertBefore(this.textNode,this.originalNextSibling);
+      mergeTextNodesResult = mergeTextNodes(this.textNode);
+    }
+    $(parent).detach();
+    return new RemoveRangeIDOnMultiChildTextNodeMemento(parent,this.originalParent, this.textNode, this.originalNextSibling, this.rangeID, this.leftToRight,mergeTextNodesResult);
+  };
+
+  return AddRangeIDOnMultiChildTextNodeMemento;
+
+})();
+
+RemoveRangeIDOnMultiChildTextNodeMemento = (function() {
+
+  function RemoveRangeIDOnMultiChildTextNodeMemento(parent,originalParent, textNode, originalNextSibling, rangeID, leftToRight) {
+    this.parent = parent;
+    this.originalParent = originalParent;
+    this.textNode = textNode;
+    this.originalNextSibling = originalNextSibling;
+    this.rangeID = rangeID;
+    this.leftToRight = leftToRight;
+    this.mergeTextNodesResult = mergeTextNodesResult;
+  }
+
+  RemoveRangeIDOnMultiChildTextNodeMemento.prototype.restore = function() {
+    splitTextNodes(this.mergeTextNodesResult);
+    this.parent.appendChild(this.textNode);
+    if (this.leftToRight) {
+      this.originalParent.parentNode.insertBefore(this.parent, this.originalParent);
+    } else {
+      dom.insertAfter(this.parent, this.originalParent);
+    }
+    return new AddRangeIDOnMultiChildTextNodeMemento(this.originalParent, this.textNode, this.originalNextSibling, this.rangeID, this.leftToRight);
+  };
+
+  return RemoveRangeIDOnMultiChildTextNodeMemento;
+
+})();
+
 
 	// Allow "class" as a property name in object properties
 	var mappedPropertyNames = {
@@ -558,28 +715,61 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			return el;
 		},
 
-		applyToTextNode : function(textNode) {
+		applyToTextNode : function(textNode,rangeID) {
 
 			var parent = textNode.parentNode;
-			if (parent.childNodes.length == 1 && dom.arrayContains(this.tagNames, parent.tagName.toLowerCase())) {
-				History["do"](new ApplyMarkupToTextMemento(parent, textNode, '', this.cssClass));
-				addClass(parent, this.cssClass);
-			} else {
+			// if (parent.childNodes.length == 1 && dom.arrayContains(this.tagNames, parent.tagName.toLowerCase())) {
+			// 	History["do"](new ApplyMarkupToTextMemento(parent, textNode, '', this.cssClass));
+			// 	addClass(parent, this.cssClass);
+   //      $(parent).attr("data-range-id",rangeID);
+			// } else {
 				var el = this.createContainer(dom.getDocument(textNode));
+        $(el).attr("data-range-id",rangeID);
 				History["do"](new ApplyMarkupToTextMemento(parent, textNode, el, this.cssClass));
 				textNode.parentNode.insertBefore(el, textNode);
 				el.appendChild(textNode);
-			}
+			// }
 
 		},
 
-		isRemovable : function(el) {
-			return el.tagName.toLowerCase() == this.elementTagName && getSortedClassName(el) == this.elementSortedClassName && elementHasProps(el, this.elementProperties) && !elementHasNonClassAttributes(el, this.attrExceptions) && this.isModifiable(el);
-		},
+    addRangeID : function(textNode,rangeID,textNodes) {
+      var parent = textNode.parentNode;
+      if (parent.childNodes.length == 1) {
+        History.do(new AddRangeIDOnSingleChildTextNodeMemento(parent,rangeID))
+        if (parent.getAttribute("data-range-id") == null) {
+          parent.setAttribute("data-range-id", rangeID);
+        } else {
+          parent.setAttribute("data-range-id", parent.getAttribute("data-range-id") + " " + rangeID);
+        }
+      } else {
+        var leftToRight = textNodes.indexOf(parent.childNodes[0]) > -1 ? true : false;
+        for (var j = 0, childNodeslen = parent.childNodes.length; j < childNodeslen; ++j) {
+          if (parent.childNodes[j] == textNode) {
+            History.do(new AddRangeIDOnMultiChildTextNodeMemento(parent,textNode,textNode.nextSibling,rangeID,leftToRight))
+            var el = parent.cloneNode(false);
+            if (el.getAttribute("data-range-id") == null) {
+              el.setAttribute("data-range-id", rangeID);
+            } else {
+              el.setAttribute("data-range-id", el.getAttribute("data-range-id") + " " + rangeID);
+            }
+            el.appendChild(textNode);
+            if (leftToRight) {
+              parent.parentNode.insertBefore(el, parent);
+            } else {
+              dom.insertAfter(el, parent);
+            }
+          }
+        }
+      }
+    },
 
-		undoToTextNode : function(textNode, range, ancestorWithClass) {
+    isRemovable : function(el) {
+     return el.tagName.toLowerCase() == this.elementTagName && getSortedClassName(el) == this.elementSortedClassName && elementHasProps(el, this.elementProperties) && !elementHasNonClassAttributes(el, this.attrExceptions) && this.isModifiable(el);
+   },
 
-			if (!range.containsNode(ancestorWithClass)) {
+   undoToTextNode : function(textNode, range, ancestorWithClass) {
+
+     if (!range.containsNode(ancestorWithClass)) {
 				// Split out the portion of the ancestor from which we can remove the CSS class
 				//var parent = ancestorWithClass.parentNode, index = dom.getNodeIndex(ancestorWithClass);
 				var ancestorRange = range.cloneRange();
@@ -606,42 +796,16 @@ rangy.createModule("CssClassApplier", function(api, module) {
 			var textNodes = getEffectiveTextNodes(range);
 
 			if (textNodes.length) {
-				var textNode, parent;
+				var textNode
 
 				for (var i = 0, len = textNodes.length; i < len; ++i) {
 					textNode = textNodes[i];
-					if (!this.isIgnorableWhiteSpaceNode(textNode) && !this.getSelfOrAncestorWithClass(textNode) && this.isModifiable(textNode)) {
-						this.applyToTextNode(textNode);
+					if (!this.isIgnorableWhiteSpaceNode(textNode) /*&& !this.getSelfOrAncestorWithClass(textNode)*/ && this.isModifiable(textNode)) {
+						this.applyToTextNode(textNode,rangeID);
 					}
-					if (!this.isIgnorableWhiteSpaceNode(textNode) && this.isModifiable(textNode)) {
-						parent = textNode.parentNode;
-						if (parent.childNodes.length == 1) {
-							if (parent.getAttribute("data-range-id") == null) {
-								parent.setAttribute("data-range-id", rangeID);
-							} else {
-								parent.setAttribute("data-range-id", parent.getAttribute("data-range-id") + " " + rangeID);
-							}
-						} else {
-							var leftToRight = textNodes.indexOf(parent.childNodes[0]) > -1 ? true : false;
-							for (var j = 0, childNodeslen = parent.childNodes.length; j < childNodeslen; ++j) {
-								if (parent.childNodes[j] == textNode) {
-									parent.removeChild(textNode);
-									var el = parent.cloneNode(false);
-									if (el.getAttribute("data-range-id") == null) {
-										el.setAttribute("data-range-id", rangeID);
-									} else {
-										el.setAttribute("data-range-id", el.getAttribute("data-range-id") + " " + rangeID);
-									}
-									el.appendChild(textNode);
-									if (leftToRight) {
-										parent.parentNode.insertBefore(el, parent);
-									} else {
-										dom.insertAfter(el, parent);
-									}
-								}
-							}
-						}
-					}
+					// if (!this.isIgnorableWhiteSpaceNode(textNode) && this.isModifiable(textNode)) {
+					// 	this.addRangeID(textNode,rangeID,textNodes)
+					// }
 
 				}
 				range.setStart(textNodes[0], 0);

@@ -1,10 +1,10 @@
 $ ->
-  
+
   rangy.init();
-  
+
   markup_id = 1
-  markCssApplier = rangy.createCssClassApplier("markup", {normalize: false}, ["p","b","span","strong","a"]);
-  
+  markCssApplier = rangy.createCssClassApplier("markup", null, ["p","b","span","strong","a","font"]);
+
   jsPlumb.Defaults.Container = $("body");
   jsPlumb.importDefaults({
         Connector:[ "Flowchart", { stub:10 } ]
@@ -16,10 +16,11 @@ $ ->
       });
   isRangeStartAndEndInMarkup = (range) ->
     $(range.startContainer).parents().hasClass("markup") && $(range.endContainer).parents().hasClass("markup")
-  
+  selectedMarkup = null
+
   $.contextMenu(
     {
-        selector: 'span.markup', 
+        selector: 'span.markup',
         callback: (key, options) ->
           switch key
             when "delete" then deleteMarkup(this)
@@ -36,141 +37,168 @@ $ ->
         }
     }
   )
-  
+
   addComment = (elem) ->
-    markup_ids = $(elem).attr("data-range-id").split(" ")
-    last_markup_id = markup_ids[markup_ids.length - 1]
-    $comment = $("<div>", {id : "comment_#{last_markup_id}"}).addClass("comment")
+    comment_id = $(elem).attr("data-range-id")
+    $comment = $("<div>", {id : "comment_#{comment_id}"}).addClass("comment")
+
+    $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
+      ->
+        History.do(new DeleteCommentMemento($markups,$comment))
+        jsPlumb.detach($connect)
+        $comment.detach()
+    )
+    $comment.append($closeButton)
+
     $textarea = $('<textarea>')
+    $textarea.autosize({append: "\n"})
     $comment.append($textarea)
+
+    $markups = $("[data-range-id='#{comment_id}']")
+    $comment.css({top: "#{$($markups[0]).position().top - $($markups[0]).closest('#doc').position().top}px", left:"0px"}).addClass("absolute")
     $("#comments").append($comment)
-    $textarea.autosize({append: "\n"});
-    $markups = $(":regex(data-range-id, ( )*#{last_markup_id}( )* )")
-    $comment.align({top:":regex(data-range-id, ( )*#{last_markup_id}( )* )"})
+
     $connect = jsPlumb.connect({
       source: $markups[0]
       target: $comment
       anchors: ["TopCenter","TopCenter"]
     })
-    $connect.setVisible(false)
-    $connect.endpoints[0].setVisible(false)
-    $connect.endpoints[1].setVisible(false)
-    $comment.qtip({
-      content: $('<a>Delete</a>',{href : "#"}).click ->
-          History.do(new DeleteCommentMemento(rangy.serializePosition($markups[0],0,$("#doc")[0]),$comment,$connect)) 
-          jsPlumb.deleteEndpoint($connect.endpoints[0])
-          $comment.remove()        
-      position: {
-        corner: {
-          target: 'bottomRight',
-          tooltip: 'topRight'
-        }
-      }
-      hide: { when: 'mouseout', fixed: true }
-    })
+    if selectedMarkup and selectedMarkup.$markups.is $markups
+      selectedMarkup.$comment = $comment
+      selectedMarkup.$connect = $connect
+
+    $textarea.focus( ->
+        clickMarkup($(this).closest(".comment"),null,$(this))
+    )
     $textarea.focus()
-    History.do(new AddCommentMemento(rangy.serializePosition($markups[0],0,$("#doc")[0]),$comment,$connect))
+    History.do(new AddCommentMemento($markups,$comment,$connect))
+
   $("#doc").bind 'mouseup', (e) ->
     selection = rangy.getSelection()
     range = selection.getRangeAt(0)
     unless range.collapsed
       selection.removeAllRanges()
-      commonAncestor = if range.commonAncestorContainer.nodeType == 3 then range.commonAncestorContainer.parentNode else range.commonAncestorContainer
-      # History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))      
       History.beginCompoundDo()
       markCssApplier.applyToRange(range,markup_id)
       History.endCompoundDo()
       markup_id++
-  
+
   $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
         false
   )
-          
-  $("body").on(
-    {
-      mouseenter: ->
-        markup_ids = $(this).attr("data-range-id").split(" ")
-        if markup_ids.length > 0
-          last_markup_id = markup_ids[markup_ids.length - 1]
-        $(":regex(data-range-id, ( )*#{last_markup_id}( )* )").addClass("markup-selected")
-        $("#comment_#{last_markup_id}").addClass("markup-selected")
-        if jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
-          $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
-          $connect.setVisible(true)
-          $connect.endpoints[0].setVisible(true)
-          $connect.endpoints[1].setVisible(true)
-             
-      mouseleave: ->
-        markup_ids = $(this).attr("data-range-id").split(" ")
-        if markup_ids.length > 0
-          last_markup_id = markup_ids[markup_ids.length - 1]
-        $(":regex(data-range-id, ( )*#{last_markup_id}( )* )").removeClass("markup-selected")
-        $("#comment_#{last_markup_id}").removeClass("markup-selected")
-        if jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)  
-          $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
-          $connect.setVisible(false)
-          $connect.endpoints[0].setVisible(false)
-          $connect.endpoints[1].setVisible(false)
-    }
-    ".markup"
-  )
-  
-  $("body").on(
-    {
-      mouseenter: ->
-        comment_id = $(this).attr("id")
-        markups_id = comment_id.split("_")[1]
-        $(":regex(data-range-id, ( )*#{markups_id}( )* )").addClass("markup-selected")
-        $(this).addClass("markup-selected")
-        $connect = jsPlumb.select({target : "#{comment_id}"}).get(0)
-        $connect.setVisible(true)
-        $connect.endpoints[0].setVisible(true)
-        $connect.endpoints[1].setVisible(true)
-        
-      mouseleave: ->
-        comment_id = $(this).attr("id")
-        markups_id = comment_id.split("_")[1]
-        $(":regex(data-range-id, ( )*#{markups_id}( )* )").removeClass("markup-selected")
-        $(this).removeClass("markup-selected")
-        $connect = jsPlumb.select({target : "#{comment_id}"}).get(0)
+
+  applyMarkupHover = ($comment,$markup)->
+    comment_id = getCommentID($comment,$markup)
+    $("[data-range-id='#{comment_id}']").addClass("markup-hover")
+    $("#comment_#{comment_id}").addClass("markup-hover")
+    if $connect = jsPlumb.select({target : "comment_#{comment_id}"}).get(0)
+      $connect.setVisible(true)
+      $connect.endpoints[0].setVisible(true)
+      $connect.endpoints[1].setVisible(true)
+
+  unapplyMarkupHover = ($comment,$markup)->
+
+    comment_id = getCommentID($comment,$markup)
+    if !selectedMarkup or !selectedMarkup.$comment.is($("#comment_#{comment_id}"))
+      $("[data-range-id='#{comment_id}']").removeClass("markup-hover")
+      $("#comment_#{comment_id}").removeClass("markup-hover")
+      if $connect = jsPlumb.select({target : "comment_#{comment_id}"}).get(0)
         $connect.setVisible(false)
         $connect.endpoints[0].setVisible(false)
         $connect.endpoints[1].setVisible(false)
-        
+
+  getCommentID = ($comment,$markup) ->
+    if $comment
+      comment_id = $comment.attr("id").split("_")[1]
+    if $markup
+      comment_id = $markup.attr("data-range-id")
+    comment_id
+
+  clickMarkup = ($comment,$markup,$target) ->
+    if selectedMarkup
+      if $markup && selectedMarkup.$markups.index($markup) >= 0
+        unselectMarkup()
+        selectedMarkup = null
+        return
+      if $comment && selectedMarkup.$comment.is($comment) && !$target.is($comment.find("textarea"))
+        unselectMarkup()
+        selectedMarkup = null
+        return
+    unselectMarkup()
+    comment_id = getCommentID($comment,$markup)
+    $comment = $("#comment_#{comment_id}") unless $comment
+    $comment.addClass("markup-selected") if $comment.size() > 0
+    $markups = $("[data-range-id='#{comment_id}']").addClass("markup-selected")
+    if $comment.size() > 0
+      $connect = jsPlumb.select({target : $comment}).get(0)
+      if $connect
+        $connect.setVisible(true)
+        $connect.endpoints[0].setVisible(true)
+        $connect.endpoints[1].setVisible(true)
+    selectedMarkup = {
+      $comment : $comment
+      $markups : $markups
+      $connect : $connect
+    }
+
+  unselectMarkup = ->
+    if selectedMarkup
+      if selectedMarkup.$comment
+        selectedMarkup.$comment.removeClass("markup-selected").removeClass("markup-hover")
+      if selectedMarkup.$markups
+        selectedMarkup.$markups.removeClass("markup-selected").removeClass("markup-hover")
+      if selectedMarkup.$connect
+        selectedMarkup.$connect.setVisible(false)
+        selectedMarkup.$connect.endpoints[0].setVisible(false)
+        selectedMarkup.$connect.endpoints[1].setVisible(false)
+
+
+  $("body").on(
+    {
+      mouseenter: ->
+        applyMarkupHover(null,$(this))
+
+      mouseleave: ->
+        unapplyMarkupHover(null,$(this))
+
+      click: (e) ->
+        clickMarkup(null,$(this),null)
+    }
+    ".markup"
+  )
+
+  $("body").on(
+    {
+      mouseenter: ->
+        applyMarkupHover($(this))
+
+      mouseleave: ->
+        unapplyMarkupHover($(this))
+
+      click: (e) ->
+        clickMarkup($(this),null,$(e.target))
     }
     ".comment"
   )
-  
-  $("body").resize( ->
-      jsPlumb.repaintEverything()
-  )
-  
+
   deleteMarkup = (markup) ->
-    markup_ids = $(markup).attr("data-range-id").split " "
-    last_markup_id = markup_ids[markup_ids.length - 1]
-    $markupsToDelete = $(":regex(data-range-id, ( )*#{last_markup_id}( )* )")
-    commonAncestor = getCommonAncestor($markupsToDelete[0],$markupsToDelete[$markupsToDelete.length - 1])
+    comment_id = $(markup).attr("data-range-id")
+    $markupsToDelete = $("[data-range-id='#{comment_id}']")
     History.beginCompoundDo()
-    $comment = $("#comment_#{last_markup_id}")
-    $connect = jsPlumb.select({target : "comment_#{last_markup_id}"}).get(0)
-    History.do(new DeleteCommentMemento(rangy.serializePosition($markupsToDelete[0],0,$("#doc")[0]),$comment,$connect)) 
-    History.do(new MarkupMemento(rangy.serializePosition(commonAncestor,0,$("#doc")[0]),(new XMLSerializer()).serializeToString(commonAncestor)))
+    $comment = $("#comment_#{comment_id}")
+    History.do(new DeleteCommentMemento($markupsToDelete,$comment))
     $markupsToDelete.each((index) ->
-        markup_ids = $(this).attr("data-range-id").split(" ")
-        if markup_ids.length <= 1   
-          $(this).removeClass("markup").removeAttr("data-range-id")
-        else
-          last_markup_id_index = markup_ids.indexOf("#{last_markup_id}")
-          if last_markup_id_index > -1
-            markup_ids.splice(last_markup_id_index,1)
-          $(this).attr("data-range-id",markup_ids.join(" "))
+        console.log (this.childNodes[0])
+        this.parentNode.insertBefore(this.childNodes[0],this)
+        $(this).remove()
     )
-    jsPlumb.deleteEndpoint($connect.endpoints[0])
-    $comment.remove() 
+    $connect = jsPlumb.select({target : $comment}).get(0) if $comment
+    jsPlumb.deleteEndpoint($connect.endpoints[0]) if $connect
+    $comment.detach()
     History.endCompoundDo()
 
   getCommonAncestor = (a, b) ->
-  
+
     $parentsa = $(a).parents()
     $parentsb = $(b).parents()
     found = null
@@ -178,7 +206,7 @@ $ ->
       thisa = this
 
       $parentsb.each(->
-          if (thisa == this)     
+          if (thisa == this)
             found = this
             return false
       )
@@ -188,56 +216,41 @@ $ ->
 
   $("#undo-btn").click ->
       History.undo()
-  
-    $("#redo-btn").click ->
+
+
+  $("#redo-btn").click ->
       History.redo()
-    
+
   class AddCommentMemento
-    
-    constructor: (@markup,@comment,@connect) -> 
-    
+
+    constructor: (@markups,@comment,@connect) ->
+
     restore: ->
-      console.log(@connect.endpoints)
-      jsPlumb.deleteEndpoint(@connect.endpoints[0])
-      @comment.remove()
-      new DeleteCommentMemento(@markup,@comment,@connect)
-            
-      
+      jsPlumb.detach(@connect)
+      @comment.detach()
+      new DeleteCommentMemento(@markups,@comment)
+
+
   class DeleteCommentMemento
-    
-    constructor: (@markup,@comment,@connect) ->
-    
+
+    constructor: (@markups,@comment) ->
+
     restore: ->
-      console.log("undo delete comment")
-      $comment = @comment
-      $markup = @markup
-      $("#comments").append($comment)
-      last_markup_id = $comment.attr("id").split("_")[1]
-      $comment.align({top:":regex(data-range-id, ( )*#{last_markup_id}( )* )"})
+      $("#comments").append(@comment)
       $connect = jsPlumb.connect({
-        source: $(rangy.deserializePosition($markup,$("#doc")[0]).node)
-        target: $comment
+        source: @markups[0]
+        target: @comment
         anchors: ["TopCenter","TopCenter"]
       })
-      $comment.qtip({
-        content: $('<a>Delete</a>',{href : "#"}).click ->
-          History.do(new DeleteCommentMemento($markup,$comment,$connect)) 
-          jsPlumb.deleteEndpoint($connect.endpoints[0])
-          $comment.remove()
-        position: {
-          corner: {
-            target: 'bottomRight'
-            tooltip: 'topRight'
-          }
-        }
-        hide: { when: 'mouseout', fixed: true }
-      })
-      new AddCommentMemento($markup,$comment,$connect)
-      
+      @comment.find("textarea").focus()
+      if selectedMarkup.$markups.is(@markups)
+        selectedMarkup.$connect = $connect
+      new AddCommentMemento(@markups,@comment,$connect)
+
   class MarkupMemento
-    
+
     constructor: (@node , @xml) ->
-    
+
     restore: ->
       state = new MarkupMemento(@node, (new XMLSerializer()).serializeToString(rangy.deserializePosition(@node,$("#doc")[0]).node) )
       $(rangy.deserializePosition(@node,$("#doc")[0]).node).replaceWith(@xml)
