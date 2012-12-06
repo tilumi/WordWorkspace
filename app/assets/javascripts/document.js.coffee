@@ -2,7 +2,11 @@ $ ->
 
   rangy.init();
 
-  markup_id = 1
+  last_mark_id = 0
+  markup_id = last_mark_id + 1
+  removed_markup_ids = []
+  added_markup_ids = []
+
   markCssApplier = rangy.createCssClassApplier("markup", null, ["p","b","span","strong","a","font"]);
 
   jsPlumb.Defaults.Container = $("body");
@@ -18,12 +22,14 @@ $ ->
     $(range.startContainer).parents().attr("data-range-id") && $(range.endContainer).parents().attr("data-range-id")
   selectedMarkup = null
 
+  
+
   $.contextMenu(
     {
         selector: 'span.markup',
         callback: (key, options) ->
           switch key
-            when "delete" then deleteMarkup(this)
+            when "delete" then removeMarkup(this)
             when "edit" then addComment(this)
         ,
         items: {
@@ -44,9 +50,7 @@ $ ->
 
     $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
       ->
-        History.do(new DeleteCommentMemento($markups,$comment))
-        jsPlumb.removeAllEndpoints($comment)
-        $comment.detach()
+        removeComment($markups,$comment)
     )
     $comment.append($closeButton)
 
@@ -72,21 +76,23 @@ $ ->
         clickMarkup($(this).closest(".comment"),null,$(this))
     )
     $textarea.focus()
-    History.do(new AddCommentMemento($markups,$comment,$connect))
+    History.do(new AddCommentMemento($markups,$comment))
 
   $("#doc").bind 'mouseup', (e) ->
     selection = rangy.getSelection()
     range = selection.getRangeAt(0)
     unless range.collapsed
       selection.removeAllRanges()
-      History.beginCompoundDo()
-      markCssApplier.applyToRange(range,markup_id)
-      History.endCompoundDo()
-      markup_id++
+      addMarkup(range)
 
   $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
         false
   )
+
+  removeComment = ($markups,$comment)->
+    History.do(new DeleteCommentMemento($markups,$comment))
+    jsPlumb.removeAllEndpoints($comment)
+    $comment.detach()
 
   applyMarkupHover = ($comment,$markup)->
     comment_id = getCommentID($comment,$markup)
@@ -182,50 +188,85 @@ $ ->
     ".comment"
   )
 
-  deleteMarkup = (markup) ->
+
+  addMarkup = (range) ->
+    addMarkupMemento = new AddMarkupMemento(markup_id)
+    History.do(addMarkupMemento)
+    markCssApplier.applyToRange(range,markup_id,addMarkupMemento)
+    added_markup_ids.push("#{markup_id}")
+    removed_markup_ids.splice(removed_markup_ids.indexOf("#{markup_id}"),1)
+    console.log(removed_markup_ids)
+    console.log(added_markup_ids)
+    markup_id++
+
+  removeMarkup = (markup) ->
     comment_id = $(markup).attr("data-range-id")
+    removed_markup_ids.push("#{comment_id}")
+    added_markup_ids.splice(added_markup_ids.indexOf("#{comment_id}"),1)
     $markupsToDelete = $("[data-range-id='#{comment_id}']")
     History.beginCompoundDo()
     $comment = $("#comment_#{comment_id}")
-    History.do(new DeleteCommentMemento($markupsToDelete,$comment))
+    if $comment.size() > 0
+      History.do(new DeleteCommentMemento($markupsToDelete,$comment))
+    removeMarkupMemento = new RemoveMarkupMemento(comment_id)
+    History.do(removeMarkupMemento)
     $connect = jsPlumb.removeAllEndpoints($comment) if $comment
     $markupsToDelete.each((index) ->
-        markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this)
+        markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this,removeMarkupMemento)
     )
     $comment.detach()
+    console.log(removed_markup_ids)
+    console.log(added_markup_ids)
     History.endCompoundDo()
-
-  getCommonAncestor = (a, b) ->
-
-    $parentsa = $(a).parents()
-    $parentsb = $(b).parents()
-    found = null
-    $parentsa.each(->
-      thisa = this
-
-      $parentsb.each(->
-          if (thisa == this)
-            found = this
-            return false
-      )
-      return false if found
-    )
-    found
 
   $("#undo-btn").click ->
       History.undo()
+      # console.log(removed_markup_ids)
+      # console.log(added_markup_ids)
 
 
   $("#redo-btn").click ->
       History.redo()
+      # console.log(removed_markup_ids)
+      # console.log(added_markup_ids)
+  
+  class AddMarkupMemento
+
+    constructor: (@markup_id)->
+      @_mementos = []
+
+    push: (m) ->
+      @_mementos.push(m)
+
+    restore: ->
+      added_markup_ids.splice(added_markup_ids.indexOf(""+@markup_id),1)
+      removed_markup_ids.push(@markup_id.toString())
+      inverse = new RemoveMarkupMemento(@markup_id)
+      inverse.push(m.restore()) for m in @_mementos.reverse()
+      inverse
+
+  class RemoveMarkupMemento
+
+    constructor: (@markup_id)->
+      @_mementos = []
+
+    push: (m) ->
+      @_mementos.push(m)
+
+    restore: ->
+      removed_markup_ids.splice(removed_markup_ids.indexOf(@markup_id.toString()),1)
+      added_markup_ids.push(@markup_id.toString())
+      inverse = new AddMarkupMemento(@markup_id)
+      inverse.push(m.restore()) for m in @_mementos.reverse()
+      inverse
 
   class AddCommentMemento
 
-    constructor: (@markups,@comment,@connect) ->
+    constructor: (@markups,@comment) ->
 
     restore: ->
-      jsPlumb.detach(@connect)
-      @comment.detach()
+      jsPlumb.removeAllEndpoints(@comment) if @comment
+      @comment.detach() if @comment
       new DeleteCommentMemento(@markups,@comment)
 
 
@@ -234,13 +275,14 @@ $ ->
     constructor: (@markups,@comment) ->
 
     restore: ->
-      $("#comments").append(@comment)
-      $connect = jsPlumb.connect({
-        source: @markups[0]
-        target: @comment
-        anchors: ["TopCenter","TopCenter"]
-      })
-      @comment.find("textarea").focus()
-      if selectedMarkup.$markups.is(@markups)
-        selectedMarkup.$connect = $connect
-      new AddCommentMemento(@markups,@comment,$connect)
+      if(@comment.size() > 0)
+        $("#comments").append(@comment)
+        $connect = jsPlumb.connect({
+          source: @markups[0]
+          target: @comment
+          anchors: ["TopCenter","TopCenter"]
+        })
+        @comment.find("textarea").focus()
+        if selectedMarkup.$markups.is(@markups)
+          selectedMarkup.$connect = $connect
+      new AddCommentMemento(@markups,@comment)

@@ -1,6 +1,7 @@
 require 'nokogiri'
 
 class DocumentsController < ApplicationController
+
   def index
     @documents = Document.all
   end
@@ -16,10 +17,14 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    content = File.read(Document.find(params[:id]).filepath, :mode => "r")
-    parsed_content=Nokogiri::HTML(content)
-    @body = parsed_content.css("body").children.to_html.html_safe
-    @title = parsed_content.css("title").children[0]
+    if current_user
+      content = File.read(Document.find(params[:id]).filepath, :mode => "r")
+      parsed_content=Nokogiri::HTML(content)
+      @body = parsed_content.css("body").children.to_html.html_safe
+      @title = parsed_content.css("title").children[0]
+    else
+      redirect_to "/auth/facebook"
+    end
   end
 
   def destroy

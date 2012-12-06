@@ -17,6 +17,7 @@ class History
           inverse = new CompoundMemento()
           inverse.push(m.restore()) for m in @_mementos.reverse()
           inverse
+    
     @init: ->
       @_isUndoRedo = false
       @_undoStack = []
@@ -27,14 +28,16 @@ class History
       if (@_tempMemento != null)
         throw "The complex memento wasn't commited."
       @_isUndoRedo = true
-      @_redoStack.push(@_undoStack.pop().restore())
+      if @_undoStack.length > 0
+        @_redoStack.push(@_undoStack.pop().restore())
       @_isUndoRedo = false
 
     @redo: ->
       if (@_tempMemento != null)
         throw "The complex memento wasn't commited."
       @_isUndoRedo = true
-      @_undoStack.push(@_redoStack.pop().restore())
+      if @_redoStack.length > 0
+        @_undoStack.push(@_redoStack.pop().restore())
       @_isUndoRedo = false
 
     @do: (m) ->

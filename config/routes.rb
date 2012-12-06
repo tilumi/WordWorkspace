@@ -1,7 +1,18 @@
 WordWorkspace::Application.routes.draw do
   
-  resource :session
+  devise_for :users do
+    get '/users/sign_in', :to => 'devise/sessions#new', :as => :new_user_session
+    get '/users/sign_out' => 'devise/sessions#destroy', :as => :user_sign_out
+  end
+
+  
+
+  # resource :session
   resources :documents
+  root :to => "documents#index"
+  match '/auth/:provider/callback', :to => 'sessions#create'
+  match '/auth/failure' => 'sessions#failure'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

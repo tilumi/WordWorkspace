@@ -1,3 +1,15 @@
+<% content_for :javascript_includes do -%>
+<%= javascript_include_tag "documents.js" %>
+<% end -%>
+<% if user_signed_in? %>
+<div>Hello!! <%= current_user.first_name + " " + current_user.last_name%></div>
+ <li>
+  <%= link_to('Logout', destroy_user_session_path, :method => :delete) %>        
+  </li>
+<% else %>
+<%=link_to "Log in with Facebook", '/auth/facebook', :class => "popup", :"data-width" => 600, :"data-height" => 400%>
+<!-- <a href="/auth/facebook">Facebook 登入</a> -->
+<% end %>
 <ul>
 	<% @documents.each do |document| %>
 	<li>
@@ -8,4 +20,4 @@
 	</li>
 	<% end %>
 </ul>
-<%= link_to 'New event', new_document_path %>
+<%= link_to 'New doc', new_document_path %>
