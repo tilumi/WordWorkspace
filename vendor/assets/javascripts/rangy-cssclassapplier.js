@@ -619,8 +619,10 @@ function isNonInlineElement(node) {
 
 			var parent = textNode.parentNode;
 			var el = this.createContainer(dom.getDocument(textNode));
-      $(el).attr("data-range-id",rangeID);
-			addMarkupMemento.push(new ApplyMarkupToTextMemento(parent, textNode, el, this.cssClass));
+      		$(el).attr("data-range-id",rangeID);
+      		if (addMarkupMemento) {
+				addMarkupMemento.push(new ApplyMarkupToTextMemento(parent, textNode, el, this.cssClass));
+			}
 			textNode.parentNode.insertBefore(el, textNode);
 			el.appendChild(textNode);
 
@@ -678,11 +680,13 @@ function isNonInlineElement(node) {
 		},
 
     removeMarkup : function(parent,text,textContainer,removeMarkupMemento){
-      var mergeTextNodesResult;
-      dom.insertAfter(text, textContainer);
-      parent.removeChild(textContainer);
-      mergeTextNodesResult = mergeTextNodes(text);
-      removeMarkupMemento.push(new RemoveMarkupFromTextMemento(parent,text,textContainer,mergeTextNodesResult));
+    	var mergeTextNodesResult;
+        dom.insertAfter(text, textContainer);
+        parent.removeChild(textContainer);
+        mergeTextNodesResult = mergeTextNodes(text);
+        if(removeMarkupMemento){
+   	    	removeMarkupMemento.push(new RemoveMarkupFromTextMemento(parent,text,textContainer,mergeTextNodesResult));
+  		}
     },
 
 		applyToSelection : function(win) {

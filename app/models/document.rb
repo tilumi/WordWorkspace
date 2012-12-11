@@ -5,6 +5,8 @@ class Document < ActiveRecord::Base
   attr_accessible :filepath, :title, :uploaded_file, :original_filename
   attr_writer :uploaded_file
 
+  has_many :markups, :dependent => :delete_all
+
   before_create :store_doc
   after_destroy :delete_associate_files
 
@@ -30,7 +32,9 @@ class Document < ActiveRecord::Base
 
     if path =~ /\.doc$|\.docx$/
       Open4::open4("sh") do |pid, stdin,stdout,stderr|
-        stdin.puts "unoconv -f html -o #{path[0..path.rindex("/")]} #{path}"
+        logger.info(path)
+        logger.info("#{path[0..path.rindex(".")]}html")
+        stdin.puts "java -jar /Users/MingFu/Downloads/jodconverter/lib/jodconverter #{path} #{path[0..path.rindex(".")]}html"
         stdin.close
         puts "#{stdout.read.strip}"
         puts "#{stderr.read.strip}"

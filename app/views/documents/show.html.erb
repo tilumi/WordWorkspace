@@ -9,6 +9,7 @@
 <% end -%>
 <div id="content">
 	<div id="doc">
+		<div id="mid" style="display:none"><%=@last_markup_id%></div>
 		<%= @body%>
 	</div>
 	<div id="comments"></div>
@@ -28,10 +29,10 @@
 			<a id="redo-btn">Redo</a>
 		</li>
 		<li>
-			<a>Link 3</a>
+			<a id="save-btn">Save</a>
 		</li>
 		<li>
-			<a>Link 4</a>
+			<a id="restore-btn">Restore</a>
 		</li>
 		<li>
 			<a>Link 5</a>

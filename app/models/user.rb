@@ -10,6 +10,7 @@ class User < ActiveRecord::Base
   attr_accessible :first_name, :last_name
 
   has_many :authorizations
+  has_many :markups
 
   def self.create_from_auth!(hash)
     created_hash = {:email => hash[:info][:email], :first_name => hash[:info][:first_name], :last_name => hash[:info][:last_name] }

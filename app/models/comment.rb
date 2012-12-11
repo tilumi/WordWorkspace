@@ -1,5 +1,5 @@
-class Markup < ActiveRecord::Base
-  attr_accessible :className, :content, :document_id, :mid, :user_id, :document, :user
+class Comment < ActiveRecord::Base
+  attr_accessible :className, :content, :mid, :x, :y, :document, :user
   belongs_to :document
   belongs_to :user
   accepts_nested_attributes_for :document

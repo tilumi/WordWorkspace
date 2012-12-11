@@ -233,6 +233,7 @@ DEPENDENCIES
   compass
   compass-rails
   devise
+  execjs
   guard-jasmine
   guard-livereload
   jasminerice

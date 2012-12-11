@@ -2,12 +2,29 @@ $ ->
 
   rangy.init();
 
-  last_mark_id = 0
-  markup_id = last_mark_id + 1
+  last_saved_markup_id = parseInt($("#mid").text())
+  last_saved_comment_id = parseInt($("#commentid").text())
+  # console.log( $("#mid").text() )
+  markup_id = last_saved_markup_id + 1
   removed_markup_ids = []
   added_markup_ids = []
+  added_comment_ids = []
+  removed_comment_ids = []
 
-  markCssApplier = rangy.createCssClassApplier("markup", null, ["p","b","span","strong","a","font"]);
+  # commandHistroy = []
+  markup_class = "markup"
+
+  # class AddMarkupCommand 
+
+  #   constructor: (@markup_id,@class,@serializedRange) ->
+
+
+  # class RemoveMarkupCommand
+
+  #   constructor: (@serializedMarkup) ->
+
+
+  markCssApplier = rangy.createCssClassApplier(markup_class, null, ["p","b","span","strong","a","font"]);
 
   jsPlumb.Defaults.Container = $("body");
   jsPlumb.importDefaults({
@@ -22,8 +39,56 @@ $ ->
     $(range.startContainer).parents().attr("data-range-id") && $(range.endContainer).parents().attr("data-range-id")
   selectedMarkup = null
 
-  
+  $("#save-btn").click( ->
+      save()
+  )
 
+  $("#restore-btn").click( ->
+      restore()
+  )
+
+
+
+  save = () ->
+
+
+    markupsToAdd = []
+    
+    for i in added_markup_ids
+      $markupToAdd = $("[data-range-id='#{i}']")
+      if $markupToAdd.size() > 0
+        markupToAdd = {}
+        markupToAdd.mid = i
+        markupToAdd.className = $markupToAdd.get(0).className
+        markupToAdd.content =  $markupToAdd.text()
+        markupsToAdd.push(markupToAdd)
+
+    commentsToAdd = []
+
+    for i in added_comment_ids
+      $commentToAdd = $("#comment_#{i}")
+      if $commentToAdd.size() > 0
+        commentToAdd = {}
+        commentToAdd.mid = i
+        commentToAdd.className = $commentToAdd.get(0).className
+
+
+    $.ajax({
+      url : 'save'
+      type : 'POST'
+      data: {
+        html :  $("#doc").html()
+        markupsToAdd : markupsToAdd
+        markupsToDelete : ( item for item in removed_markup_ids when parseInt(item) <= last_saved_markup_id )
+
+      }
+      error: (xhr) ->
+      success: (response) ->
+        added_markup_ids.length = 0
+        removed_markup_ids.length = 0
+        last_saved_markup_id = markup_id - 1
+    })
+    
   $.contextMenu(
     {
         selector: 'span.markup',
@@ -76,6 +141,12 @@ $ ->
         clickMarkup($(this).closest(".comment"),null,$(this))
     )
     $textarea.focus()
+
+    added_comment_ids.push(comment_id)
+    if removed_comment_ids.indexOf(comment_id) > -1
+      removed_comment_ids.splice(removed_comment_ids.indexOf(comment_id),1)
+    console.log(removed_comment_ids)
+    console.log(added_comment_ids)
     History.do(new AddCommentMemento($markups,$comment))
 
   $("#doc").bind 'mouseup', (e) ->
@@ -91,6 +162,12 @@ $ ->
 
   removeComment = ($markups,$comment)->
     History.do(new DeleteCommentMemento($markups,$comment))
+    comment_id = $comment.attr("id").split("_")[1]
+    removed_comment_ids.push(comment_id)
+    if added_comment_ids.indexOf(comment_id) > -1
+      added_comment_ids.splice(added_comment_ids.indexOf(comment_id), 1)
+    console.log(removed_comment_ids)
+    console.log(added_comment_ids)
     jsPlumb.removeAllEndpoints($comment)
     $comment.detach()
 
@@ -190,19 +267,23 @@ $ ->
 
 
   addMarkup = (range) ->
+    # commandHistroy.push(new AddMarkupCommand(rangy.serializeRange(range,true,$("#doc").get(0))))
     addMarkupMemento = new AddMarkupMemento(markup_id)
     History.do(addMarkupMemento)
     markCssApplier.applyToRange(range,markup_id,addMarkupMemento)
     added_markup_ids.push("#{markup_id}")
-    removed_markup_ids.splice(removed_markup_ids.indexOf("#{markup_id}"),1)
+    if removed_markup_ids.indexOf("#{markup_id}") > -1
+      removed_markup_ids.splice(removed_markup_ids.indexOf("#{markup_id}"),1)
     console.log(removed_markup_ids)
     console.log(added_markup_ids)
     markup_id++
 
   removeMarkup = (markup) ->
+    # commandHistroy.push(new RemoveMarkupCommand(rangy.serializePosition($(markup).get(0),0,$("#doc").get(0))))
     comment_id = $(markup).attr("data-range-id")
     removed_markup_ids.push("#{comment_id}")
-    added_markup_ids.splice(added_markup_ids.indexOf("#{comment_id}"),1)
+    if added_markup_ids.indexOf("#{comment_id}") > -1
+      added_markup_ids.splice(added_markup_ids.indexOf("#{comment_id}"),1)
     $markupsToDelete = $("[data-range-id='#{comment_id}']")
     History.beginCompoundDo()
     $comment = $("#comment_#{comment_id}")
@@ -220,12 +301,14 @@ $ ->
     History.endCompoundDo()
 
   $("#undo-btn").click ->
+      # commandHistroy.push("undo")
       History.undo()
       # console.log(removed_markup_ids)
       # console.log(added_markup_ids)
 
 
   $("#redo-btn").click ->
+      # commandHistroy.push("redo")
       History.redo()
       # console.log(removed_markup_ids)
       # console.log(added_markup_ids)
@@ -239,7 +322,8 @@ $ ->
       @_mementos.push(m)
 
     restore: ->
-      added_markup_ids.splice(added_markup_ids.indexOf(""+@markup_id),1)
+      if added_markup_ids.indexOf(""+@markup_id) > -1
+        added_markup_ids.splice(added_markup_ids.indexOf(""+@markup_id),1)
       removed_markup_ids.push(@markup_id.toString())
       inverse = new RemoveMarkupMemento(@markup_id)
       inverse.push(m.restore()) for m in @_mementos.reverse()
@@ -254,7 +338,8 @@ $ ->
       @_mementos.push(m)
 
     restore: ->
-      removed_markup_ids.splice(removed_markup_ids.indexOf(@markup_id.toString()),1)
+      if removed_markup_ids.indexOf(@markup_id.toString()) > -1
+        removed_markup_ids.splice(removed_markup_ids.indexOf(@markup_id.toString()),1)
       added_markup_ids.push(@markup_id.toString())
       inverse = new AddMarkupMemento(@markup_id)
       inverse.push(m.restore()) for m in @_mementos.reverse()
@@ -265,8 +350,15 @@ $ ->
     constructor: (@markups,@comment) ->
 
     restore: ->
-      jsPlumb.removeAllEndpoints(@comment) if @comment
-      @comment.detach() if @comment
+      if @comment.size() > 0
+        jsPlumb.removeAllEndpoints(@comment) 
+        @comment.detach()
+        comment_id = $(@comment).attr("id").split("_")[1]
+        removed_comment_ids.push(comment_id)
+        if added_comment_ids.indexOf(comment_id) > -1
+          added_comment_ids.splice(added_comment_ids.indexOf(comment_id), 1)
+      console.log(removed_comment_ids)
+      console.log(added_comment_ids)
       new DeleteCommentMemento(@markups,@comment)
 
 
@@ -276,6 +368,10 @@ $ ->
 
     restore: ->
       if(@comment.size() > 0)
+        comment_id = $(@comment).attr("id").split("_")[1]
+        added_comment_ids.push(comment_id)
+        if removed_comment_ids.indexOf(comment_id) > -1
+          removed_comment_ids.splice(removed_comment_ids.indexOf(comment_id),1)
         $("#comments").append(@comment)
         $connect = jsPlumb.connect({
           source: @markups[0]
@@ -285,4 +381,6 @@ $ ->
         @comment.find("textarea").focus()
         if selectedMarkup.$markups.is(@markups)
           selectedMarkup.$connect = $connect
+      console.log(removed_comment_ids)
+      console.log(added_comment_ids)
       new AddCommentMemento(@markups,@comment)

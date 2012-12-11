@@ -6,9 +6,11 @@ WordWorkspace::Application.routes.draw do
   end
 
   
+  match '/documents/save' =>  'documents#save'
 
   # resource :session
   resources :documents
+  # resources :users
   root :to => "documents#index"
   match '/auth/:provider/callback', :to => 'sessions#create'
   match '/auth/failure' => 'sessions#failure'
