@@ -3,7 +3,7 @@ $ ->
   rangy.init();
 
   last_saved_markup_id = parseInt($("#mid").text())
-  last_saved_comment_id = parseInt($("#commentid").text())
+  # last_saved_comment_id = parseInt($("#commentid").text())
   # console.log( $("#mid").text() )
   markup_id = last_saved_markup_id + 1
   removed_markup_ids = []
@@ -43,14 +43,67 @@ $ ->
       save()
   )
 
-  $("#restore-btn").click( ->
-      restore()
-  )
+  # $("#restore-btn").click( ->
+  #     restore()
+  # )
 
+  reAttachComments = () ->
+    saved_comments = JSON.parse($("#saved_comments").text())
+    for saved_comment in saved_comments
+      comment_id = saved_comment.mid
+      $comment = $("<div>", {id : "comment_#{comment_id}"}).addClass("comment")
 
+      $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
+        ->
+          removeComment($markups,$comment)
+      )
+      $comment.append($closeButton)
+
+      $textarea = $('<textarea>')
+      $textarea.autosize({append: "\n"})
+      $textarea.width(saved_comment.width) if saved_comment.width > 0
+      $textarea.height(saved_comment.height) if saved_comment.height > 0
+      $textarea.val(saved_comment.content)
+      $textarea.on({
+        input : addToAddedCommentIDs(comment_id)
+        resize : addToAddedCommentIDs(comment_id)        
+      })
+      $comment.append($textarea)
+      $comment.on({
+        mousedown : ->
+          this.mouseDownPosition = $(this).position()
+        mouseup: ->
+          if this.mouseDownPosition
+            if $(this).position().top != this.mouseDownPosition.top or $(this).position().left != this.mouseDownPosition.left
+              addToAddedCommentIDs(comment_id)
+      })
+
+      $markups = $("[data-range-id='#{comment_id}']")
+      $comment.css({top: "#{saved_comment.y}px", left:"#{saved_comment.x}px"}).addClass("absolute")      
+      jsPlumb.draggable($comment)
+      $("#comments").append($comment)
+
+      $connect = jsPlumb.connect({
+        source: $markups[0]
+        target: $comment
+        anchors: ["TopCenter","TopCenter"]
+      })
+      if selectedMarkup and selectedMarkup.$markups.is $markups
+        selectedMarkup.$comment = $comment
+        selectedMarkup.$connect = $connect
+
+      $textarea.focus( ->
+          clickMarkup($(this).closest(".comment"),null,$(this))
+      )
+      $textarea.focus()
+
+  addToAddedCommentIDs = (comment_id) ->
+    if added_comment_ids.indexOf(comment_id) == -1
+      added_comment_ids.push(comment_id)
+    if removed_comment_ids.indexOf(comment_id) > -1
+      removed_comment_ids.splice(removed_comment_ids.indexOf(comment_id),1)
 
   save = () ->
-
 
     markupsToAdd = []
     
@@ -71,7 +124,13 @@ $ ->
         commentToAdd = {}
         commentToAdd.mid = i
         commentToAdd.className = $commentToAdd.get(0).className
-
+        commentToAdd.content = $commentToAdd.find("textarea").val()
+        commentToAdd.x = $commentToAdd.position().left
+        commentToAdd.y = $commentToAdd.position().top
+        commentToAdd.width = $commentToAdd.find("textarea").width()
+        commentToAdd.height = $commentToAdd.find("textarea").height()
+        commentsToAdd.push(commentToAdd)
+        # console.log($commentToAdd.position())
 
     $.ajax({
       url : 'save'
@@ -80,12 +139,16 @@ $ ->
         html :  $("#doc").html()
         markupsToAdd : markupsToAdd
         markupsToDelete : ( item for item in removed_markup_ids when parseInt(item) <= last_saved_markup_id )
+        commentsToAdd : commentsToAdd
+        commentsToDelete : ( item for item in removed_comment_ids when parseInt(item) <= last_saved_markup_id )
 
       }
       error: (xhr) ->
       success: (response) ->
         added_markup_ids.length = 0
         removed_markup_ids.length = 0
+        added_comment_ids.length = 0
+        removed_comment_ids.length = 0
         last_saved_markup_id = markup_id - 1
     })
     
@@ -121,6 +184,10 @@ $ ->
 
     $textarea = $('<textarea>')
     $textarea.autosize({append: "\n"})
+    $textarea.on({
+      input : addToAddedCommentIDs(comment_id)
+      resize : addToAddedCommentIDs(comment_id)
+    })
     $comment.append($textarea)
 
     $markups = $("[data-range-id='#{comment_id}']")
@@ -384,3 +451,5 @@ $ ->
       console.log(removed_comment_ids)
       console.log(added_comment_ids)
       new AddCommentMemento(@markups,@comment)
+
+  reAttachComments()

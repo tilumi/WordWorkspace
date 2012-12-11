@@ -7,9 +7,10 @@
 <% content_for :css_includes do -%>
 <%= stylesheet_link_tag    "document.css", :media => "all" %>
 <% end -%>
+<div id="mid" style="display:none"><%=@last_markup_id%></div>
+<div id="saved_comments"  style="display:none"><%=@saved_comments%></div>
 <div id="content">
 	<div id="doc">
-		<div id="mid" style="display:none"><%=@last_markup_id%></div>
 		<%= @body%>
 	</div>
 	<div id="comments"></div>

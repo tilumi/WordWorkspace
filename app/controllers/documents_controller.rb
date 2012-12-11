@@ -36,7 +36,7 @@ class DocumentsController < ApplicationController
         parsed_content=Nokogiri::HTML(content)
         @body = parsed_content.css("body").children.to_html.html_safe
         @title = parsed_content.css("title").children[0]
-        @last_markup_id
+        @saved_comments = Comment.where(:user_id => current_user.id, :document_id => doc.id).to_json()
       end
     else
       redirect_to "/auth/facebook"
@@ -55,7 +55,7 @@ class DocumentsController < ApplicationController
       
       if params[:markupsToAdd]
         markupsToAdd = params[:markupsToAdd]        
-        markupsToAdd.each { |key, markupToAdd|
+        markupsToAdd.each_value { |markupToAdd|
           markupToAdd[:document] = session[:opened_doc]
           markupToAdd[:user] = current_user
           markup = Markup.new(markupToAdd)
@@ -71,6 +71,34 @@ class DocumentsController < ApplicationController
           markupToDelete = Markup.where(:user_id => current_user.id, :document_id => session[:opened_doc].id, :mid => mid).first()
           markupToDelete.destroy() if markupToDelete
         }
+      end
+
+      if params[:commentsToAdd]
+        commentsToAdd = params[:commentsToAdd]
+        commentsToAdd.each_value { |commentToAdd| 
+          conditions = {  :user_id => current_user.id, 
+                          :document_id => session[:opened_doc].id,
+                          :mid => commentToAdd['mid']
+                        }
+
+          comment = Comment.find(:first, :conditions => conditions) || Comment.create(conditions) 
+          # comment = Comment.find_or_create_by_user_id_and_document_id(current_user.id,session[:opened_doc].id)
+          # logger.info(comment)
+          # logger.info(commentToAdd)
+          # commentToAdd[:document] = session[:opened_doc]
+          # commentToAdd[:user] = current_user
+          # comment = Comment.new(commentToAdd)
+          logger.log comment.errors.full_messages unless comment.update_attributes(commentToAdd)
+        }
+      end
+
+      if params[:commentsToDelete]
+        commentsToDelete = params[:commentsToDelete]
+        commentsToDelete.each{ |mid|
+          commentToDelete = Comment.where(:user_id => current_user.id, :document_id => session[:opened_doc].id, :mid => mid).first()
+          commentToDelete.destroy if commentToDelete
+        }
+
       end
       render :json => {:success => true}
     end

@@ -146,14 +146,15 @@
 						// Detects IE9.  IE9 does not fire onpropertychange or oninput for deletions,
 						// so binding to onkeyup to catch most of those occassions.  There is no way that I
 						// know of to detect something like 'cut' in IE9.
-						ta[oninput] = ta.onkeyup = adjust;
+						ta.addEventListener('input',adjust,false);
+						ta.addEventListener('keyup',adjust,false);
 					} else {
 						// IE7 / IE8
-						ta[onpropertychange] = adjust;
+						ta.atachEvenet('onpropertychange',adjust);
 					}
 				} else {
 					// Modern Browsers
-					ta[oninput] = adjust;
+					ta.addEventListener('input',adjust,false);
 
 					// The textarea overflow is now hidden.  But Chrome doesn't reflow the text after the scrollbars are removed.
 					// This is a hack to get Chrome to reflow it's text.

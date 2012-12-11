@@ -147,7 +147,10 @@ $markup-color : darken(#F8E0F1, 20%);
 }
 
 .close-button{
-  float: right;
+  display:block;
+  margin-left: auto;
+  margin-right: 0px;
+  // float: right;
 
 }
 
