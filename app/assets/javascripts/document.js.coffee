@@ -3,26 +3,13 @@ $ ->
   rangy.init();
 
   last_saved_markup_id = parseInt($("#mid").text())
-  # last_saved_comment_id = parseInt($("#commentid").text())
-  # console.log( $("#mid").text() )
   markup_id = last_saved_markup_id + 1
   removed_markup_ids = []
   added_markup_ids = []
   added_comment_ids = []
   removed_comment_ids = []
 
-  # commandHistroy = []
   markup_class = "markup"
-
-  # class AddMarkupCommand 
-
-  #   constructor: (@markup_id,@class,@serializedRange) ->
-
-
-  # class RemoveMarkupCommand
-
-  #   constructor: (@serializedMarkup) ->
-
 
   markCssApplier = rangy.createCssClassApplier(markup_class, null, ["p","b","span","strong","a","font"]);
 
@@ -47,55 +34,81 @@ $ ->
   #     restore()
   # )
 
-  reAttachComments = () ->
+  reAttachCommentsAfterLoaded = () ->
     saved_comments = JSON.parse($("#saved_comments").text())
     for saved_comment in saved_comments
-      comment_id = saved_comment.mid
-      $comment = $("<div>", {id : "comment_#{comment_id}"}).addClass("comment")
+      do (saved_comment) ->
+        comment_id = saved_comment.mid
+        $comment = $("<div>", {id : "comment_#{comment_id}"}).addClass("comment")
 
-      $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
-        ->
-          removeComment($markups,$comment)
-      )
-      $comment.append($closeButton)
+        $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
+          ->
+            removeComment($markups,$comment)
+        )
+        $comment.append($closeButton)
 
-      $textarea = $('<textarea>')
-      $textarea.autosize({append: "\n"})
-      $textarea.width(saved_comment.width) if saved_comment.width > 0
-      $textarea.height(saved_comment.height) if saved_comment.height > 0
-      $textarea.val(saved_comment.content)
-      $textarea.on({
-        input : addToAddedCommentIDs(comment_id)
-        resize : addToAddedCommentIDs(comment_id)        
-      })
-      $comment.append($textarea)
-      $comment.on({
-        mousedown : ->
-          this.mouseDownPosition = $(this).position()
-        mouseup: ->
-          if this.mouseDownPosition
-            if $(this).position().top != this.mouseDownPosition.top or $(this).position().left != this.mouseDownPosition.left
-              addToAddedCommentIDs(comment_id)
-      })
+        $textarea = $('<textarea>')
+        $textarea.autosize({append: "\n"})
+        $textarea.width(saved_comment.width) if saved_comment.width > 0
+        $textarea.height(saved_comment.height) if saved_comment.height > 0
+        $textarea.val(saved_comment.content)
+        $textarea.on({
+          input : addToAddedCommentIDs(comment_id)
+          resize : addToAddedCommentIDs(comment_id)        
+        })
+        $comment.append($textarea)
+        $comment.on({
+          mousedown : ->
+            this.mouseDownPosition = $(this).position()
+          mouseup: ->
+            if this.mouseDownPosition
+              if $(this).position().top != this.mouseDownPosition.top or $(this).position().left != this.mouseDownPosition.left
+                addToAddedCommentIDs(comment_id)
+        })
 
-      $markups = $("[data-range-id='#{comment_id}']")
-      $comment.css({top: "#{saved_comment.y}px", left:"#{saved_comment.x}px"}).addClass("absolute")      
-      jsPlumb.draggable($comment)
-      $("#comments").append($comment)
+        $markups = $("[data-range-id='#{comment_id}']")
+        $comment.css({top: "#{saved_comment.y}px", left:"#{saved_comment.x}px", position: "absolute"})    
+        $("#comments").append($comment)
 
-      $connect = jsPlumb.connect({
-        source: $markups[0]
-        target: $comment
-        anchors: ["TopCenter","TopCenter"]
-      })
-      if selectedMarkup and selectedMarkup.$markups.is $markups
-        selectedMarkup.$comment = $comment
-        selectedMarkup.$connect = $connect
+        # $connect = jsPlumb.connect({
+        #   source: $markups[0]
+        #   target: $comment
+        #   anchors: ["TopCenter","TopCenter"]
+        # })
+        # jsPlumb.draggable($comment)
+        # if selectedMarkup and selectedMarkup.$markups.is $markups
+          # selectedMarkup.$comment = $comment
+          # selectedMarkup.$connect = $connect
 
-      $textarea.focus( ->
-          clickMarkup($(this).closest(".comment"),null,$(this))
-      )
-      $textarea.focus()
+        $textarea.focus( ->
+            clickMarkup($(this).closest(".comment"),null,$(this))
+        )
+        # $textarea.focus()
+
+  addVideoQtip = ->
+    $("a").each ->
+      if $(this).text().indexOf("影片") > -1
+        $(this).qtip({
+          # content: $('<iframe width="400" height="240" src="'+"#{$(this).attr("href")}"+'" frameborder="0" allowfullscreen></iframe>')
+          content : $('<video width="400" height="240" src="http://localhost:1935/vod/mp4:sample.mp4" controls></video>')
+          show: {
+            solo : true
+          },
+          style: {
+              width: 390,
+              height: 230,
+              padding: 0,
+              tip: true,
+              name: 'dark'
+          },
+          hide: {
+            fixed: true,
+            when: {
+              event: 'unfocus'
+            }
+          }
+        });
+        $(this).attr("href","#")
 
   addToAddedCommentIDs = (comment_id) ->
     if added_comment_ids.indexOf(comment_id) == -1
@@ -192,17 +205,17 @@ $ ->
 
     $markups = $("[data-range-id='#{comment_id}']")
     $comment.css({top: "#{$($markups[0]).position().top - $($markups[0]).closest('#doc').position().top}px", left:"0px"}).addClass("absolute")
-    jsPlumb.draggable($comment)
     $("#comments").append($comment)
 
-    $connect = jsPlumb.connect({
-      source: $markups[0]
-      target: $comment
-      anchors: ["TopCenter","TopCenter"]
-    })
+    # jsPlumb.draggable($comment)
+    # $connect = jsPlumb.connect({
+    #   source: $markups[0]
+    #   target: $comment
+    #   anchors: ["TopCenter","TopCenter"]
+    # })
     if selectedMarkup and selectedMarkup.$markups.is $markups
       selectedMarkup.$comment = $comment
-      selectedMarkup.$connect = $connect
+      # selectedMarkup.$connect = $connect
 
     $textarea.focus( ->
         clickMarkup($(this).closest(".comment"),null,$(this))
@@ -241,22 +254,34 @@ $ ->
   applyMarkupHover = ($comment,$markup)->
     comment_id = getCommentID($comment,$markup)
     $("[data-range-id='#{comment_id}']").addClass("markup-hover")
-    $("#comment_#{comment_id}").addClass("markup-hover")
-    if $connect = jsPlumb.select({target : "comment_#{comment_id}"}).get(0)
-      $connect.setVisible(true)
-      $connect.endpoints[0].setVisible(true)
-      $connect.endpoints[1].setVisible(true)
+    $comment = $("#comment_#{comment_id}")
+    if $comment.size() > 0
+      $comment.addClass("markup-hover")
+      $connect = jsPlumb.connect({
+        source: $("[data-range-id='#{comment_id}']")[0]
+        target: $comment
+        anchors: ["TopCenter","TopCenter"]
+      })
+      jsPlumb.draggable($comment)
+    # if $connect = jsPlumb.select({target : "#comment_#{comment_id}"}).get(0)
+    #   $connect.repaint()
+    #   $connect.setVisible(true)
+    #   $connect.endpoints[0].setVisible(true)
+    #   $connect.endpoints[1].setVisible(true)
 
   unapplyMarkupHover = ($comment,$markup)->
 
     comment_id = getCommentID($comment,$markup)
     if !selectedMarkup or !selectedMarkup.$comment.is($("#comment_#{comment_id}"))
       $("[data-range-id='#{comment_id}']").removeClass("markup-hover")
-      $("#comment_#{comment_id}").removeClass("markup-hover")
-      if $connect = jsPlumb.select({target : "comment_#{comment_id}"}).get(0)
-        $connect.setVisible(false)
-        $connect.endpoints[0].setVisible(false)
-        $connect.endpoints[1].setVisible(false)
+      $comment = $("#comment_#{comment_id}")
+      if $comment.size() > 0
+        $comment.removeClass("markup-hover")
+        jsPlumb.removeAllEndpoints($comment)
+      # if $connect = jsPlumb.select({target : "comment_#{comment_id}"}).get(0)
+      #   $connect.setVisible(false)
+      #   $connect.endpoints[0].setVisible(false)
+      #   $connect.endpoints[1].setVisible(false)
 
   getCommentID = ($comment,$markup) ->
     if $comment
@@ -281,28 +306,33 @@ $ ->
     $comment.addClass("markup-selected") if $comment.size() > 0
     $markups = $("[data-range-id='#{comment_id}']").addClass("markup-selected")
     if $comment.size() > 0
-      $connect = jsPlumb.select({target : $comment}).get(0)
-      if $connect
-        $connect.setVisible(true)
-        $connect.endpoints[0].setVisible(true)
-        $connect.endpoints[1].setVisible(true)
+      $connect = jsPlumb.connect({
+        source: $markups
+        target: $comment
+        anchors: ["TopCenter","TopCenter"]
+      })
+      jsPlumb.draggable($comment)
     selectedMarkup = {
       $comment : $comment
       $markups : $markups
-      $connect : $connect
+      # $connect : $connect
     }
 
   unselectMarkup = ->
     if selectedMarkup
-      if selectedMarkup.$comment
+      if selectedMarkup.$comment.size() > 0
         selectedMarkup.$comment.removeClass("markup-selected").removeClass("markup-hover")
+        jsPlumb.removeAllEndpoints(selectedMarkup.$comment)
       if selectedMarkup.$markups
         selectedMarkup.$markups.removeClass("markup-selected").removeClass("markup-hover")
-      if selectedMarkup.$connect
-        selectedMarkup.$connect.setVisible(false)
-        selectedMarkup.$connect.endpoints[0].setVisible(false)
-        selectedMarkup.$connect.endpoints[1].setVisible(false)
+      selectedMarkup = null
 
+
+  $("#doc").on('click',":not(.markup *),:not(textarea)", (e) ->
+      e.stopPropagation()
+      if $(this).closest(".markup").size() == 0
+        unselectMarkup()
+  )
 
   $("body").on(
     {
@@ -312,8 +342,8 @@ $ ->
       mouseleave: ->
         unapplyMarkupHover(null,$(this))
 
-      click: (e) ->
-        clickMarkup(null,$(this),null)
+      mousedown: (e) ->
+        clickMarkup(null,$(this),null) if e.which == 3
     }
     ".markup"
   )
@@ -323,10 +353,12 @@ $ ->
       mouseenter: ->
         applyMarkupHover($(this))
 
+
       mouseleave: ->
         unapplyMarkupHover($(this))
 
       click: (e) ->
+        # jsPlumb.draggable(this)
         clickMarkup($(this),null,$(e.target))
     }
     ".comment"
@@ -358,11 +390,13 @@ $ ->
       History.do(new DeleteCommentMemento($markupsToDelete,$comment))
     removeMarkupMemento = new RemoveMarkupMemento(comment_id)
     History.do(removeMarkupMemento)
-    $connect = jsPlumb.removeAllEndpoints($comment) if $comment
+    jsPlumb.removeAllEndpoints($comment) if $comment
     $markupsToDelete.each((index) ->
         markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this,removeMarkupMemento)
     )
     $comment.detach()
+    if selectedMarkup.$markups.index($(markup)) >= 0
+      selectedMarkup = null
     console.log(removed_markup_ids)
     console.log(added_markup_ids)
     History.endCompoundDo()
@@ -418,7 +452,7 @@ $ ->
 
     restore: ->
       if @comment.size() > 0
-        jsPlumb.removeAllEndpoints(@comment) 
+        # jsPlumb.removeAllEndpoints(@comment) 
         @comment.detach()
         comment_id = $(@comment).attr("id").split("_")[1]
         removed_comment_ids.push(comment_id)
@@ -440,16 +474,19 @@ $ ->
         if removed_comment_ids.indexOf(comment_id) > -1
           removed_comment_ids.splice(removed_comment_ids.indexOf(comment_id),1)
         $("#comments").append(@comment)
-        $connect = jsPlumb.connect({
-          source: @markups[0]
-          target: @comment
-          anchors: ["TopCenter","TopCenter"]
-        })
+        # $connect = jsPlumb.connect({
+        #   source: @markups[0]
+        #   target: @comment
+        #   anchors: ["TopCenter","TopCenter"]
+        # })
         @comment.find("textarea").focus()
-        if selectedMarkup.$markups.is(@markups)
-          selectedMarkup.$connect = $connect
+        # if selectedMarkup.$markups.is(@markups)
+        #   selectedMarkup.$connect = $connect
       console.log(removed_comment_ids)
       console.log(added_comment_ids)
       new AddCommentMemento(@markups,@comment)
 
-  reAttachComments()
+  reAttachCommentsAfterLoaded()
+  addVideoQtip()
+  # jsPlumb.draggable($(".comment"))
+  # jsPlumb.repaintEverything()

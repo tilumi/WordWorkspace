@@ -36,8 +36,6 @@ class Document < ActiveRecord::Base
         logger.info("#{path[0..path.rindex(".")]}html")
         stdin.puts "java -jar /Users/MingFu/Downloads/jodconverter/lib/jodconverter #{path} #{path[0..path.rindex(".")]}html"
         stdin.close
-        puts "#{stdout.read.strip}"
-        puts "#{stderr.read.strip}"
       end
 
       filename = path[path.rindex("/")+1..path.rindex(".")-1]
