@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head></head>
+<head>
+	<script src="/jwplayer.js"></script>
+	<script>jwplayer.key="AHSMl9kJbLLh+AdSGFKCxnfwkVMai8op+zLqhA=="</script>
+</head>
 <body>
-<video src=rtsp://192.168.73.101/Wildlife.mp4 controls>video</video>
+<div id='my-video'></div>
+<script type='text/javascript'>
+    jwplayer('my-video').setup({
+        file: 'http://localhost:1935/vod/mp4:sample.mp4/manifest.f4m',
+        width: '480',
+        height: '270'
+    });
+</script>
 </body>
 </html>

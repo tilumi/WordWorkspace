@@ -10,6 +10,16 @@
 <div id="mid" style="display:none"><%=@last_markup_id%></div>
 <div id="saved_comments"  style="display:none"><%=@saved_comments%></div>
 <div id="content">
+	<div id="users">
+		<%for user in @users%>
+		<div class="user">	
+			<img class="photo" src='<%=user.image%>'/>	
+			<div class="name">
+				<%=user.first_name%> <%=user.last_name%>
+			</div>
+		</div>
+		<%end%>
+	</div>
 	<div id="doc">
 		<%= @body%>
 	</div>
@@ -17,12 +27,12 @@
 </div>
 <div id="nav">
 	<ul>
-		<li>
+		<!-- <li>
 			<a class="top" href="#top"><span></span></a>
 		</li>
 		<li>
 			<a class="bottom" href="#bottom"><span></span></a>
-		</li>
+		</li> -->
 		<li>
 			<a id="undo-btn">Undo</a>
 		</li>
@@ -32,7 +42,7 @@
 		<li>
 			<a id="save-btn">Save</a>
 		</li>
-		<li>
+		<!-- <li>
 			<a id="restore-btn">Restore</a>
 		</li>
 		<li>
@@ -44,6 +54,6 @@
 		<li class="search">
 			<input type="text"/>
 			<input class="searchbutton" type="submit" value=""/>
-		</li>
+		</li> -->
 	</ul>
 </div>

@@ -37,6 +37,10 @@ class DocumentsController < ApplicationController
         @body = parsed_content.css("body").children.to_html.html_safe
         @title = parsed_content.css("title").children[0]
         @saved_comments = Comment.where(:user_id => current_user.id, :document_id => doc.id).to_json()
+        @users = []
+        30.times do 
+          @users << User.first
+        end
       end
     else
       redirect_to "/auth/facebook"

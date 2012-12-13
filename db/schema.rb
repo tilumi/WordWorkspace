@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121211061509) do
+ActiveRecord::Schema.define(:version => 20121212065141) do
 
   create_table "authorizations", :force => true do |t|
     t.string   "provider"
@@ -72,6 +72,7 @@ ActiveRecord::Schema.define(:version => 20121211061509) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
+    t.string   "image"
   end
 
 end

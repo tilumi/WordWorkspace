@@ -204,7 +204,7 @@ $ ->
     $comment.append($textarea)
 
     $markups = $("[data-range-id='#{comment_id}']")
-    $comment.css({top: "#{$($markups[0]).position().top - $($markups[0]).closest('#doc').position().top}px", left:"0px"}).addClass("absolute")
+    $comment.css({top: "#{$($markups[0]).position().top - $($markups[0]).closest('#doc').position().top}px", left:"0px", position : 'absolute'})
     $("#comments").append($comment)
 
     # jsPlumb.draggable($comment)
@@ -256,13 +256,14 @@ $ ->
     $("[data-range-id='#{comment_id}']").addClass("markup-hover")
     $comment = $("#comment_#{comment_id}")
     if $comment.size() > 0
+      source = $("[data-range-id='#{comment_id}']")[0]
       $comment.addClass("markup-hover")
       $connect = jsPlumb.connect({
-        source: $("[data-range-id='#{comment_id}']")[0]
+        source: source
         target: $comment
         anchors: ["TopCenter","TopCenter"]
       })
-      jsPlumb.draggable($comment)
+      # jsPlumb.draggable($comment)
     # if $connect = jsPlumb.select({target : "#comment_#{comment_id}"}).get(0)
     #   $connect.repaint()
     #   $connect.setVisible(true)
@@ -334,7 +335,7 @@ $ ->
         unselectMarkup()
   )
 
-  $("body").on(
+  $("#content").on(
     {
       mouseenter: ->
         applyMarkupHover(null,$(this))
@@ -343,12 +344,13 @@ $ ->
         unapplyMarkupHover(null,$(this))
 
       mousedown: (e) ->
-        clickMarkup(null,$(this),null) if e.which == 3
+        clickMarkup(null,$(this),null)
+        e.preventDefault()
     }
     ".markup"
   )
 
-  $("body").on(
+  $("#content").on(
     {
       mouseenter: ->
         applyMarkupHover($(this))
@@ -357,9 +359,10 @@ $ ->
       mouseleave: ->
         unapplyMarkupHover($(this))
 
-      click: (e) ->
+      mousedown: (e) ->
         # jsPlumb.draggable(this)
         clickMarkup($(this),null,$(e.target))
+
     }
     ".comment"
   )
@@ -486,7 +489,20 @@ $ ->
       console.log(added_comment_ids)
       new AddCommentMemento(@markups,@comment)
 
+
   reAttachCommentsAfterLoaded()
   addVideoQtip()
+  # $("#users").jqDock({ 
+  #   align: 'center' 
+  #   bias: 25
+  #   size: 39
+  #   # labels : 'br'
+  # })
+  $("#users").height($(window).height()-50)
+  $(window).resize( ->
+      $("#users").height($(window).height()-50)
+  )
+  # $('body').layout({ applyDefaultStyles: true });
+  # $(".jqDockLabel").attr('style', 'display:block')
   # jsPlumb.draggable($(".comment"))
   # jsPlumb.repaintEverything()

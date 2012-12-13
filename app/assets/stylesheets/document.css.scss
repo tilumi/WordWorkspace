@@ -1,4 +1,4 @@
-$markup-color : darken(#F8E0F1, 20%);
+$markup-color : #f986c1;
 
 #doc{
   .markup{
@@ -14,6 +14,58 @@ $markup-color : darken(#F8E0F1, 20%);
   }
 }
 
+#users{
+  margin-top:20px;
+  position: fixed;
+  overflow: auto;
+  width: 18%;
+  .user{
+    position: relative;
+    width: 90%;
+    height: 50px;
+    display: table;
+    margin: 10px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    background-color: #d2fc88;
+    -webkit-transition: all .2s ease-in-out;
+    -moz-transition: all .2s ease-in-out;
+    -o-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    &:hover{
+      background-color: #adfa2a;
+      -webkit-transform: scale(1.1); 
+      -moz-transform: scale(1.1); 
+      -o-transform: scale(1.1); 
+      transform: scale(1.1); 
+      cursor: pointer;cursor: hand;
+    }
+  }
+  .photo{
+    // float:left;
+    vertical-align: middle; 
+    // text-align: center; 
+    display: table-cell;
+  }
+  .name{
+    // float:left;
+    vertical-align: middle; 
+    text-align: left; 
+    display: table-cell;
+  }
+  // height:400px;
+}
+//   top:50px;
+//   left:10px;
+//   // bottom:px;
+//   width:15%;
+//   height:100%;
+//   overflow: auto;
+//   // position: fixed;
+//   // display: 
+
+//   // border: 1px solid #ddd;
+// }
 
 #nav{
   height:35px;
@@ -28,7 +80,7 @@ $markup-color : darken(#F8E0F1, 20%);
     height:25px;
     list-style:none;
     margin:6px auto 0px auto;
-    width:600px;
+    width:200px;
     li{
       display:inline;
       float:left;
@@ -95,9 +147,9 @@ $markup-color : darken(#F8E0F1, 20%);
   }
 }
 
-#content{
-  position:relative;
-}
+// #content{
+//   position:relative;
+// }
 
 #doc{
   width:700px;
@@ -114,9 +166,9 @@ $markup-color : darken(#F8E0F1, 20%);
   position: absolute;
 }
 
-#content{
-  margin-top:35px;
-}
+// #content{
+//   margin-top:35px;
+// }
 
 .unselectable {
  -moz-user-select: -moz-none;
@@ -134,7 +186,7 @@ $markup-color : darken(#F8E0F1, 20%);
  padding-left: 3px;
  padding-top: 1px;
  padding-bottom: 3px;
- padding-right: 9px;
+ padding-right: 3px;
  opacity: 0.3;
  &.markup-hover{
    opacity: 0.6;
