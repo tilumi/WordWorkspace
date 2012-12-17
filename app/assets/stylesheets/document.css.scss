@@ -130,7 +130,16 @@ $markup-color : #f986c1;
         background:transparent url(../assets/bottom.png) no-repeat center center;
       }
     }
+
+    &#save-btn{
+      span{
+       background:transparent url(../assets/page-save-icon.png) no-repeat center center; 
+      }
+    }
+
   }
+
+  
 
   input{
     &.searchbutton{

@@ -33,6 +33,7 @@ group :test, :development do
   gem 'guard-jasmine'
   gem 'jasminerice'
   gem 'guard-livereload'
+  gem 'database_cleaner'
 end
 
 gem 'nokogiri'

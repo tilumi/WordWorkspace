@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121212065141) do
+ActiveRecord::Schema.define(:version => 20121213131749) do
 
   create_table "authorizations", :force => true do |t|
     t.string   "provider"
@@ -22,17 +22,14 @@ ActiveRecord::Schema.define(:version => 20121212065141) do
   end
 
   create_table "comments", :force => true do |t|
-    t.integer  "mid"
-    t.string   "className"
     t.integer  "x"
     t.integer  "y"
     t.text     "content"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
-    t.integer  "user_id"
-    t.integer  "document_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
     t.integer  "width"
     t.integer  "height"
+    t.integer  "markup_id"
   end
 
   create_table "documents", :force => true do |t|
@@ -51,6 +48,14 @@ ActiveRecord::Schema.define(:version => 20121212065141) do
     t.text     "content"
     t.datetime "created_at",  :null => false
     t.datetime "updated_at",  :null => false
+  end
+
+  create_table "text_ranges", :force => true do |t|
+    t.integer  "markup_id"
+    t.string   "start_position"
+    t.integer  "length"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
   end
 
   create_table "users", :force => true do |t|

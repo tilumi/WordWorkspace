@@ -27,10 +27,13 @@ class History
     @undo: ->
       if (@_tempMemento != null)
         throw "The complex memento wasn't commited."
+      result = false  
       @_isUndoRedo = true
       if @_undoStack.length > 0
         @_redoStack.push(@_undoStack.pop().restore())
+        result = true
       @_isUndoRedo = false
+      result
 
     @redo: ->
       if (@_tempMemento != null)

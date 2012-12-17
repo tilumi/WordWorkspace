@@ -8,11 +8,12 @@
 <%= stylesheet_link_tag    "document.css", :media => "all" %>
 <% end -%>
 <div id="mid" style="display:none"><%=@last_markup_id%></div>
-<div id="saved_comments"  style="display:none"><%=@saved_comments%></div>
+<div id="saved_comments" style="display:none"><%=@comments%></div>
+<div id="text_ranges" style="display:none"><%=@textRanges%></div>
 <div id="content">
 	<div id="users">
 		<%for user in @users%>
-		<div class="user">	
+		<div class="user" data-user-id='<%=user.id%>'>	
 			<img class="photo" src='<%=user.image%>'/>	
 			<div class="name">
 				<%=user.first_name%> <%=user.last_name%>
@@ -40,7 +41,7 @@
 			<a id="redo-btn">Redo</a>
 		</li>
 		<li>
-			<a id="save-btn">Save</a>
+			<a id="save-btn"><span></span></a>
 		</li>
 		<!-- <li>
 			<a id="restore-btn">Restore</a>

@@ -681,7 +681,7 @@ function isNonInlineElement(node) {
 
     removeMarkup : function(parent,text,textContainer,removeMarkupMemento){
     	var mergeTextNodesResult;
-        dom.insertAfter(text, textContainer);
+        $(textContainer).contents().insertAfter(textContainer);
         parent.removeChild(textContainer);
         mergeTextNodesResult = mergeTextNodes(text);
         if(removeMarkupMemento){

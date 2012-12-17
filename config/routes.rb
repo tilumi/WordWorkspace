@@ -7,6 +7,7 @@ WordWorkspace::Application.routes.draw do
 
   
   match '/documents/save' =>  'documents#save'
+  match '/documents/load' =>  'documents#load'
 
   # resource :session
   resources :documents

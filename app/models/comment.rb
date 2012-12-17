@@ -1,7 +1,5 @@
 class Comment < ActiveRecord::Base
-  attr_accessible :className, :content, :mid, :x, :y, :document, :user, :width, :height, :user_id, :document_id
-  belongs_to :document
-  belongs_to :user
-  accepts_nested_attributes_for :document
-  accepts_nested_attributes_for :user
-end
+  attr_accessor :mid, :className
+  attr_accessible :content, :x, :y, :width, :height, :markup_id
+  belongs_to :markup
+ end
