@@ -35,7 +35,7 @@ group :test, :development do
   gem 'guard-livereload'
   gem 'database_cleaner'
   gem 'sqlite3'
-  gem 'therubyracer'
+  # gem 'therubyracer'
 end
 
 gem 'nokogiri'
