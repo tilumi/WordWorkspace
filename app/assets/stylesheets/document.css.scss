@@ -1,15 +1,31 @@
 $markup-color : #f986c1;
 
 #doc{
-  .markup{
+  div.markup{
     background-color : rgba($markup-color,0.3)
   }
-  .markup-hover{
+
+  span.markup{
+    background-color : rgba(#aef26d,0.3)
+  }
+
+  div.markup-hover{
     background-color : rgba($markup-color,0.6) !important;
     z-index: 2;
   }
-  .markup-selected{
+
+  span.markup-hover{
+    background-color : rgba(#aef26d,0.6) !important;
+    z-index: 2;
+  }
+
+  div.markup-selected{
     background-color : $markup-color !important;
+    z-index: 1;
+  }
+
+  span.markup-selected{
+    background-color : #aef26d !important;
     z-index: 1;
   }
 }
@@ -19,6 +35,7 @@ $markup-color : #f986c1;
   position: fixed;
   overflow: auto;
   width: 18%;
+  border-right: 2px solid #ddd;
   .user{
     position: relative;
     width: 90%;
@@ -79,12 +96,12 @@ $markup-color : #f986c1;
   ul{
     height:25px;
     list-style:none;
-    margin:6px auto 0px auto;
-    width:200px;
+    margin:2px auto auto auto;
+    width:270px;
     li{
       display:inline;
       float:left;
-      margin:0px 2px;
+      margin:0px 0px;
       &.search{
         float:right;
       }
@@ -94,6 +111,24 @@ $markup-color : #f986c1;
         margin:0px 1px 0px 50px;
         padding:2px 2px 2px 2px;
       }
+      div{
+        display: inline-block;
+        width:150px;
+        height: 28px;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1px solid #ccc;
+        color: #0000ff;
+        text-align: center;
+        span{
+          width: 100%;
+          // text-align: center;
+          margin-left: auto;
+          margin-right: auto;
+          line-height:28px;
+        }
+
+      }
     }
   }
 
@@ -101,39 +136,41 @@ $markup-color : #f986c1;
     font-size:11px;
     font-weight:bold;
     float:left;
-    padding: 2px 4px;
+    // padding: 2px 4px;
+    margin-right: 4px;
     color:#999;
     text-decoration: none;
     border:1px solid #ccc;
     cursor: pointer;
     background:transparent url(../assets/overlay.png) repeat-x center left;
-    height:16px;
+    height:28px;
     line-height:16px;
     &:hover{
       background:#D9D9DA none;
       color: #fff;
     }
-    &.top, &.bottom{
+    &.redo-btn, &.undo-btn, &.save-btn{
       span{
         float:left;
-        width:16px;
-        height:16px;
+        width:27px;
+        height:30px;
       }
     }
-    &.top{
+    &.redo-btn{
       span{
-        background:transparent url(../assets/top.png) no-repeat center center;
+        background:transparent url(../assets/redo-icon.png) no-repeat center center;
       }
     }
-    &.bottom{
+    &.undo-btn{
+      margin-left: 4px;
       span{
-        background:transparent url(../assets/bottom.png) no-repeat center center;
+        background:transparent url(../assets/undo-icon.png) no-repeat center center;
       }
     }
 
-    &#save-btn{
+    &.save-btn{
       span{
-       background:transparent url(../assets/page-save-icon.png) no-repeat center center; 
+       background:transparent url(../assets/page-save-icon2.png) no-repeat center center; 
       }
     }
 

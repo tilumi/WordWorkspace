@@ -5,7 +5,7 @@ gem 'rails', '3.2.8'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'sqlite3'
+gem 'pg'
 
 
 # Gems used only for assets and not required
@@ -34,6 +34,7 @@ group :test, :development do
   gem 'jasminerice'
   gem 'guard-livereload'
   gem 'database_cleaner'
+  gem 'sqlite3'
 end
 
 gem 'nokogiri'

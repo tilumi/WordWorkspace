@@ -2,13 +2,16 @@ require 'nokogiri'
 require 'fileutils'
 require 'execjs'
 require 'json'
+require 'open-uri'
 
 class DocumentsController < ApplicationController
 
   PRIVATE_DOCUMENT_DIRECTORY = "app/documents"
 
   def index
-    @documents = Document.all
+    if current_user
+      @documents = Document.all
+    end
   end
 
   def new
@@ -86,9 +89,9 @@ class DocumentsController < ApplicationController
           markup.comment           
         }.find_all{ |comment| comment }.to_json(:except => [ :markup_id, :created_at, :updated_at ], :methods => [:mid, :className])
         @users = []
-        30.times do 
-          @users << User.first
-        end
+        # 30.times do 
+          @users = User.all
+        # end
       end
     else
       redirect_to "/auth/facebook"
@@ -219,7 +222,10 @@ class DocumentsController < ApplicationController
         if params[:commentsToDelete]
           commentsToDelete = params[:commentsToDelete]
           commentsToDelete.each{ |id|
-            Comment.destroy(id)
+            comment_to_delete = Comment.find_by_id(id)
+            if comment_to_delete
+              comment_to_delete.destroy
+            end
           }
         end
         
@@ -257,6 +263,10 @@ class DocumentsController < ApplicationController
   def destroy
     Document.destroy(params[:id])
     redirect_to documents_url
+  end
+
+  def load_bible
+
   end
 
   private

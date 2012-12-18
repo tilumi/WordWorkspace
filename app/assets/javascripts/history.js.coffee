@@ -24,12 +24,13 @@ class History
       @_redoStack = []
       @_tempMemento = null
 
-    @undo: ->
+    @undo: (threshold)->
+      threshold = 0 unless threshold
       if (@_tempMemento != null)
         throw "The complex memento wasn't commited."
       result = false  
       @_isUndoRedo = true
-      if @_undoStack.length > 0
+      if @_undoStack.length > threshold
         @_redoStack.push(@_undoStack.pop().restore())
         result = true
       @_isUndoRedo = false

@@ -3,11 +3,13 @@ $ ->
   rangy.init();
 
   last_saved_markup_id = parseInt($("#mid").text())
+  undoThreshold = 0
   markup_id = last_saved_markup_id + 1
   removed_markup_ids = []
   added_markup_ids = []
   added_comment_ids = []
   removed_comment_ids = []
+  commandHistroy = []
 
   markup_class = "markup"
 
@@ -105,6 +107,8 @@ $ ->
             clickMarkup($(this).closest(".comment"),null,$(this))
         )
         History.do(new AddCommentMemento($markups,$comment))
+        undoThreshold = History._undoStack.length
+        added_comment_ids.length = 0
         # $textarea.focus()
 
   addVideoQtip = ->
@@ -229,6 +233,7 @@ $ ->
               ->
                 $(this).attr("data-id",mid_pk_hash[mid])
             )
+        $("#info").text("Document saved!").fadeIn(100).fadeOut(1000)
 
     })
     
@@ -242,12 +247,12 @@ $ ->
         ,
         items: {
           "edit": {name: "Add Comment", icon: "edit"},
-          "cut": {name: "Cut", icon: "cut"},
-          "copy": {name: "Copy", icon: "copy"},
-          "paste": {name: "Paste", icon: "paste"},
+          # "cut": {name: "Cut", icon: "cut"},
+          # "copy": {name: "Copy", icon: "copy"},
+          # "paste": {name: "Paste", icon: "paste"},
           "delete": {name: "Delete", icon: "delete"},
-          "sep1": "---------",
-          "quit": {name: "Quit", icon: "quit"}
+          # "sep1": "---------",
+          # "quit": {name: "Quit", icon: "quit"}
         }
     }
   )
@@ -263,6 +268,7 @@ $ ->
 
     $textarea = $('<textarea>')
     $textarea.autosize({append: "\n"})
+    $textarea.width(180)
     $textarea.on({
       input : addToAddedCommentIDs(comment_id)
       resize : addToAddedCommentIDs(comment_id)
@@ -317,6 +323,7 @@ $ ->
         target: $comment
         anchors: ["TopCenter","TopCenter"]
       })
+      jsPlumb.draggable($comment)
 
   unapplyMarkupHover = ($comment,$markup)->
 
@@ -373,9 +380,10 @@ $ ->
       selectedMarkup = null
 
 
-  $("#doc").on('click',":not(.markup *),:not(textarea)", (e) ->
+  $("body").on('click',":not(.markup *)", (e) ->
       e.stopPropagation()
-      if $(this).closest(".markup").size() == 0
+      console.log this
+      if $(this).closest(".comment").size() == 0 and $(this).closest(".markup").size() == 0
         unselectMarkup()
   )
 
@@ -389,7 +397,8 @@ $ ->
 
       mousedown: (e) ->
         clickMarkup(null,$(this),null)
-        e.preventDefault()
+        if e.which == 1
+          e.preventDefault()
     }
     ".markup"
   )
@@ -404,8 +413,11 @@ $ ->
         unapplyMarkupHover($(this))
 
       mousedown: (e) ->
-        # jsPlumb.draggable(this)
-        clickMarkup($(this),null,$(e.target))
+        this.downPosition = $(this).position()
+
+      mouseup: (e) ->
+        if this.downPosition and this.downPosition.top == $(this).position().top and this.downPosition.left == $(this).position().left
+          clickMarkup($(this),null,$(e.target))
 
     }
     ".comment"
@@ -483,19 +495,19 @@ $ ->
     {
       keydown: (e) -> 
         if (e.metaKey and e.keyCode == 90)   
-          History.undo()
+          $("#undo-btn").click()
         if (e.metaKey and e.keyCode == 89)   
-          History.redo()
+          $("#redo-btn").click()
         if (e.metaKey and e.keyCode == 83)   
           e.preventDefault()
-          save()
+          $("#save-btn").click()
 
     }
     
   )
 
   $("#undo-btn").click ->
-      History.undo()
+      History.undo(undoThreshold)
 
   $("#redo-btn").click ->
       History.redo()
@@ -563,13 +575,30 @@ $ ->
       console.log(added_comment_ids)
       new AddCommentMemento(@markups,@comment)
 
-  $("#users").height($(window).height()-50)
+  $("#users").height($(window).height()-30)
   $(window).resize( ->
-    $("#users").height($(window).height()-50)
+    $("#users").height($(window).height()-30)
   )
+
+  window.onbeforeunload = () -> 
+      console.log added_markup_ids
+      console.log removed_markup_ids
+      console.log added_comment_ids
+      console.log removed_comment_ids
+      if removed_markup_ids.length > 0 or added_markup_ids.length > 0 or added_comment_ids.length > 0 or removed_comment_ids.length > 0
+        return "您所作的變更尚未儲存！！若離開將會失去你所做的變更！！";
+    
+  
+
+  removeCursiveFont = () ->
+    $("font").each( ->
+        if $(this).attr("face") and $(this).attr("face").indexOf("cursive") > -1
+          $(this).attr("face",$(this).attr("face").split(',').filter( (face) -> face.indexOf("cursive") == -1 ).toString())
+    )
   
   restoreAfterLoad = ->
     
+    removeCursiveFont()
     reMarkupAfterLoaded()
     reAttachCommentsAfterLoaded()
     addVideoQtip()

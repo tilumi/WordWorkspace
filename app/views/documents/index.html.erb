@@ -10,6 +10,7 @@
 <%=link_to "Log in with Facebook", '/auth/facebook', :class => "popup", :"data-width" => 600, :"data-height" => 400%>
 <!-- <a href="/auth/facebook">Facebook 登入</a> -->
 <% end %>
+<% if user_signed_in? %>
 <ul>
 	<% @documents.each do |document| %>
 	<li>
@@ -21,3 +22,4 @@
 	<% end %>
 </ul>
 <%= link_to 'New doc', new_document_path %>
+<% end %>
