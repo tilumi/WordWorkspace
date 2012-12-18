@@ -35,10 +35,13 @@ group :test, :development do
   gem 'guard-livereload'
   gem 'database_cleaner'
   gem 'sqlite3'
+  gem 'therubyracer'
 end
 
 gem 'nokogiri'
-gem 'therubyracer'
+group :production, :staging do
+  gem 'therubyracer', '~> 0.9.3.beta1'
+end
 gem 'open4'
 gem 'devise'
 gem 'omniauth'
