@@ -1,0 +1,10 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Email:</b>
+  <%= @allowed_user.email %>
+</p>
+
+
+<%= link_to 'Edit', edit_allowed_user_path(@allowed_user) %> |
+<%= link_to 'Back', allowed_users_path %>

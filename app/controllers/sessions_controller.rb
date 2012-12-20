@@ -1,14 +1,14 @@
 class SessionsController < ApplicationController
   def create
     @auth = Authorization.create_by_omniauth(auth_hash, current_user)
-    if @auth.user
+    if @auth and @auth.user
        sign_in_and_redirect :user, @auth.user
     else
-      raise do
+      # raise do
         logger.info "auth_hash: #{auth_hash.inspect}"
-        logger.info "@auth: #{@auth.errors.inspect}"
-        redirect_to new_user_session_path
-      end
+        # logger.info "@auth: #{@auth.errors.inspect}"
+        redirect_to documents_path
+      # end
     end
   end
 

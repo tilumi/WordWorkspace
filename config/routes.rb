@@ -1,5 +1,7 @@
 WordWorkspace::Application.routes.draw do
   
+  resources :allowed_users
+
   devise_for :users do
     get '/users/sign_in', :to => 'devise/sessions#new', :as => :new_user_session
     get '/users/sign_out' => 'devise/sessions#destroy', :as => :user_sign_out

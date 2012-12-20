@@ -1,0 +1,23 @@
+<h1>Listing allowed_users</h1>
+
+<table>
+  <tr>
+    <th>Email</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @allowed_users.each do |allowed_user| %>
+  <tr>
+    <td><%= allowed_user.email %></td>
+    <td><%= link_to 'Show', allowed_user %></td>
+    <td><%= link_to 'Edit', edit_allowed_user_path(allowed_user) %></td>
+    <td><%= link_to 'Destroy', allowed_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Allowed user', new_allowed_user_path %>

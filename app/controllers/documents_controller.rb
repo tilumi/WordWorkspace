@@ -89,9 +89,9 @@ class DocumentsController < ApplicationController
           markup.comment           
         }.find_all{ |comment| comment }.to_json(:except => [ :markup_id, :created_at, :updated_at ], :methods => [:mid, :className])
         @users = []
-        # 30.times do 
-          @users = User.all
-        # end
+        30.times do 
+          @users << User.first
+        end
       end
     else
       redirect_to "/auth/facebook"

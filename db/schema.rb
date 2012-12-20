@@ -11,7 +11,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121213131749) do
+ActiveRecord::Schema.define(:version => 20121219065511) do
+
+  create_table "allowed_users", :force => true do |t|
+    t.string   "email"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "authorizations", :force => true do |t|
     t.string   "provider"
@@ -48,6 +54,22 @@ ActiveRecord::Schema.define(:version => 20121213131749) do
     t.text     "content"
     t.datetime "created_at",  :null => false
     t.datetime "updated_at",  :null => false
+  end
+
+  create_table "outlines", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "document_id"
+    t.string   "start_paragraph"
+    t.string   "end_paragraph"
+    t.integer  "x"
+    t.integer  "y"
+    t.integer  "width"
+    t.integer  "height"
+    t.string   "className"
+    t.text     "content"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.integer  "oid"
   end
 
   create_table "text_ranges", :force => true do |t|

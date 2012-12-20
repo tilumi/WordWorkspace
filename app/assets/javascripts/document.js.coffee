@@ -5,14 +5,19 @@ $ ->
   last_saved_markup_id = parseInt($("#mid").text())
   undoThreshold = 0
   markup_id = last_saved_markup_id + 1
+  current_outline_id = 1
   removed_markup_ids = []
   added_markup_ids = []
   added_comment_ids = []
   removed_comment_ids = []
+  added_outline_ids = []
+  removed_outline_ids = []
   commandHistroy = []
-
+  MARKUP_MODE = 1
+  OUTLINE_MODE = 2
+  edit_mode = 1
+  selectedMarkup = null
   markup_class = "markup"
-
   markCssApplier = rangy.createCssClassApplier(markup_class, null, ["p","b","span","strong","a","font"]);
 
   jsPlumb.Defaults.Container = $("body");
@@ -26,12 +31,8 @@ $ ->
       });
   isRangeStartAndEndInMarkup = (range) ->
     $(range.startContainer).parents().attr("data-range-id") && $(range.endContainer).parents().attr("data-range-id")
-  selectedMarkup = null
 
-  $("#save-btn").click( ->
-      save()
-  )
-
+  
   class SurroundContentsMemento
 
     constructor: (@span) ->
@@ -115,7 +116,7 @@ $ ->
     $("a").each ->
       if $(this).text().indexOf("影片") > -1
         $(this).qtip({
-          content : $('<video width="400" height="240" src="http://localhost:1935/vod/mp4:sample.mp4" controls></video>')
+          content : $('<iframe width="380" height="220" src="http://www.youtube.com/embed/yqBKrz9auGo" frameborder="0" allowfullscreen></iframe>')
           show: {
             solo : true
           },
@@ -148,6 +149,19 @@ $ ->
         removed_comment_ids.push(id)
     if added_comment_ids.indexOf(mid) > -1
       added_comment_ids.splice(added_comment_ids.indexOf(mid),1)
+
+  addToAddedOutlineIDs = (oid) ->
+    createAddToOutlineIDsFunc(added_outline_ids,removed_outline_ids).call(this,oid)
+
+  addToRemovedOutlineIDs = (oid) ->
+    createAddToOutlineIDsFunc(removed_outline_ids,added_outline_ids).call(this,oid)
+
+  createAddToOutlineIDsFunc = (outline_ids_to_add, outline_ids_to_remove)->
+    (oid) ->
+      if outline_ids_to_add.indexOf(oid) == -1
+        outline_ids_to_add.push(oid)
+      if outline_ids_to_remove.indexOf(oid) > -1
+        outline_ids_to_remove.splice(outline_ids_to_remove.indexOf(oid),1)  
 
   save = () ->
 
@@ -200,6 +214,14 @@ $ ->
         textRange.length = $(this).text().length
         textRanges.push(textRange)
     )
+
+    outlinesToAdd = []
+
+    for i in added_outline_ids
+      outline = {}
+      outline.oid = parseInt(i)
+      outline
+    
 
     $.ajax({
       url : 'save'
@@ -269,6 +291,7 @@ $ ->
     $textarea = $('<textarea>')
     $textarea.autosize({append: "\n"})
     $textarea.width(180)
+    $textarea.height(40)
     $textarea.on({
       input : addToAddedCommentIDs(comment_id)
       resize : addToAddedCommentIDs(comment_id)
@@ -285,22 +308,12 @@ $ ->
         clickMarkup($(this).closest(".comment"),null,$(this))
     )
     $textarea.focus()
-
     addToAddedCommentIDs(comment_id)
     console.log(removed_comment_ids)
     console.log(added_comment_ids)
     History.do(new AddCommentMemento($markups,$comment))
 
-  $("#doc").bind 'mouseup', (e) ->
-    selection = rangy.getSelection()
-    range = selection.getRangeAt(0)
-    unless range.collapsed
-      selection.removeAllRanges()
-      addMarkup(range)
-
-  $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
-        false
-  )
+  
 
   removeComment = ($markups,$comment)->
     History.do(new DeleteCommentMemento($markups,$comment))
@@ -379,11 +392,276 @@ $ ->
         selectedMarkup.$markups.removeClass("markup-selected").removeClass("markup-hover")
       selectedMarkup = null
 
+  addMarkup = (range) ->
+    # commandHistroy.push(new AddMarkupCommand(rangy.serializeRange(range,true,$("#doc").get(0))))
+    addMarkupMemento = new AddMarkupMemento(markup_id)
+    History.do(addMarkupMemento)
+    markCssApplier.applyToRange(range,markup_id,addMarkupMemento)
+    added_markup_ids.push("#{markup_id}")
+    if removed_markup_ids.indexOf("#{markup_id}") > -1
+      removed_markup_ids.splice(removed_markup_ids.indexOf("#{markup_id}"),1)
+    console.log(removed_markup_ids)
+    console.log(added_markup_ids)
+    markup_id++
+
+  removeMarkup = (markup) ->
+    # commandHistroy.push(new RemoveMarkupCommand(rangy.serializePosition($(markup).get(0),0,$("#doc").get(0))))
+    comment_id = $(markup).attr("data-range-id")
+    removed_markup_ids.push("#{comment_id}")
+    if added_markup_ids.indexOf("#{comment_id}") > -1
+      added_markup_ids.splice(added_markup_ids.indexOf("#{comment_id}"),1)
+    $markupsToDelete = $("[data-range-id='#{comment_id}']")
+    History.beginCompoundDo()
+    $comment = $("#comment_#{comment_id}")
+    if $comment.size() > 0
+      History.do(new DeleteCommentMemento($markupsToDelete,$comment))
+    removeMarkupMemento = new RemoveMarkupMemento(comment_id)
+    History.do(removeMarkupMemento)
+    jsPlumb.removeAllEndpoints($comment) if $comment
+    $markupsToDelete.each((index) ->
+        markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this,removeMarkupMemento)
+    )
+    $comment.detach()
+    if selectedMarkup and selectedMarkup.$markups.index($(markup)) >= 0
+      selectedMarkup = null
+    console.log(removed_markup_ids)
+    console.log(added_markup_ids)
+    History.endCompoundDo()
+  
+  class AddMarkupMemento
+
+    constructor: (@markup_id)->
+      @_mementos = []
+
+    push: (m) ->
+      @_mementos.push(m)
+
+    restore: ->
+      if added_markup_ids.indexOf(""+@markup_id) > -1
+        added_markup_ids.splice(added_markup_ids.indexOf(""+@markup_id),1)
+      removed_markup_ids.push(@markup_id.toString())
+      inverse = new RemoveMarkupMemento(@markup_id)
+      inverse.push(m.restore()) for m in @_mementos.reverse()
+      inverse
+
+  class RemoveMarkupMemento
+
+    constructor: (@markup_id)->
+      @_mementos = []
+
+    push: (m) ->
+      @_mementos.push(m)
+
+    restore: ->
+      if removed_markup_ids.indexOf(@markup_id.toString()) > -1
+        removed_markup_ids.splice(removed_markup_ids.indexOf(@markup_id.toString()),1)
+      added_markup_ids.push(@markup_id.toString())
+      inverse = new AddMarkupMemento(@markup_id)
+      inverse.push(m.restore()) for m in @_mementos.reverse()
+      inverse
+
+  class AddCommentMemento
+
+    constructor: (@markups,@comment) ->
+
+    restore: ->
+      if @comment.size() > 0
+        jsPlumb.removeAllEndpoints(@comment.get(0))
+        @comment.detach()
+        comment_id = $(@comment).attr("id").split("_")[1]
+        addToRemovedCommentIDs(comment_id, $(@comment).attr("data-id"))
+        # removed_comment_ids.push(comment_id)
+        # if added_comment_ids.indexOf(comment_id) > -1
+        #   added_comment_ids.splice(added_comment_ids.indexOf(comment_id), 1)
+      console.log(removed_comment_ids)
+      console.log(added_comment_ids)
+      new DeleteCommentMemento(@markups,@comment)
+
+
+  class DeleteCommentMemento
+
+    constructor: (@markups,@comment) ->
+
+    restore: ->
+      if(@comment.size() > 0)
+        comment_id = $(@comment).attr("id").split("_")[1]
+        addToAddedCommentIDs(comment_id,$(@comment).attr("data-id"))
+        $("#comments").append(@comment)
+        @comment.find("textarea").focus()
+      console.log(removed_comment_ids)
+      console.log(added_comment_ids)
+      new AddCommentMemento(@markups,@comment)
+
+  class AddOutlineMemento
+
+    constructor: (@startParagraph, @endParagraph, @outline) ->
+
+    restore: ->
+      outline_id = @outline.attr("id").split("_")[1]
+      jsPlumb.removeAllEndpoints(@outline)
+      @outline.detach()
+      addToRemovedOutlineIDs(outline_id)
+      new RemoveOutlineMemento(@startParagraph, @endParagraph, @outline)
+
+  class RemoveOutlineMemento
+
+    constructor: (@startParagraph, @endParagraph, @outline) ->
+
+    restore: ->
+      $("#comments").append(@outline)
+      $connect = jsPlumb.connect({
+        connector : [ "Bezier", { curviness:100 } ]
+        source: @startParagraph
+        target: @outline
+        anchors: [[1,0,1,0],[ 0,0.4,-1,0]]
+      })
+      jsPlumb.connect({
+        connector : [ "Bezier", { curviness:100 } ]
+        source: @endParagraph
+        target: @outline
+        anchors: [[1,1,1,0],[ 0,0.6,-1,0]]
+      })
+      jsPlumb.draggable(@outline)
+      @outline.find("textarea").focus()
+      outline_id = @outline.attr("id").split("_")[1]
+      addToAddedOutlineIDs(outline_id)
+      new AddOutlineMemento(@startParagraph, @endParagraph, @outline)
+
+
+  $("#users").height($(window).height()-30)
+  $(window).resize( ->
+    $("#users").height($(window).height()-30)
+  )
+
+  window.onbeforeunload = () -> 
+      console.log added_markup_ids
+      console.log removed_markup_ids
+      console.log added_comment_ids
+      console.log removed_comment_ids
+      if removed_markup_ids.length > 0 or added_markup_ids.length > 0 or added_comment_ids.length > 0 or removed_comment_ids.length > 0
+        return "您所作的變更尚未儲存！！若離開將會失去你所做的變更！！";
+    
+  
+  removeCursiveFont = () ->
+    $("font").each( ->
+        if $(this).attr("face") and $(this).attr("face").indexOf("cursive") > -1
+          $(this).attr("face",$(this).attr("face").split(',').filter( (face) -> face.indexOf("cursive") == -1 ).toString())
+    )
+  
+  restoreAfterLoad = ->
+    
+    removeCursiveFont()
+    reMarkupAfterLoaded()
+    reAttachCommentsAfterLoaded()
+    addVideoQtip()
+
+  removeOutline = ($startParagraph, $endParagraph, $outline) ->
+    outline_id = $outline.attr("id").split("_")[1]
+    jsPlumb.removeAllEndpoints($outline)
+    $outline.detach()
+    # $startParagraph.removeAttr
+    addToRemovedOutlineIDs(outline_id)
+    History.do(new RemoveOutlineMemento($startParagraph,$endParagraph,$outline))
+
+  addOutline = (range)->
+    $startParagraph = $(range.startContainer).closest("p")
+    $endParagraph = $(range.endContainer).closest("p")
+    midpointInParagraphs = ($startParagraph.position().top + $endParagraph.position().top + $endParagraph.height())/2
+    $outline = $("<div>", {id : "outline_#{current_outline_id}"}).addClass("outline")
+    $startParagraph.attr("data-outline-start", current_outline_id)
+    $endParagraph.attr("data-outline-end", current_outline_id)
+    outline_id = $outline.attr("id").split("_")[1]
+    $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
+      ->
+        removeOutline($startParagraph, $endParagraph, $outline)
+    )
+    $outline.append($closeButton)
+
+    $textarea = $('<textarea>')
+    $textarea.autosize({append: "\n"})
+    $textarea.width(180)
+    $textarea.height(40)
+    $textarea.on({
+      input : addToAddedCommentIDs(outline_id)
+      resize : addToAddedCommentIDs(outline_id)
+    })
+    $outline.append($textarea)
+    $("#comments").append($outline)
+    $outline.css({top: "#{midpointInParagraphs - $('#doc').position().top}px", left:"0px", position : 'absolute'})
+    # $textarea.focus( ->
+    #     clickMarkup($(this).closest(".comment"),null,$(this))
+    # )
+    $textarea.focus()
+    $connect = jsPlumb.connect({
+      connector : [ "Bezier", { curviness:100 } ]
+      source: $startParagraph
+      target: $outline
+      anchors: [[1,0,1,0],[ 0,0.4,-1,0]]
+    })
+    jsPlumb.connect({
+      connector : [ "Bezier", { curviness:100 } ]
+      source: $endParagraph
+      target: $outline
+      anchors: [[1,1,1,0],[ 0,0.6,-1,0]]
+    })
+    jsPlumb.draggable($outline)
+    addToAddedOutlineIDs(outline_id)
+    History.do(new AddOutlineMemento($startParagraph, $endParagraph, $outline))
+    current_outline_id++
+
+  $("#save-btn").click( ->
+      save()
+  )
+
+  $("#mark-btn").click( ->
+    edit_mode = MARKUP_MODE
+  )
+
+  $("#outline-btn").click( ->
+    edit_mode = OUTLINE_MODE
+  )
+
+  $("#doc").bind 'mouseup', (e) ->
+    
+      selection = rangy.getSelection()
+      range = selection.getRangeAt(0)
+      unless range.collapsed
+        if edit_mode == MARKUP_MODE
+          selection.removeAllRanges()
+          addMarkup(range)
+        else if edit_mode == OUTLINE_MODE
+          selection.removeAllRanges()
+          addOutline(range)
+
+  $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
+        false
+  )
+
+  $(document).on(
+    {
+      keydown: (e) -> 
+        if (e.metaKey and e.keyCode == 90)   
+          History.undo(undoThreshold)
+        if (e.metaKey and e.keyCode == 89)   
+          History.redo()
+        if (e.metaKey and e.keyCode == 83)   
+          e.preventDefault()
+          save()
+
+    }
+    
+  )
+
+  $("#undo-btn").click ->
+      History.undo(undoThreshold)
+
+  $("#redo-btn").click ->
+      History.redo()
 
   $("body").on('click',":not(.markup *)", (e) ->
       e.stopPropagation()
       console.log this
-      if $(this).closest(".comment").size() == 0 and $(this).closest(".markup").size() == 0
+      if $(this).closest(".comment").size() == 0 and $(this).closest(".markup").size() == 0  and $(this).closest(".outline").size() == 0 
         unselectMarkup()
   )
 
@@ -453,154 +731,5 @@ $ ->
     }
     ".user"
   )
-
-
-  addMarkup = (range) ->
-    # commandHistroy.push(new AddMarkupCommand(rangy.serializeRange(range,true,$("#doc").get(0))))
-    addMarkupMemento = new AddMarkupMemento(markup_id)
-    History.do(addMarkupMemento)
-    markCssApplier.applyToRange(range,markup_id,addMarkupMemento)
-    added_markup_ids.push("#{markup_id}")
-    if removed_markup_ids.indexOf("#{markup_id}") > -1
-      removed_markup_ids.splice(removed_markup_ids.indexOf("#{markup_id}"),1)
-    console.log(removed_markup_ids)
-    console.log(added_markup_ids)
-    markup_id++
-
-  removeMarkup = (markup) ->
-    # commandHistroy.push(new RemoveMarkupCommand(rangy.serializePosition($(markup).get(0),0,$("#doc").get(0))))
-    comment_id = $(markup).attr("data-range-id")
-    removed_markup_ids.push("#{comment_id}")
-    if added_markup_ids.indexOf("#{comment_id}") > -1
-      added_markup_ids.splice(added_markup_ids.indexOf("#{comment_id}"),1)
-    $markupsToDelete = $("[data-range-id='#{comment_id}']")
-    History.beginCompoundDo()
-    $comment = $("#comment_#{comment_id}")
-    if $comment.size() > 0
-      History.do(new DeleteCommentMemento($markupsToDelete,$comment))
-    removeMarkupMemento = new RemoveMarkupMemento(comment_id)
-    History.do(removeMarkupMemento)
-    jsPlumb.removeAllEndpoints($comment) if $comment
-    $markupsToDelete.each((index) ->
-        markCssApplier.removeMarkup(this.parentNode,this.childNodes[0],this,removeMarkupMemento)
-    )
-    $comment.detach()
-    if selectedMarkup and selectedMarkup.$markups.index($(markup)) >= 0
-      selectedMarkup = null
-    console.log(removed_markup_ids)
-    console.log(added_markup_ids)
-    History.endCompoundDo()
-
-  $(document).on(
-    {
-      keydown: (e) -> 
-        if (e.metaKey and e.keyCode == 90)   
-          $("#undo-btn").click()
-        if (e.metaKey and e.keyCode == 89)   
-          $("#redo-btn").click()
-        if (e.metaKey and e.keyCode == 83)   
-          e.preventDefault()
-          $("#save-btn").click()
-
-    }
-    
-  )
-
-  $("#undo-btn").click ->
-      History.undo(undoThreshold)
-
-  $("#redo-btn").click ->
-      History.redo()
-  
-  class AddMarkupMemento
-
-    constructor: (@markup_id)->
-      @_mementos = []
-
-    push: (m) ->
-      @_mementos.push(m)
-
-    restore: ->
-      if added_markup_ids.indexOf(""+@markup_id) > -1
-        added_markup_ids.splice(added_markup_ids.indexOf(""+@markup_id),1)
-      removed_markup_ids.push(@markup_id.toString())
-      inverse = new RemoveMarkupMemento(@markup_id)
-      inverse.push(m.restore()) for m in @_mementos.reverse()
-      inverse
-
-  class RemoveMarkupMemento
-
-    constructor: (@markup_id)->
-      @_mementos = []
-
-    push: (m) ->
-      @_mementos.push(m)
-
-    restore: ->
-      if removed_markup_ids.indexOf(@markup_id.toString()) > -1
-        removed_markup_ids.splice(removed_markup_ids.indexOf(@markup_id.toString()),1)
-      added_markup_ids.push(@markup_id.toString())
-      inverse = new AddMarkupMemento(@markup_id)
-      inverse.push(m.restore()) for m in @_mementos.reverse()
-      inverse
-
-  class AddCommentMemento
-
-    constructor: (@markups,@comment) ->
-
-    restore: ->
-      if @comment.size() > 0
-        @comment.detach()
-        comment_id = $(@comment).attr("id").split("_")[1]
-        addToRemovedCommentIDs(comment_id, $(@comment).attr("data-id"))
-        # removed_comment_ids.push(comment_id)
-        # if added_comment_ids.indexOf(comment_id) > -1
-        #   added_comment_ids.splice(added_comment_ids.indexOf(comment_id), 1)
-      console.log(removed_comment_ids)
-      console.log(added_comment_ids)
-      new DeleteCommentMemento(@markups,@comment)
-
-
-  class DeleteCommentMemento
-
-    constructor: (@markups,@comment) ->
-
-    restore: ->
-      if(@comment.size() > 0)
-        comment_id = $(@comment).attr("id").split("_")[1]
-        addToAddedCommentIDs(comment_id,$(@comment).attr("data-id"))
-        $("#comments").append(@comment)
-        @comment.find("textarea").focus()
-      console.log(removed_comment_ids)
-      console.log(added_comment_ids)
-      new AddCommentMemento(@markups,@comment)
-
-  $("#users").height($(window).height()-30)
-  $(window).resize( ->
-    $("#users").height($(window).height()-30)
-  )
-
-  window.onbeforeunload = () -> 
-      console.log added_markup_ids
-      console.log removed_markup_ids
-      console.log added_comment_ids
-      console.log removed_comment_ids
-      if removed_markup_ids.length > 0 or added_markup_ids.length > 0 or added_comment_ids.length > 0 or removed_comment_ids.length > 0
-        return "您所作的變更尚未儲存！！若離開將會失去你所做的變更！！";
-    
-  
-
-  removeCursiveFont = () ->
-    $("font").each( ->
-        if $(this).attr("face") and $(this).attr("face").indexOf("cursive") > -1
-          $(this).attr("face",$(this).attr("face").split(',').filter( (face) -> face.indexOf("cursive") == -1 ).toString())
-    )
-  
-  restoreAfterLoad = ->
-    
-    removeCursiveFont()
-    reMarkupAfterLoaded()
-    reAttachCommentsAfterLoaded()
-    addVideoQtip()
   
   restoreAfterLoad()

@@ -1,33 +1,35 @@
 $markup-color : #f986c1;
+$outline-color: #f986c1;
 
 #doc{
-  div.markup{
-    background-color : rgba($markup-color,0.3)
-  }
+  // div.markup{
+  //   background-color : rgba($markup-color,0.3);
+  // }
 
   span.markup{
-    background-color : rgba(#aef26d,0.3)
+    background-color : rgba(#aef26d,0.6);
   }
 
-  div.markup-hover{
-    background-color : rgba($markup-color,0.6) !important;
-    z-index: 2;
-  }
+  // div.markup-hover{
+  //   background-color : rgba($markup-color,0.6) !important;
+  //   z-index: 2;
+  // }
 
   span.markup-hover{
     background-color : rgba(#aef26d,0.6) !important;
     z-index: 2;
   }
 
-  div.markup-selected{
-    background-color : $markup-color !important;
-    z-index: 1;
-  }
+  // div.markup-selected{
+  //   background-color : $markup-color !important;
+  //   z-index: 1;
+  // }
 
   span.markup-selected{
     background-color : #aef26d !important;
     z-index: 1;
   }
+
 }
 
 #users{
@@ -97,7 +99,7 @@ $markup-color : #f986c1;
     height:25px;
     list-style:none;
     margin:2px auto auto auto;
-    width:270px;
+    width:360px;
     li{
       display:inline;
       float:left;
@@ -242,6 +244,26 @@ $markup-color : #f986c1;
    opacity: 1;
    z-index: 1;
  }
+}
+
+div.outline{
+  display: table;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color:$outline-color;
+  padding-left: 3px;
+  padding-top: 1px;
+  padding-bottom: 3px;
+  padding-right: 3px;
+  opacity: 0.3;
+  &.markup-hover{
+   opacity: 0.6;
+   z-index: 2;
+  }
+  &.markup-selected{
+   opacity: 1;
+   z-index: 1;
+  }
 }
 
 .close-button{
