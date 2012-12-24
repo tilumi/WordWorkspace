@@ -88,6 +88,11 @@ class DocumentsController < ApplicationController
           end
           markup.comment           
         }.find_all{ |comment| comment }.to_json(:except => [ :markup_id, :created_at, :updated_at ], :methods => [:mid, :className])
+
+        outlineHasMaxID = Outline.where(:user_id => current_user.id, :document_id => doc.id).order("oid DESC").limit(1).first()
+        @last_saved_outline_id = outlineHasMaxID.oid if outlineHasMaxID
+        @last_saved_outline_id ||= 0
+        @outlines = Outline.where(:user_id => current_user.id, :document_id => doc.id).to_json(:except => [:user_id, :document_id, :created_at, :updated_at])
         @users = []
         30.times do 
           @users << User.first
@@ -154,10 +159,17 @@ class DocumentsController < ApplicationController
           markup.comment           
         }.find_all{ |comment| comment }.to_json(:except => [ :markup_id, :created_at, :updated_at ], :methods => [:mid, :className])
 
+        outlineHasMaxID = Outline.where(:user_id => params[:user_id], :document_id => doc.id).order("oid DESC").limit(1).first()
+        last_saved_outline_id = outlineHasMaxID.oid if outlineHasMaxID
+        last_saved_outline_id ||= 0
+        outlines = Outline.where(:user_id => params[:user_id], :document_id => doc.id).to_json(:except => [:user_id, :document_id, :created_at, :updated_at])
+
         render :json => {:success => true, 
               :last_markup_id => last_markup_id,
               :textRanges => textRanges,
-              :comments => comments
+              :comments => comments,
+              :last_saved_outline_id => last_saved_outline_id,
+              :outlines => outlines
                }
       end
     end
@@ -169,8 +181,7 @@ class DocumentsController < ApplicationController
       mid_pk_hash = Hash.new  
       text_range_mid_pk_hash = Hash.new
       comment_mid_pk_hash = Hash.new
-      deleted_text_range_id = Array.new
-      deleted_comment_id = Array.new
+      outline_oid_pk_hash = Hash.new
 
       Markup.transaction do
         if params[:markupsToAdd]
@@ -229,7 +240,28 @@ class DocumentsController < ApplicationController
           }
         end
         
-        # logger.info mid_pk_hash
+        if params[:outlinesToAdd]
+          outlinesToAdd = params[:outlinesToAdd]
+          outlinesToAdd.each_value { |outlineToAdd|
+            if outlineToAdd[:id] and outline = Outline.find_by_id(outlineToAdd[:id])
+              outline.update_attributes(outlineToAdd)
+            else
+              outlineToAdd[:document] = session[:opened_doc]
+              outlineToAdd[:user] = current_user
+              outline = Outline.new(outlineToAdd)
+              logger.log outline.errors.full_messages unless outline.save()
+              outline_oid_pk_hash[outlineToAdd[:oid]] = outline.id
+            end
+          }
+        end
+
+        if params[:outlinesToDelete]
+          params[:outlinesToDelete].each{ |outlineToDelete|
+            if outline = Outline.find_by_id(outlineToDelete)
+              outline.destroy
+            end
+          }
+        end
         
         if params[:textRanges]
           textRanges = params[:textRanges]
@@ -255,7 +287,8 @@ class DocumentsController < ApplicationController
 
       render :json => {:success => true, 
               :text_range_mid_pk_hash => text_range_mid_pk_hash, 
-              :comment_mid_pk_hash => comment_mid_pk_hash
+              :comment_mid_pk_hash => comment_mid_pk_hash,
+              :outline_oid_pk_hash => outline_oid_pk_hash
                }
     end
   end

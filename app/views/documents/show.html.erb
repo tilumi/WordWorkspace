@@ -7,9 +7,11 @@
 <% content_for :css_includes do -%>
 <%= stylesheet_link_tag    "document.css", :media => "all" %>
 <% end -%>
-<div id="mid" style="display:none"><%=@last_markup_id%></div>
+<div id="last_saved_markup_id" style="display:none"><%=@last_markup_id%></div>
 <div id="saved_comments" style="display:none"><%=@comments%></div>
 <div id="text_ranges" style="display:none"><%=@textRanges%></div>
+<div id="last_saved_outline_id" style="display:none"><%=@last_saved_outline_id%></div>
+<div id="outlines" style="display:none"><%=@outlines%></div>
 <div id="content">
 	<div id="users">
 		<%for user in @users%>

@@ -1709,7 +1709,9 @@ jsPlumbUtil = {
 				var s = _getElementObject(elId);
 				if (s != null) {						
 					sizes[elId] = _getSize(s);
+					// console.log(sizes)
 					offsets[elId] = _getOffset(s, _currentInstance);
+					// console.log(offsets)
 					offsetTimestamps[elId] = timestamp;
 				}
 			} else {
@@ -10388,6 +10390,15 @@ between this method and jsPlumb.reset).
 		 */
 		getSize : function(el) {
 			return [el.outerWidth(), el.outerHeight()];
+			// if($.browser.webkit){
+			// 	rect = el.get(0).getBoundingClientRect();
+			// 	console.log(rect);
+			// 	return [Math.ceil(rect.right - rect.left), Math.ceil(rect.bottom - rect.top)];
+			// }
+			// else{
+			// 	// console.log([el.get(0).offsetWidth, el.get(0).offsetHeight])
+			// 	return [el.outerWidth(), el.outerHeight()];
+			// }
 		},
 
         getTagName : function(el) {
