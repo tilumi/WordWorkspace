@@ -20,7 +20,11 @@ class DocumentsController < ApplicationController
 
   def create
     @document = Document.new(params[:document])
-    @document.save
+    if @document.store_doc
+      @document.save
+      else
+        flash[:error] = 'File uploaded failed, you only can upload doc/docx file.'
+      end        
     redirect_to documents_url
   end
 
@@ -93,10 +97,10 @@ class DocumentsController < ApplicationController
         @last_saved_outline_id = outlineHasMaxID.oid if outlineHasMaxID
         @last_saved_outline_id ||= 0
         @outlines = Outline.where(:user_id => current_user.id, :document_id => doc.id).to_json(:except => [:user_id, :document_id, :created_at, :updated_at])
-        @users = []
-        30.times do 
-          @users << User.first
-        end
+        @users = User.all
+        # 30.times do 
+        #   @users << User.first
+        # end
       end
     else
       redirect_to "/auth/facebook"

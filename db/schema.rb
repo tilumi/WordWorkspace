@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121219065511) do
+ActiveRecord::Schema.define(:version => 20121226072327) do
 
   create_table "allowed_users", :force => true do |t|
     t.string   "email"
@@ -100,6 +100,13 @@ ActiveRecord::Schema.define(:version => 20121219065511) do
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
     t.string   "image"
+  end
+
+  create_table "videos", :force => true do |t|
+    t.integer  "document_id"
+    t.string   "path"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
   end
 
 end

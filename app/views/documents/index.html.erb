@@ -1,6 +1,9 @@
 <% content_for :javascript_includes do -%>
 <%= javascript_include_tag "documents.js" %>
 <% end -%>
+<% content_for :css_includes do -%>
+<%= stylesheet_link_tag    "documents.css", :media => "all" %>
+<% end -%>
 <% if user_signed_in? %>
 <div>Hello!! <%= current_user.first_name + " " + current_user.last_name%></div>
  <li>
@@ -9,6 +12,9 @@
 <% else %>
 <%=link_to "Log in with Facebook", '/auth/facebook', :class => "popup", :"data-width" => 600, :"data-height" => 400%>
 <!-- <a href="/auth/facebook">Facebook 登入</a> -->
+<% end %>
+<% if flash[:error] %>
+	<div class='error'><%=flash[:error]%></div>
 <% end %>
 <% if user_signed_in? %>
 <ul>

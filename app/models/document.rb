@@ -6,15 +6,11 @@ class Document < ActiveRecord::Base
   attr_writer :uploaded_file
 
   has_many :markups, :dependent => :delete_all
+  has_many :videos
+  has_many :outlines
 
-  before_create :store_doc
+
   after_destroy :delete_associate_files
-
-  protected
-
-  def my_logger
-    @@my_logger ||= Logger.new("#{Rails.root}/log/my.log")
-  end
 
   def new_filename(original_filename)
     "#{DateTime.now.strftime("%Y%m%d%H%M%S")}#{original_filename[original_filename.rindex(".")..-1]}"
@@ -25,21 +21,31 @@ class Document < ActiveRecord::Base
     self.original_filename = @uploaded_file.original_filename
     path = File.join(DOCUMENT_DIRECTORY, self.original_filename)
     File.open(path,"wb") { |f| f.write(@uploaded_file.read)}
-    doc_to_html(path)
+    if doc_to_html(path)
+      return true
+    else
+      self.filepath = path
+      delete_associate_files
+      return false
+    end
   end
+
+  protected
 
   def doc_to_html(path)
 
+    # binding.pry unless Rails.env == "production"
     if path =~ /\.doc$|\.docx$/
       Open4::open4("sh") do |pid, stdin,stdout,stderr|
         logger.info(path)
         logger.info("#{path[0..path.rindex(".")]}html")
-        stdin.puts "java -jar /Users/MingFu/Downloads/jodconverter/lib/jodconverter #{path} #{path[0..path.rindex(".")]}html"
+        logger.info(%Q{java -jar lib/jodconverter/lib/jodconverter "#{path}" "#{path[0..path.rindex(".")]}html"})
+        stdin.puts %Q{java -jar lib/jodconverter/lib/jodconverter "#{path}" "#{path[0..path.rindex(".")]}html"}        
         stdin.close
+        logger.info stderr
       end
-
-      filename = path[path.rindex("/")+1..path.rindex(".")-1]
       self.filepath = path.gsub(/\.doc$|\.docx$/,".html")
+      File.exists?(self.filepath)
     end
   end
 

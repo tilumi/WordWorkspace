@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="/assets/jwplayer/jwplayer.js" ></script>
+  <script type="text/javascript" src="/assets/jwplayer/swfobject.js" ></script>
+</head>
+<body>
+<div id='container'>The player will be placed here</div>
+
+<script type="text/javascript">
+  var flashvars = {
+
+    file:'mp4:sample.mp4',
+    streamer:'rtmp://localhost/vod'
+  };
+
+  swfobject.embedSWF('/assets/jwplayer/jwplayer.flash.swf','container','480','270','9.0.115','false', flashvars,
+
+   {allowfullscreen:'true',allowscriptaccess:'always'},
+   {id:'jwplayer',name:'jwplayer'}
+
+  );
+</script>
+</body>
+</html>

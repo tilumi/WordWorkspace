@@ -3,162 +3,26 @@ $ ->
   rangy.init();
 
   last_saved_markup_id = parseInt($("#last_saved_markup_id").text())
-  last_saved_outline_id = parseInt($("#last_saved_outline_id").text())
   undoThreshold = 0
   markup_id = last_saved_markup_id + 1
-  current_outline_id = last_saved_outline_id + 1
   removed_markup_ids = []
   added_markup_ids = []
   added_comment_ids = []
   removed_comment_ids = []
-  added_outline_ids = []
-  removed_outline_ids = []
-  commandHistroy = []
   MARKUP_MODE = 1
   OUTLINE_MODE = 2
-  edit_mode = 1
+  edit_mode = 0
   selectedMarkup = null
   markup_class = "markup"
   markCssApplier = rangy.createCssClassApplier(markup_class, null, ["p","b","span","strong","a","font"]);
 
-  jsPlumb.Defaults.Container = $("body");
   commentConOptions = {
-        # connector:[ "Flowchart", { stub:10 } ]
         connector : [ "Bezier", { curviness: 50 } ]
         paintStyle:{ lineWidth:3, strokeStyle:"#ffa500", "dashstyle":"2 4" }
         endpoint:[ "Dot", { radius:5 } ],
         endpointStyle:{ fillStyle:"#ffa500" }
         connectionsDetachable:false
       }
-
-  outlinesConOptions = {
-        connector : [ "Bezier", { curviness:100 } ]
-        paintStyle:{ lineWidth:3, strokeStyle:"#ffa500", "dashstyle":"2 4" }
-        cssClass : 'outline'
-        hoverClass : 'outline-hover'
-      }
-
-  outlineEndpointOptions = {
-            isSource:true
-            endpoint:[ "Dot", { radius:5 } ],
-            paintStyle:{ fillStyle:"#ffa500" }
-          }
-
-  dropOptions = {
-        tolerance:'touch',
-        hoverClass:'dropHover',
-        activeClass:'dragActive',
-        zIndex : 5,
-      };
-
-  jsPlumb.bind('connectionDragStop', (connection) ->
-      jsPlumb.selectEndpoints({scope:connection.endpoints[1].scope}).each((endpoint) ->
-        if endpoint.connections.length == 0
-            endpoint.setVisible(false)
-      )
-    )
-
-  originalId = null
-
-  class ChangeEndpointMemento
-
-    constructor: (@originalId, @currentId, @scope, @outline)->
-
-    restore: ->
-      console.log @originalId
-      console.log @currentId
-      console.log @scope
-      console.log @outline
-      scopeAnchorHash = new Object()
-      scopeAnchorHash['outline-start'] = [ 0,0.4,-1,0]
-      scopeAnchorHash['outline-end'] = [ 0,0.6,-1,0]
-      jsPlumb.select({source: @outline.attr('id') ,scope: @scope}).each((connection) ->
-          if connection.endpoints[1].connections.length <= 1
-            connection.endpoints[1].setVisible(false)
-          jsPlumb.deleteEndpoint(connection.endpoints[0])
-
-        )
-      targetEndpoint = jsPlumb.selectEndpoints({scope:@scope,target:@originalId}).get(0)
-      targetEndpoint.setVisible(true)
-      sourceEndpoint = jsPlumb.addEndpoint(@outline,
-        {
-          anchor: scopeAnchorHash[@scope]
-        },outlineEndpointOptions)
-      sourceEndpoint.setDragAllowedWhenFull(false)
-      jsPlumb.connect(
-        {source: sourceEndpoint
-        target : targetEndpoint
-        scope : @scope},
-        outlinesConOptions
-        )
-      addToAddedOutlineIDs(@outline.attr("id").split("_")[1],@outline.attr("data-outline-id"))
-      new ChangeEndpointMemento(@currentId, @originalId, @scope, @outline)
-  setTimeout(() ->
-    $("p").each( -> 
-
-      bindEventsOnEndpoints = (endpoint, scope) ->
-        endpoint.bind('mouseenter', (endpoint,event) ->
-          jsPlumb.selectEndpoints({scope:scope}).each((endpoint) ->
-              endpoint.setVisible(true)
-          )
-        )
-
-        endpoint.bind('mouseexit', (endpointTarget,event) ->
-          jsPlumb.selectEndpoints({scope:scope}).each((endpoint) ->
-              if endpoint.connections.length == 0
-                endpoint.setVisible(false)
-          )
-        )
-
-      if($(this).text().length > 0 && /\S/gm.test($(this).text()))
-        
-        endpointStart = jsPlumb.addEndpoint(this,
-          {
-            isTarget:true
-            anchor : [1,0,1,0]
-            scope : 'outline-start'
-            endpoint:[ "Dot", { radius:10, cssClass : 'outline', hoverClass : 'outline-target-hover' } ],
-            paintStyle:{ fillStyle:"#ffa500" }
-            dropOptions : dropOptions
-            reattach : true
-            maxConnections : -1
-            beforeDrop: (params) ->
-              # console.log originalId
-              # console.log params.targetId
-              History.do(new ChangeEndpointMemento(originalId, params.targetId,'outline-start',$("##{params.sourceId}")))
-              addToAddedOutlineIDs(params.sourceId.split("_")[1],$("##{params.sourceId}").attr("data-outline-id"))
-              true
-            beforeDetach: (connection) ->
-              originalId = connection.targetId
-          })
-        endpointStart.setVisible(false)
-
-        endpointEnd = jsPlumb.addEndpoint(this,
-          {
-            isTarget:true
-            anchor : [1,1,1,0]
-            scope : 'outline-end'
-            endpoint:[ "Dot", { radius:10, cssClass : 'outline', hoverClass : 'outline-target-hover' } ],
-            paintStyle:{ fillStyle:"#ffa500" }
-            dropOptions : dropOptions
-            maxConnections : -1
-            reattach : true
-            beforeDrop: (params) ->
-              # console.log params.targetId
-              History.do(new ChangeEndpointMemento(originalId, params.targetId,'outline-end',$("##{params.sourceId}")))
-              addToAddedOutlineIDs(params.sourceId.split("_")[1],$("##{params.sourceId}").attr("data-outline-id"))
-              true
-            beforeDetach: (connection) ->
-              originalId = connection.targetId
-          })
-        endpointEnd.setVisible(false)
-        bindEventsOnEndpoints(endpointStart,'outline-start')
-        bindEventsOnEndpoints(endpointEnd,'outline-end')
-    )
-  ,100)
-  isRangeStartAndEndInMarkup = (range) ->
-    $(range.startContainer).parents().attr("data-range-id") && $(range.endContainer).parents().attr("data-range-id")
-
   
   class SurroundContentsMemento
 
@@ -232,122 +96,10 @@ $ ->
         $("#comments").append($comment)
 
         $textarea.focus( ->
-            clickMarkup($(this).closest(".comment"),null,$(this))
+            selectMarkup($(this).closest(".comment"),null,$(this))
         )
         History.do(new AddCommentMemento($markups,$comment))
-        added_comment_ids.length = 0
-
-  connectParagraphToOutline = ($startParagraph, $endParagraph, $outline) ->
-    startTargetEndpoint = jsPlumb.getEndpoints($startParagraph).filter((endpoint) -> endpoint.scope == "outline-start")[0]
-    startTargetEndpoint.setVisible(true)
-    startSourceEndpoint = jsPlumb.addEndpoint($outline,
-      {
-        anchor: [ 0,0.4,-1,0]
-      },outlineEndpointOptions)
-    startSourceEndpoint.setDragAllowedWhenFull(false)
-    jsPlumb.connect(
-      {source: startSourceEndpoint
-      target : startTargetEndpoint
-      scope : 'outline-start'},
-      outlinesConOptions
-      )
-    endTargetEndpoint = jsPlumb.getEndpoints($endParagraph).filter((endpoint) -> endpoint.scope == "outline-end")[0]
-    endTargetEndpoint.setVisible(true)
-    endSourceEndpoint = jsPlumb.addEndpoint($outline,
-      {
-        anchor: [ 0,0.6,-1,0]
-      },outlineEndpointOptions)
-    endSourceEndpoint.setDragAllowedWhenFull(false)
-    jsPlumb.connect(
-      {source: endSourceEndpoint
-      target : endTargetEndpoint
-      scope : 'outline-end'},
-      outlinesConOptions
-    )
-    jsPlumb.draggable($outline)  
-
-  reAttachOutlinesAfterLoaded = () ->
-    saved_outlines = JSON.parse($("#outlines").text())
-    for saved_outline in saved_outlines
-      do(saved_outline) ->
-        $startParagraph = $(rangy.deserializePosition(saved_outline.start_paragraph, $("#doc").get(0)).node)
-        $endParagraph = $(rangy.deserializePosition(saved_outline.end_paragraph, $("#doc").get(0)).node)
-        outline_id = saved_outline.oid
-        $outline = $("<div>", {id : "outline_#{outline_id}"}).addClass(saved_outline.className)
-        if saved_outline.id
-          $outline.attr("data-outline-id",saved_outline.id)
-        $outline.css({top: "#{saved_outline.y}px", left: "#{saved_outline.x}px", position: "absolute"})
-        $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
-          ->
-            removeOutline($startParagraph, $endParagraph, $outline)
-        )
-        $outline.append($closeButton)
-        
-        $textarea = $('<textarea>')
-        $textarea.autosize({append: "\n"})
-        $textarea.width(saved_outline.width)
-        $textarea.height(saved_outline.height)
-        $textarea.val(saved_outline.content)
-        $textarea.on({
-          input : addToAddedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-          resize : addToAddedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-          focus : ->        
-            this.hasFocus = true
-            $outline.addClass('outline-hover')
-            jsPlumb.select({source:$outline.attr('id')}).each(
-              (connection) ->
-                connection.setHover(true)
-            )
-          focusout : ->
-            this.hasFocus = false
-            $outline.removeClass('outline-hover')
-            jsPlumb.select({source:$outline.attr('id')}).each(
-              (connection) ->
-                connection.setHover(false)
-            )
-        })
-        $outline.on({
-          mousedown : ->
-            this.mouseDownPosition = $(this).position()
-          mouseup: ->
-            if this.mouseDownPosition
-              if $(this).position().top != this.mouseDownPosition.top or $(this).position().left != this.mouseDownPosition.left
-                addToAddedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-        })
-        $outline.append($textarea)
-
-        $("#comments").append($outline)
-        setTimeout(() -> 
-            connectParagraphToOutline($startParagraph, $endParagraph, $outline)
-          ,100)
-        History.do(new AddOutlineMemento($startParagraph, $endParagraph, $outline))
-        undoThreshold = History._undoStack.length
-        added_outline_ids.length = 0
-
-
-  addVideoQtip = ->
-    $("a").each ->
-      if $(this).text().indexOf("影片") > -1
-        $(this).qtip({
-          content : $('<iframe width="380" height="220" src="http://www.youtube.com/embed/yqBKrz9auGo" frameborder="0" allowfullscreen></iframe>')
-          show: {
-            solo : true
-          },
-          style: {
-              width: 390,
-              height: 230,
-              padding: 0,
-              tip: true,
-              name: 'dark'
-          },
-          hide: {
-            fixed: true,
-            when: {
-              event: 'unfocus'
-            }
-          }
-        });
-        $(this).attr("href","#")
+        added_comment_ids.length = 0  
 
   addToAddedCommentIDs = (mid,id) ->
     if added_comment_ids.indexOf(mid) == -1
@@ -362,21 +114,6 @@ $ ->
         removed_comment_ids.push(id)
     if added_comment_ids.indexOf(mid) > -1
       added_comment_ids.splice(added_comment_ids.indexOf(mid),1)
-
-  addToAddedOutlineIDs = (oid, id) ->
-    createAddToOutlineIDsFunc(added_outline_ids,removed_outline_ids).call(this, "#{oid}", "#{id}")
-
-  addToRemovedOutlineIDs = (oid, id) ->
-    createAddToOutlineIDsFunc(removed_outline_ids,added_outline_ids).call(this, "#{id}", "#{oid}")
-
-  createAddToOutlineIDsFunc = (outline_ids_to_add, outline_ids_to_remove)->
-    (oid, id) ->
-      if oid
-        if outline_ids_to_add.indexOf(oid) == -1
-          outline_ids_to_add.push(oid)
-      if id
-        if outline_ids_to_remove.indexOf(id) > -1
-          outline_ids_to_remove.splice(outline_ids_to_remove.indexOf(id),1)
 
   save = () ->
 
@@ -432,12 +169,11 @@ $ ->
 
     outlinesToAdd = []
 
-    for i in added_outline_ids
+    for i in Outline.added_outline_ids()
       outline = {}
       $outline = $("#outline_#{i}")
       outline.id = $outline.attr("data-outline-id")
       outline.oid = parseInt(i)
-      # console.log jsPlumb.select({source:"outline_#{i}", scope: 'outline-start'}).get(0).target
       outline.start_paragraph = rangy.serializePosition(jsPlumb.select({source:"outline_#{i}",scope:'outline-start' }).get(0).target.get(0),0,$("#doc").get(0))
       outline.end_paragraph = rangy.serializePosition(jsPlumb.select({source:"outline_#{i}", scope: 'outline-end' }).get(0).target.get(0),0,$("#doc").get(0))
       outline.x = $outline.position().left
@@ -455,9 +191,9 @@ $ ->
         markupsToAdd : markupsToAdd
         markupsToDelete : removed_markup_ids.filter( (mid) -> parseInt(mid) <= last_saved_markup_id )
         commentsToAdd : commentsToAdd
-        commentsToDelete : removed_comment_ids
+        commentsToDelete : removed_comment_ids.filter( (id) -> id != 'undefined' && id )
         outlinesToAdd : outlinesToAdd
-        outlinesToDelete : removed_outline_ids
+        outlinesToDelete : Outline.removed_outline_ids().filter( (id) -> id != 'undefined' && id )
         textRanges : textRanges
 
       }
@@ -467,10 +203,8 @@ $ ->
         removed_markup_ids.length = 0
         added_comment_ids.length = 0
         removed_comment_ids.length = 0
-        added_outline_ids.length = 0
-        removed_outline_ids.length = 0
+        Outline.initAfterSave()
         last_saved_markup_id = markup_id - 1
-        last_saved_outline_id = current_outline_id - 1
         if response['text_range_mid_pk_hash']
           mid_pk_hash = response['text_range_mid_pk_hash']
           for mid of mid_pk_hash
@@ -551,7 +285,7 @@ $ ->
       selectedMarkup.$comment = $comment
       # selectedMarkup.$connect = $connect
     $textarea.focus( ->
-        clickMarkup($(this).closest(".comment"),null,$(this))
+        selectMarkup($(this).closest(".comment"),null,$(this))
     )
     $textarea.focus()
     addToAddedCommentIDs(comment_id)
@@ -601,7 +335,7 @@ $ ->
       comment_id = $markup.attr("data-range-id")
     comment_id
 
-  clickMarkup = ($comment,$markup,$target) ->
+  selectMarkup = ($comment,$markup,$target) ->
     if selectedMarkup
       if $markup && selectedMarkup.$markups.index($markup) >= 0
         unselectMarkup()
@@ -733,51 +467,23 @@ $ ->
       console.log(added_comment_ids)
       new AddCommentMemento(@markups,@comment)
 
-  class AddOutlineMemento
-
-    constructor: (@startParagraph, @endParagraph, @outline) ->
-
-    restore: ->
-      outline_id = @outline.attr("id").split("_")[1]
-      jsPlumb.select({source:"outline_#{outline_id}"}).each((connection) ->
-        if connection.endpoints[1].connections.length <= 1
-          connection.endpoints[1].setVisible(false)
-      )
-      jsPlumb.removeAllEndpoints(@outline)
-      @outline.detach()
-      addToRemovedOutlineIDs(outline_id,@outline.attr("data-outline-id"))
-      new RemoveOutlineMemento(@startParagraph, @endParagraph, @outline)
-
-  class RemoveOutlineMemento
-
-    constructor: (@startParagraph, @endParagraph, @outline) ->
-
-    restore: ->
-      $("#comments").append(@outline)
-      @outline.find("textarea").focus()
-      outline_id = @outline.attr("id").split("_")[1]
-      connectParagraphToOutline(@startParagraph, @endParagraph, @outline)
-      addToAddedOutlineIDs(outline_id, @outline.attr("data-outline-id"))
-      new AddOutlineMemento(@startParagraph, @endParagraph, @outline)
-
-
   $("#users").height($(window).height()-30)
   $(window).resize( ->
     $("#users").height($(window).height()-30)
   )
 
-  window.onbeforeunload = () -> 
+  window.onbeforeunload = () ->       
+    if removed_markup_ids.filter( (mid) -> parseInt(mid) <= last_saved_markup_id ).length > 0 or added_markup_ids.length > 0 or 
+        added_comment_ids.length > 0 or removed_comment_ids.filter( (id) -> id != 'undefined' && id ).length > 0 or Outline.isDirty()
+
       console.log added_markup_ids
       console.log removed_markup_ids
       console.log added_comment_ids
       console.log removed_comment_ids
-      console.log added_outline_ids
-      console.log removed_outline_ids
-      if removed_markup_ids.length > 0 or added_markup_ids.length > 0 or 
-          added_comment_ids.length > 0 or removed_comment_ids.length > 0 or 
-          added_outline_ids.length > 0 or removed_outline_ids.length > 0
+      console.log Outline.added_outline_ids()
+      console.log Outline.removed_outline_ids()
 
-        return "您所作的變更尚未儲存！！若離開將會失去你所做的變更！！";
+      return "您所作的變更尚未儲存！！若離開將會失去你所做的變更！！";
     
   
   removeCursiveFont = () ->
@@ -791,81 +497,26 @@ $ ->
     removeCursiveFont()
     reMarkupAfterLoaded()
     reAttachCommentsAfterLoaded()
-    reAttachOutlinesAfterLoaded()
+    Outline.reAttachOutlinesAfterLoaded()
     addVideoQtip()
-
-  removeOutline = ($startParagraph, $endParagraph, $outline) ->
-    outline_id = $outline.attr("id").split("_")[1]
-    jsPlumb.select({source:"outline_#{outline_id}"}).each((connection) ->
-      if connection.endpoints[1].connections.length <= 1
-        connection.endpoints[1].setVisible(false)
-    )
-    jsPlumb.removeAllEndpoints($outline)
-    addToRemovedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-    $outline.detach()
-    History.do(new RemoveOutlineMemento($startParagraph,$endParagraph,$outline))
-
-  addOutline = (range)->
-    $startParagraph = $(range.startContainer).closest("p")
-    $endParagraph = $(range.endContainer).closest("p")
-    midpointInParagraphs = ($startParagraph.position().top + $endParagraph.position().top + $endParagraph.height())/2
-    $outline = $("<div>", {id : "outline_#{current_outline_id}"}).addClass("outline")
-    outline_id = $outline.attr("id").split("_")[1]
-    $closeButton = $("<img>",{src : "/assets/close.png"}).addClass("close-button").click(
-      ->
-        removeOutline($startParagraph, $endParagraph, $outline)
-    )
-    $outline.append($closeButton)
-
-    $textarea = $('<textarea>')
-    $textarea.autosize({append: "\n"})
-    $textarea.width(180)
-    $textarea.height(40)
-    $textarea.on({
-      input : addToAddedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-      resize : addToAddedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-      focus : ->        
-        this.hasFocus = true
-        $outline.addClass('outline-hover')
-        jsPlumb.select({source:$outline.attr('id')}).each(
-          (connection) ->
-            connection.setHover(true)
-        )
-      focusout : ->
-        this.hasFocus = false
-        $outline.removeClass('outline-hover')
-        jsPlumb.select({source:$outline.attr('id')}).each(
-          (connection) ->
-            connection.setHover(false)
-        )
-    })
-    $outline.on({
-          mousedown : ->
-            this.mouseDownPosition = $(this).position()
-          mouseup: ->
-            if this.mouseDownPosition
-              if $(this).position().top != this.mouseDownPosition.top or $(this).position().left != this.mouseDownPosition.left
-                addToAddedOutlineIDs(outline_id, $outline.attr("data-outline-id"))
-        })
-    $outline.append($textarea)
-    $("#comments").append($outline)
-    console.log $outline.height()
-    $outline.css({top: "#{midpointInParagraphs - $('#doc').position().top}px", left:"0px", position : 'absolute'})
-    $textarea.focus()
-    connectParagraphToOutline($startParagraph, $endParagraph, $outline)
-    addToAddedOutlineIDs(outline_id)
-    History.do(new AddOutlineMemento($startParagraph, $endParagraph, $outline))
-    current_outline_id++
+    undoThreshold = History._undoStack.length
 
   $("#save-btn").click( ->
       save()
   )
 
+  $("#pointer-btn").click( ->
+    $("#doc").css( 'cursor', 'default' )
+    edit_mode = 0
+  )
+
   $("#mark-btn").click( ->
+    $("#doc").css( 'cursor', 'url(/assets/aero_select.cur), auto' )
     edit_mode = MARKUP_MODE
   )
 
   $("#outline-btn").click( ->
+    $("#doc").css( 'cursor', 'url(/assets/aero_pen.cur), auto' )
     edit_mode = OUTLINE_MODE
   )
 
@@ -880,7 +531,7 @@ $ ->
             addMarkup(range)
           else if edit_mode == OUTLINE_MODE
             selection.removeAllRanges()
-            addOutline(range)
+            Outline.addOutline(range)
 
   $("#nav").find("a").addClass("unselectable").on( "onselectstart" , ->
         false
@@ -943,7 +594,7 @@ $ ->
         unapplyMarkupHover(null,$(this))
 
       mousedown: (e) ->
-        clickMarkup(null,$(this),null)
+        selectMarkup(null,$(this),null)
         if e.which == 1
           e.preventDefault()
     }
@@ -963,7 +614,7 @@ $ ->
 
       mouseup: (e) ->
         if this.downPosition and this.downPosition.top == $(this).position().top and this.downPosition.left == $(this).position().left
-          clickMarkup($(this),null,$(e.target))
+          selectMarkup($(this),null,$(e.target))
 
     }
     ".comment"
@@ -987,6 +638,7 @@ $ ->
               removed_markup_ids.length = 0
               added_comment_ids.length = 0
               removed_comment_ids.length = 0
+              Outline.initAfterReload()
               if(response['last_markup_id'])
                 last_markup_id = parseInt(response['last_markup_id'])
               if(response['textRanges'])

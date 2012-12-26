@@ -1,5 +1,7 @@
 WordWorkspace::Application.routes.draw do
   
+  resources :videos
+
   resources :allowed_users
 
   devise_for :users do

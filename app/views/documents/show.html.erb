@@ -1,4 +1,8 @@
 <% content_for :javascript_includes do -%>
+<%= javascript_include_tag "jwplayer/jwplayer.js" %>
+<%= javascript_include_tag "jwplayer/swfobject.js" %>
+<%= javascript_include_tag "document_video.js" %>
+<%= javascript_include_tag "document_outline.js" %>
 <%= javascript_include_tag "document.js" %>
 <% end -%>
 <% content_for :title do -%>
@@ -34,10 +38,13 @@
 			<a class="save-btn" id="save-btn"><span></span></a>
 		</li>
 		<li>
-			<a class="top" id="mark-btn"><span>Mark</span></a>
+			<a class="text-btn" id="pointer-btn"><span>Pointer</span></a>
 		</li>
 		<li>
-			<a class="bottom" id="outline-btn"><span>Outline</span></a>
+			<a class="text-btn" id="mark-btn"><span>Mark</span></a>
+		</li>
+		<li>
+			<a class="text-btn" id="outline-btn"><span>Outline</span></a>
 		</li>
 		<li>
 			<div><span id="info"></span></div>

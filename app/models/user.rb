@@ -11,6 +11,7 @@ class User < ActiveRecord::Base
 
   has_many :authorizations
   has_many :markups
+  has_many :outlines
 
   def self.create_from_auth!(hash)
     created_hash = {:email => hash[:info][:email], :first_name => hash[:info][:first_name], 

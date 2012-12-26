@@ -10,6 +10,6 @@ test:
     :api_secret: "86d556069247081bccb152dc6e372e6c"
 production:
   :facebook:
-    :domain: "localhost"
-    :api_id: "120811191413187"
-    :api_secret: "86d556069247081bccb152dc6e372e6c"
+    :domain: "loyal.jms.tw"
+    :api_id: "506471126052324"
+    :api_secret: "444c2fdaa1ecd0753fbb4ee6e7c6038e"

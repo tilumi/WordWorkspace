@@ -5,7 +5,7 @@ gem 'rails', '3.2.8'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'pg'
+# gem 'pg'
 
 
 # Gems used only for assets and not required
@@ -34,10 +34,12 @@ group :test, :development do
   gem 'jasminerice'
   gem 'guard-livereload'
   gem 'database_cleaner'
-  gem 'sqlite3'
-  # gem 'therubyracer'
 end
 
+gem 'pry', :group => :development
+gem "pry-nav", :group => :development
+
+gem 'sqlite3'
 gem 'nokogiri'
 group :production, :staging do
   gem 'therubyracer', '~> 0.9.3.beta1'
@@ -47,6 +49,7 @@ gem 'devise'
 gem 'omniauth'
 gem 'omniauth-facebook'
 gem 'execjs'
+gem 'active_scaffold'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
