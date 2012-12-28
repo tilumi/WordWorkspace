@@ -1,6 +1,11 @@
+# require 'el_finder/action'
+
 class VideosController < ApplicationController
+  include ElFinder::Action
+
   # GET /videos
   # GET /videos.json
+
   def index
     @videos = Video.all
 

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>elFinder 2.x source version with PHP connector</title>
+	<!-- 
+	<script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
+	-->
+	<!-- <script src="jquery/jquery-1.7.2.min.js"></script> -->
+	<script src="jquery/jquery-1.8.1.min.js" type="text/javascript" charset="utf-8"></script>
+	
+	<!-- <script src="jquery/jquery-ui-1.8.21.custom.min.js"></script> -->
+	<script src="/assets/jquery-ui.js?body=1" type="text/javascript"></script>
+	<link href="/assets/jquery-ui-1.9.2.custom.css?body=1" media="all" rel="stylesheet" type="text/css" />
+	
+	<!-- <link rel="stylesheet" href="jquery/ui-themes/smoothness/jquery-ui-1.8.21.custom.css" type="text/css"> -->
+
+	
+	<link rel="stylesheet" href="css/common.css"      type="text/css">
+	<link rel="stylesheet" href="css/dialog.css"      type="text/css">
+	<link rel="stylesheet" href="css/toolbar.css"     type="text/css">
+	<link rel="stylesheet" href="css/navbar.css"      type="text/css">
+	<link rel="stylesheet" href="css/statusbar.css"   type="text/css">
+	<link rel="stylesheet" href="css/contextmenu.css" type="text/css">
+	<link rel="stylesheet" href="css/cwd.css"         type="text/css">
+	<link rel="stylesheet" href="css/quicklook.css"   type="text/css">
+	<link rel="stylesheet" href="css/commands.css"    type="text/css">
+
+	<link rel="stylesheet" href="css/fonts.css"       type="text/css">
+	<link rel="stylesheet" href="css/theme.css"       type="text/css">
+
+	<!-- elfinder core -->
+	<script src="js/elFinder.js"></script>
+	<script src="js/elFinder.version.js"></script>
+	<script src="js/jquery.elfinder.js"></script>
+	<script src="js/elFinder.resources.js"></script>
+	<script src="js/elFinder.options.js"></script>
+	<script src="js/elFinder.history.js"></script>
+	<script src="js/elFinder.command.js"></script>
+
+	<!-- elfinder ui -->
+	<script src="js/ui/overlay.js"></script>
+	<script src="js/ui/workzone.js"></script>
+	<script src="js/ui/navbar.js"></script>
+	<script src="js/ui/dialog.js"></script>
+	<script src="js/ui/tree.js"></script>
+	<script src="js/ui/cwd.js"></script>
+	<script src="js/ui/toolbar.js"></script>
+	<script src="js/ui/button.js"></script>
+	<script src="js/ui/uploadButton.js"></script>
+	<script src="js/ui/viewbutton.js"></script>
+	<script src="js/ui/searchbutton.js"></script>
+	<script src="js/ui/sortbutton.js"></script>
+	<script src="js/ui/panel.js"></script>
+	<script src="js/ui/contextmenu.js"></script>
+	<script src="js/ui/path.js"></script>
+	<script src="js/ui/stat.js"></script>
+	<script src="js/ui/places.js"></script>
+
+	<!-- elfinder commands -->
+	<script src="js/commands/back.js"></script>
+	<script src="js/commands/forward.js"></script>
+	<script src="js/commands/reload.js"></script>
+	<script src="js/commands/up.js"></script>
+	<script src="js/commands/home.js"></script>
+	<script src="js/commands/copy.js"></script>
+	<script src="js/commands/cut.js"></script>
+	<script src="js/commands/paste.js"></script>
+	<script src="js/commands/open.js"></script>
+	<script src="js/commands/rm.js"></script>
+	<script src="js/commands/info.js"></script>
+	<script src="js/commands/duplicate.js"></script>
+	<script src="js/commands/rename.js"></script>
+	<script src="js/commands/help.js"></script>
+	<script src="js/commands/getfile.js"></script>
+	<script src="js/commands/mkdir.js"></script>
+	<script src="js/commands/mkfile.js"></script>
+	<script src="js/commands/upload.js"></script>
+	<script src="js/commands/download.js"></script>
+	<script src="js/commands/edit.js"></script>
+	<script src="js/commands/quicklook.js"></script>
+	<script src="js/commands/quicklook.plugins.js"></script>
+	<script src="js/commands/extract.js"></script>
+	<script src="js/commands/archive.js"></script>
+	<script src="js/commands/search.js"></script>
+	<script src="js/commands/view.js"></script>
+	<script src="js/commands/resize.js"></script>
+	<script src="js/commands/sort.js"></script>	
+	<script src="js/commands/netmount.js"></script>	
+
+	<!-- elfinder languages -->
+	<script src="js/i18n/elfinder.ar.js"></script>
+	<script src="js/i18n/elfinder.bg.js"></script>
+	<script src="js/i18n/elfinder.ca.js"></script>
+	<script src="js/i18n/elfinder.cs.js"></script>
+	<script src="js/i18n/elfinder.de.js"></script>
+	<script src="js/i18n/elfinder.en.js"></script>
+	<script src="js/i18n/elfinder.es.js"></script>
+	<script src="js/i18n/elfinder.fa.js"></script>
+	<script src="js/i18n/elfinder.fr.js"></script>
+	<script src="js/i18n/elfinder.hu.js"></script>
+	<script src="js/i18n/elfinder.it.js"></script>
+	<script src="js/i18n/elfinder.jp.js"></script>
+	<script src="js/i18n/elfinder.ko.js"></script>
+	<script src="js/i18n/elfinder.nl.js"></script>
+	<script src="js/i18n/elfinder.no.js"></script>
+	<script src="js/i18n/elfinder.pl.js"></script>
+	<script src="js/i18n/elfinder.pt_BR.js"></script>
+	<script src="js/i18n/elfinder.ru.js"></script>
+	<script src="js/i18n/elfinder.tr.js"></script>
+	<script src="js/i18n/elfinder.zh_CN.js"></script>
+
+	<!-- elfinder dialog -->
+	<script src="js/jquery.dialogelfinder.js"></script>
+
+	<!-- elfinder 1.x connector API support -->
+	<script src="js/proxy/elFinderSupportVer1.js"></script>
+
+	<!-- elfinder custom extenstions -->
+	<script src="/assets/jwplayer/jwplayer.js?body=1" type="text/javascript"></script>
+	<script src="/assets/jwplayer/swfobject.js?body=1" type="text/javascript"></script>
+	<script src="/assets/elfinder/elfinder.zh_TW.js?body=1" type="text/javascript"></script>
+	<script src="/assets/tinybox2/tinybox.js?body=1" type="text/javascript"></script>
+	<script src="/assets/colorbox/jquery.colorbox.js?body=1" type="text/javascript"></script>
+
+  	<link href="/assets/tinybox2/style.css?body=1" media="all" rel="stylesheet" type="text/css" />
+	<link href="/assets/colorbox/colorbox.css?body=1" media="all" rel="stylesheet" type="text/css" />
+
+	<style type="text/css">
+		body { font-family:arial, verdana, sans-serif;}
+		.button {
+			width: 100px;
+			position:relative;
+			display: -moz-inline-stack;
+			display: inline-block;
+			vertical-align: top;
+			zoom: 1;
+			*display: inline;
+			margin:0 3px 3px 0;
+			padding:1px 0;
+			text-align:center;
+			border:1px solid #ccc;
+			background-color:#eee;
+			margin:1em .5em;
+			padding:.3em .7em;
+			border-radius:5px; 
+			-moz-border-radius:5px; 
+			-webkit-border-radius:5px;
+			cursor:pointer;
+		}
+	</style>
+
+	<script>
+		$().ready(function() {
+			elfinder = $('#finder').elfinder({
+				url : '/finder/elfinder',
+				transport: new elFinderSupportVer1(),
+				handlers : {
+                    select : function(event, elfinderInstance) {
+                        var selected = event.data.selected;
+						
+						if (selected.length) {
+							// console.log(elfinderInstance.file(selected[0]))
+						}
+						
+                    }
+                },
+                // ui:['toolbar', 'places', 'path', 'stat'],
+                getFileCallback: function(file) {                	
+			        var clickedIndex, files, i, key;
+			        console.log(elfinder.files());
+			        file = file.url
+			        if (/.mp4$/.test(file)) {
+			          file = file.slice(0, file.lastIndexOf('/')) + file.slice(file.lastIndexOf('/') + 1);
+			          return TINY.box.show({
+			            html: "<div id='video'></div>",
+			            animate: true,
+			            width: 520,
+			            height: 305,
+			            openjs: function() {
+			              return jwplayer("video").setup({
+			                file: file,
+			                width: "515",
+			                height: "300",
+			                primary: "flash",
+			                autostart: true
+			              });
+			            }
+			          });
+			        } else if (/(.jpg$)|(.png$)/.test(file)) {
+			          console.log(file);
+			          files = elfinder.files();
+			          i = 0;
+			          for (key in files) {
+			            if (/(.jpg$)|(.png$)/.test(files[key].url)) {
+			              if (file === files[key].url) {
+			                clickedIndex = i;
+			              }
+			              $("#images").append($("<a class='image' href='/finder/image_proxy?query=" + (files[key].url.slice(file.lastIndexOf(':') + 2)) + "'>"));
+			              i++;
+			            }
+			          }
+			          $(".image").each(function(index, element) {
+			            if (index !== clickedIndex) {
+			              return $(this).colorbox({
+			                rel: 'image',
+			                maxWidth: "80%",
+			                maxHeight: "80%",
+			                transition: 'fade',
+			                onClosed: function() {
+			                  return $("#images").html("");
+			                }
+			              });
+			            }
+			          });
+			          return $($(".image").get(clickedIndex)).colorbox({
+			            rel: 'image',
+			            maxWidth: "80%",
+			            maxHeight: "80%",
+			            transition: 'fade',
+			            open: true,
+			            onClosed: function() {
+			              return $("#images").html("");
+			            }
+			          });
+			        }else if(/(.doc$)|(.docx$)/.test(file)){
+
+			        }
+
+		      	},
+				lang : 'en',
+				customData : {answer : 42},
+				
+				uiOptions : {
+					toolbar : [['back', 'forward'],['home','up'],['view'],['search']]
+				},
+				height:550
+			}).elfinder('instance')
+
+		});
+	</script>
+</head>
+<body>
+	<div id="finder">finder <span>here</span></div>
+	<br clear="all"/>
+	<div id="images"></div>
+</body>
+</html>

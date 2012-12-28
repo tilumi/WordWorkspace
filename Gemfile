@@ -49,7 +49,8 @@ gem 'devise'
 gem 'omniauth'
 gem 'omniauth-facebook'
 gem 'execjs'
-gem 'active_scaffold'
+gem 'el_finder'
+# gem 'active_scaffold'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'

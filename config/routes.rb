@@ -1,6 +1,5 @@
 WordWorkspace::Application.routes.draw do
   
-  resources :videos
 
   resources :allowed_users
 
@@ -9,11 +8,14 @@ WordWorkspace::Application.routes.draw do
     get '/users/sign_out' => 'devise/sessions#destroy', :as => :user_sign_out
   end
 
-  
+  match '/finder' => 'finder#index'
+  match '/finder/elfinder' => 'finder#elfinder'
+  match 'finder/image_proxy' => 'finder#image_proxy'
   match '/documents/save' =>  'documents#save'
   match '/documents/load' =>  'documents#load'
 
   # resource :session
+  resources :videos
   resources :documents
   # resources :users
   root :to => "documents#index"
