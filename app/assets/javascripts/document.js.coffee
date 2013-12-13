@@ -23,7 +23,6 @@ $ ->
         endpointStyle:{ fillStyle:"#ffa500" }
         connectionsDetachable:false
       }
-  
   class SurroundContentsMemento
 
     constructor: (@span) ->
@@ -55,9 +54,9 @@ $ ->
       if newMarkupSpan.previousSibling.nodeType == 3 && newMarkupSpan.previousSibling.length == 0
         $(newMarkupSpan.previousSibling).remove()
       if newMarkupSpan.nextSibling.nodeType == 3 && newMarkupSpan.nextSibling.length == 0
-        $(newMarkupSpan.nextSibling).remove()  
+        $(newMarkupSpan.nextSibling).remove()
       History.do(new SurroundContentsMemento(newMarkupSpan))
-    
+
 
   reAttachCommentsAfterLoaded = () ->
     saved_comments = JSON.parse($("#saved_comments").text())
@@ -79,7 +78,7 @@ $ ->
         # $textarea.val(saved_comment.content)
         $textarea.on({
           input : addToAddedCommentIDs(comment_id, saved_comment.id)
-          resize : addToAddedCommentIDs(comment_id, saved_comment.id)        
+          resize : addToAddedCommentIDs(comment_id, saved_comment.id)
         })
         $comment.append($textarea)
         $comment.on({
@@ -92,14 +91,14 @@ $ ->
         })
 
         $markups = $("[data-range-id='#{comment_id}']")
-        $comment.css({top: "#{saved_comment.y}px", left:"#{saved_comment.x}px", position: "absolute"})    
+        $comment.css({top: "#{saved_comment.y}px", left:"#{saved_comment.x}px", position: "absolute"})
         $("#comments").append($comment)
 
         $textarea.focus( ->
             selectMarkup($(this).closest(".comment"),null,$(this))
         )
         History.do(new AddCommentMemento($markups,$comment))
-        added_comment_ids.length = 0  
+        added_comment_ids.length = 0
 
   addToAddedCommentIDs = (mid,id) ->
     if added_comment_ids.indexOf(mid) == -1
@@ -124,7 +123,7 @@ $ ->
         rangy.serializePosition(span,0,$("#doc").get(0))
 
     markupsToAdd = []
-    
+
     for i in added_markup_ids
       $markupToAdd = $("[data-range-id='#{i}']")
       if $markupToAdd.size() > 0
@@ -133,7 +132,7 @@ $ ->
         markupToAdd.className = $markupToAdd.get(0).className.split(" ")[0]
         markupToAdd.content =  $markupToAdd.text()
         markupToAdd.textRanges = []
-        
+
 
         markupsToAdd.push(markupToAdd)
 
@@ -182,7 +181,7 @@ $ ->
       outline.height = $outline.find("textarea").height()
       outline.className = $outline.get(0).className.split(" ")[0]
       outline.content = $outline.find("textarea").val()
-      outlinesToAdd.push(outline)    
+      outlinesToAdd.push(outline)
 
     $.ajax({
       url : 'save'
@@ -208,14 +207,14 @@ $ ->
         if response['text_range_mid_pk_hash']
           mid_pk_hash = response['text_range_mid_pk_hash']
           for mid of mid_pk_hash
-            $("[data-range-id=#{mid}]").each( 
+            $("[data-range-id=#{mid}]").each(
               ->
                 $(this).attr("data-id",mid_pk_hash[mid])
             )
         if response['comment_mid_pk_hash']
           mid_pk_hash = response['comment_mid_pk_hash']
           for mid of mid_pk_hash
-            $("#comment_#{mid}").each( 
+            $("#comment_#{mid}").each(
               ->
                 $(this).attr("data-id",mid_pk_hash[mid])
             )
@@ -230,7 +229,7 @@ $ ->
         $("#info").text("Document saved!").fadeIn(100).fadeOut(1000)
 
     })
-    
+
   $.contextMenu(
     {
         selector: 'span.markup',
@@ -293,7 +292,7 @@ $ ->
     console.log(added_comment_ids)
     History.do(new AddCommentMemento($markups,$comment))
 
-  
+
 
   removeComment = ($markups,$comment)->
     History.do(new DeleteCommentMemento($markups,$comment))
@@ -405,7 +404,7 @@ $ ->
     console.log(removed_markup_ids)
     console.log(added_markup_ids)
     History.endCompoundDo()
-  
+
   class AddMarkupMemento
 
     constructor: (@markup_id)->
@@ -472,8 +471,8 @@ $ ->
     $("#users").height($(window).height()-30)
   )
 
-  window.onbeforeunload = () ->       
-    if removed_markup_ids.filter( (mid) -> parseInt(mid) <= last_saved_markup_id ).length > 0 or added_markup_ids.length > 0 or 
+  window.onbeforeunload = () ->
+    if removed_markup_ids.filter( (mid) -> parseInt(mid) <= last_saved_markup_id ).length > 0 or added_markup_ids.length > 0 or
         added_comment_ids.length > 0 or removed_comment_ids.filter( (id) -> id != 'undefined' && id ).length > 0 or Outline.isDirty()
 
       console.log added_markup_ids
@@ -484,16 +483,16 @@ $ ->
       console.log Outline.removed_outline_ids()
 
       return "您所作的變更尚未儲存！！若離開將會失去你所做的變更！！";
-    
-  
+
+
   removeCursiveFont = () ->
     $("font").each( ->
         if $(this).attr("face") and $(this).attr("face").indexOf("cursive") > -1
           $(this).attr("face",$(this).attr("face").split(',').filter( (face) -> face.indexOf("cursive") == -1 ).toString())
     )
-  
+
   restoreAfterLoad = ->
-    
+
     removeCursiveFont()
     reMarkupAfterLoaded()
     reAttachCommentsAfterLoaded()
@@ -521,7 +520,7 @@ $ ->
   )
 
   $("#doc").bind 'mouseup', (e) ->
-    
+
       selection = rangy.getSelection()
       unless selection.collapsed
         range = selection.getRangeAt(0)
@@ -539,18 +538,18 @@ $ ->
 
   $(document).on(
     {
-      keydown: (e) -> 
-        if (e.metaKey and e.keyCode == 90)   
+      keydown: (e) ->
+        if (e.metaKey and e.keyCode == 90)
           History.undo(undoThreshold)
-        if (e.metaKey and e.keyCode == 89)   
+        if (e.metaKey and e.keyCode == 89)
           e.preventDefault()
           History.redo()
-        if (e.metaKey and e.keyCode == 83)   
+        if (e.metaKey and e.keyCode == 83)
           e.preventDefault()
           save()
 
     }
-    
+
   )
 
   $("#undo-btn").click ->
@@ -562,7 +561,7 @@ $ ->
   $("body").on('click',":not(.markup *)", (e) ->
       e.stopPropagation()
       console.log this
-      if $(this).closest(".comment").size() == 0 and $(this).closest(".markup").size() == 0  and $(this).closest(".outline").size() == 0 
+      if $(this).closest(".comment").size() == 0 and $(this).closest(".markup").size() == 0  and $(this).closest(".outline").size() == 0
         unselectMarkup()
   )
 
@@ -655,5 +654,5 @@ $ ->
     }
     ".user"
   )
-  
+
   restoreAfterLoad()

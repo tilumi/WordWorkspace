@@ -20,34 +20,38 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
   gem 'compass'
   gem 'compass-rails'
+  gem 'jquery-rails'
+  gem 'jquery-ui-rails'
 end
 
-gem 'jquery-rails'
+
 
 gem 'ruby-openid'
 gem 'rack-openid'
 
 group :test, :development do
-  gem "rspec-rails"
+  gem 'rspec-rails'
   gem 'capybara'
   gem 'guard-jasmine'
   gem 'jasminerice'
   gem 'guard-livereload'
   gem 'database_cleaner'
+  gem 'rails-erd'
 end
 
 gem 'pry', :group => :development
-gem "pry-nav", :group => :development
+gem 'pry-nav', :group => :development
 
 gem 'sqlite3'
 gem 'nokogiri'
 group :production, :staging do
-  gem 'therubyracer', '~> 0.9.3.beta1'
+  gem 'therubyracer'
 end
 gem 'open4'
 gem 'devise'
 gem 'omniauth'
-gem 'omniauth-facebook'
+gem 'omniauth-facebook', '1.4.0'
+gem 'omniauth-google-oauth2'
 gem 'execjs'
 gem 'el_finder'
 # gem 'active_scaffold'

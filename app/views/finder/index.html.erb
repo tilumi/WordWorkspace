@@ -1,23 +1,138 @@
 <% content_for :javascript_includes do -%>
-<%= javascript_include_tag "jwplayer/jwplayer.js" %>
-<%= javascript_include_tag "jwplayer/swfobject.js" %>
-<%= javascript_include_tag "elfinder/elfinder.min 2.js" %>
-<%= javascript_include_tag "elfinder/proxy/elFinderSupportVer1" %>
-<%= javascript_include_tag "elfinder/elfinder.zh_TW" %>
-<%= javascript_include_tag "tinybox2/tinybox.js" %>
-<%= javascript_include_tag "colorbox/jquery.colorbox.js" %>
-<%= javascript_include_tag "elfinder/fm" %>
-<% end -%>
-<% content_for :css_includes do -%>
-<%= stylesheet_link_tag    "tinybox2/style.css", :media => "all" %>
-<%= stylesheet_link_tag    "colorbox/colorbox.css", :media => "all" %>
+<%= javascript_include_tag "finder/finder" %>
 <% end -%>
 <% content_for :title do -%>
 <%= @title %>
 <% end -%>
 <% content_for :css_includes do -%>
-<%= stylesheet_link_tag "elfinder.min.css", :media => "all" %>
-<%= stylesheet_link_tag "theme.css", :media => "all" %>
+<%= stylesheet_link_tag  "finder/finder", :media => "all" %>
 <% end -%>
-  <div id='elfinder'></div>
-  <div id="images"></div>
+	
+	<!-- elfinder custom extenstions -->
+	<script src="/assets/jwplayer/jwplayer.js?body=1" type="text/javascript"></script>
+	<script src="/assets/jwplayer/swfobject.js?body=1" type="text/javascript"></script>
+	<!-- // <script src="/assets/elfinder/elfinder.zh_TW.js?body=1" type="text/javascript"></script> -->
+	<script src="/assets/tinybox2/tinybox.js?body=1" type="text/javascript"></script>
+	<script src="/assets/colorbox/jquery.colorbox.js?body=1" type="text/javascript"></script>
+
+  	<link href="/assets/tinybox2/style.css?body=1" media="all" rel="stylesheet" type="text/css" />
+	<link href="/assets/colorbox/colorbox.css?body=1" media="all" rel="stylesheet" type="text/css" />
+
+	
+
+
+	<style type="text/css">
+		body { font-family:arial, verdana, sans-serif;}
+		.button {
+			width: 100px;
+			position:relative;
+			display: -moz-inline-stack;
+			display: inline-block;
+			vertical-align: top;
+			zoom: 1;
+			*display: inline;
+			margin:0 3px 3px 0;
+			padding:1px 0;
+			text-align:center;
+			border:1px solid #ccc;
+			background-color:#eee;
+			margin:1em .5em;
+			padding:.3em .7em;
+			border-radius:5px; 
+			-moz-border-radius:5px; 
+			-webkit-border-radius:5px;
+			cursor:pointer;
+		}
+	</style>
+	<script>
+		$().ready(function() {
+			elfinder = $('#finder').elfinder({
+				url : '/finder/elfinder',
+				transport: new elFinderSupportVer1(),
+				handlers : {
+                    select : function(event, elfinderInstance) {
+                        var selected = event.data.selected;
+						
+						if (selected.length) {
+							// console.log(elfinderInstance.file(selected[0]))
+						}
+						
+                    }
+                },
+                // ui:['toolbar', 'places', 'path', 'stat'],
+                getFileCallback: function(file) {                	
+			        var clickedIndex, files, i, key;
+			        console.log(elfinder.files());
+			        file = file.url
+			        if (/.mp4$/.test(file)) {
+			          file = file.slice(0, file.lastIndexOf('/')) + file.slice(file.lastIndexOf('/') + 1);
+			          return TINY.box.show({
+			            html: "<div id='video'></div>",
+			            animate: true,
+			            width: 520,
+			            height: 305,
+			            openjs: function() {
+			              return jwplayer("video").setup({
+			                file: file,
+			                width: "515",
+			                height: "300",
+			                primary: "flash",
+			                autostart: true
+			              });
+			            }
+			          });
+			        } else if (/(.jpg$)|(.png$)/.test(file)) {
+			          console.log(file);
+			          files = elfinder.files();
+			          i = 0;
+			          for (key in files) {
+			            if (/(.jpg$)|(.png$)/.test(files[key].url)) {
+			              if (file === files[key].url) {
+			                clickedIndex = i;
+			              }
+			              $("#images").append($("<a class='image' href='/finder/image_proxy?query=" + (files[key].url.slice(file.lastIndexOf(':') + 2)) + "'>"));
+			              i++;
+			            }
+			          }
+			          $(".image").each(function(index, element) {
+			            if (index !== clickedIndex) {
+			              return $(this).colorbox({
+			                rel: 'image',
+			                maxWidth: "80%",
+			                maxHeight: "80%",
+			                transition: 'fade',
+			                onClosed: function() {
+			                  return $("#images").html("");
+			                }
+			              });
+			            }
+			          });
+			          return $($(".image").get(clickedIndex)).colorbox({
+			            rel: 'image',
+			            maxWidth: "80%",
+			            maxHeight: "80%",
+			            transition: 'fade',
+			            open: true,
+			            onClosed: function() {
+			              return $("#images").html("");
+			            }
+			          });
+			        }else if(/(.doc$)|(.docx$)/.test(file)){
+
+			        }
+
+		      	},
+				lang : 'zh_TW',
+				customData : {answer : 42},
+				
+				uiOptions : {
+					toolbar : [['back', 'forward'],['home','up'],['view'],['search']]
+				},
+				height:550
+			}).elfinder('instance')
+
+		});
+	</script>
+	<div id="finder">finder <span>here</span></div>
+	<br clear="all"/>
+	<div id="images"></div>

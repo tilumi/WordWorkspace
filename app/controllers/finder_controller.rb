@@ -1,11 +1,10 @@
 class FinderController < ApplicationController
 
+  before_filter :require_login
+
 	skip_before_filter :verify_authenticity_token, :only => ['elfinder']
 
 	def index
-		# if params.title
-		# 	@title = params[:title]
-		# end
     if params[:root]
       session[:root] = File.join(params[:root])
     else
@@ -17,7 +16,7 @@ class FinderController < ApplicationController
 
   def elfinder
     # binding.pry
-    session[:root] = File.join('/Library', 'WowzaMediaServer-3.5.0', 'content')
+    # session[:root] = File.join('/Library', 'WowzaMediaServer-3.5.0', 'content')
     # session[:root] = File.join('/Users/MingFu')
     h, r = ElFinder::Connector.new(
       :root => session[:root],
@@ -50,6 +49,10 @@ class FinderController < ApplicationController
 
   def get_image_url(query)
 	File.join(session[:root], query)  	
+  end
+
+  def require_login
+    redirect_to documents_path unless current_user
   end
 
 end

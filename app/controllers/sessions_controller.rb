@@ -6,8 +6,8 @@ class SessionsController < ApplicationController
     else
       # raise do
         logger.info "auth_hash: #{auth_hash.inspect}"
-        # logger.info "@auth: #{@auth.errors.inspect}"
-        redirect_to documents_path
+        logger.info "@auth: #{@auth.errors.inspect}"
+        redirect_to new_user_session_path
       # end
     end
   end

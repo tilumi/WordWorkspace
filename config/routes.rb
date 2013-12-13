@@ -3,10 +3,8 @@ WordWorkspace::Application.routes.draw do
 
   resources :allowed_users
 
-  devise_for :users do
-    get '/users/sign_in', :to => 'devise/sessions#new', :as => :new_user_session
-    get '/users/sign_out' => 'devise/sessions#destroy', :as => :user_sign_out
-  end
+  
+  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
 
   match '/finder' => 'finder#index'
   match '/finder/elfinder' => 'finder#elfinder'
@@ -20,6 +18,7 @@ WordWorkspace::Application.routes.draw do
   # resources :users
   root :to => "documents#index"
   match '/auth/:provider/callback', :to => 'sessions#create'
+  match "/signout" => "sessions#destroy", :as => :signout
   match '/auth/failure' => 'sessions#failure'
 
   # The priority is based upon order of creation:
